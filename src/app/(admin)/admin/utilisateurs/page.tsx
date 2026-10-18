@@ -28,16 +28,21 @@ export default async function AdminUtilisateursPage() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* HEADER DE PAGE DARK LUXURY */}
       <div>
-        <h1 className="font-display text-3xl tracking-wide text-brand-black md:text-4xl">
+        <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-brand-red">
+          [ Gestion des Comptes & Privilèges ]
+        </span>
+        <h1 className="mt-1 font-display text-3xl font-light tracking-wide text-white md:text-5xl">
           Utilisateurs
         </h1>
-        <p className="mt-1 text-sm text-brand-black/60">
-          Gérez les comptes clients, validez les demandes pro, attribuez les rôles admin.
+        <p className="mt-2 font-mono text-xs text-neutral-400 max-w-xl leading-relaxed">
+          Gérez les comptes clients, validez les accès professionnels B2B/Premium et attribuez les privilèges administrateur.
         </p>
       </div>
 
+      {/* TABLEAU COMPLET ET FILTRES GLASSMORPHISM */}
       <UsersTable initialUsers={users} />
     </div>
   );

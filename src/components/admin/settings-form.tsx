@@ -6,6 +6,7 @@ import {
   Save,
   AlertCircle,
   CheckCircle2,
+  Settings as SettingsIcon,
 } from "lucide-react";
 
 type Settings = {
@@ -55,13 +56,10 @@ export function SettingsForm({ initial }: { initial: Settings }) {
       const data = await res.json();
 
       if (!res.ok) {
-        // Affiche les erreurs champ par champ
         if (data.details && typeof data.details === "object") {
-          const details =
-            data.details.fieldErrors || data.details;
+          const details = data.details.fieldErrors || data.details;
           setFieldErrors(details as FieldErrors);
 
-          // Message global
           const firstField = Object.keys(details)[0];
           setError(
             firstField
@@ -69,7 +67,7 @@ export function SettingsForm({ initial }: { initial: Settings }) {
               : data.error || "Données invalides"
           );
         } else {
-          setError(data.error || "Erreur");
+          setError(data.error || "Erreur lors de l'enregistrement");
         }
         return;
       }
@@ -77,22 +75,22 @@ export function SettingsForm({ initial }: { initial: Settings }) {
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch {
-      setError("Connexion impossible");
+      setError("Connexion impossible au serveur");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-8">
       {/* Contact */}
-      <Section title="Contact & réseaux sociaux">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <Section title="Contact & réseaux sociaux" subtitle="Coordonnées de l'entreprise et liens sociaux publicitaires">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           <Field
             label="Téléphone"
             name="phone"
             defaultValue={initial.phone}
-            placeholder="+229 97 00 00 00"
+            placeholder="+229 01 96 98 71 09"
             errors={fieldErrors.phone}
           />
           <Field
@@ -104,7 +102,7 @@ export function SettingsForm({ initial }: { initial: Settings }) {
             errors={fieldErrors.email}
           />
           <Field
-            label="Adresse"
+            label="Adresse physique"
             name="address"
             defaultValue={initial.address}
             placeholder="Cotonou, Bénin"
@@ -112,24 +110,24 @@ export function SettingsForm({ initial }: { initial: Settings }) {
             errors={fieldErrors.address}
           />
           <Field
-            label="Facebook (URL ou nom)"
+            label="Facebook (URL ou identifiant)"
             name="facebook"
             defaultValue={initial.facebook}
             placeholder="facebook.com/pmosonsoser"
             errors={fieldErrors.facebook}
           />
           <Field
-            label="Instagram (URL ou nom)"
+            label="Instagram (URL ou identifiant)"
             name="instagram"
             defaultValue={initial.instagram}
             placeholder="instagram.com/pmosonsoser"
             errors={fieldErrors.instagram}
           />
           <Field
-            label="WhatsApp"
+            label="Numéro WhatsApp Support"
             name="whatsapp"
             defaultValue={initial.whatsapp}
-            placeholder="+229 97 00 00 00"
+            placeholder="+229 01 96 98 71 09"
             className="md:col-span-2"
             errors={fieldErrors.whatsapp}
           />
@@ -137,8 +135,8 @@ export function SettingsForm({ initial }: { initial: Settings }) {
       </Section>
 
       {/* Livraison */}
-      <Section title="Livraison">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <Section title="Paramètres de livraison" subtitle="Tarification dynamique et limites de zone de livraison">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           <Field
             label="Frais de base (FCFA)"
             name="baseFee"
@@ -154,14 +152,14 @@ export function SettingsForm({ initial }: { initial: Settings }) {
             errors={fieldErrors.pricePerKm}
           />
           <Field
-            label="Livraison gratuite dès (FCFA)"
+            label="Livraison offerte dès (FCFA)"
             name="freeDeliveryThreshold"
             type="number"
             defaultValue={String(initial.freeDeliveryThreshold)}
             errors={fieldErrors.freeDeliveryThreshold}
           />
           <Field
-            label="Rayon max (km)"
+            label="Rayon maximal de livraison (km)"
             name="maxRadiusKm"
             type="number"
             defaultValue={String(initial.maxRadiusKm)}
@@ -171,10 +169,10 @@ export function SettingsForm({ initial }: { initial: Settings }) {
       </Section>
 
       {/* Banque */}
-      <Section title="Coordonnées bancaires (virement)">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <Section title="Coordonnées bancaires (Virement)" subtitle="Informations transmises aux clients pour les règlements bancaires">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           <Field
-            label="Banque"
+            label="Établissement bancaire"
             name="bankName"
             defaultValue={initial.bankName}
             placeholder="Bank of Africa Bénin"
@@ -188,7 +186,7 @@ export function SettingsForm({ initial }: { initial: Settings }) {
             errors={fieldErrors.bankHolder}
           />
           <Field
-            label="IBAN / RIB"
+            label="IBAN / Numéro RIB"
             name="bankIban"
             defaultValue={initial.bankIban}
             placeholder="BJ66 BJ00 0000…"
@@ -198,9 +196,9 @@ export function SettingsForm({ initial }: { initial: Settings }) {
         </div>
       </Section>
 
-      {/* WU */}
-      <Section title="Western Union">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      {/* Western Union */}
+      <Section title="Western Union" subtitle="Identité du bénéficiaire pour le transfert de fonds international">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           <Field
             label="Prénom du bénéficiaire"
             name="wuFirstName"
@@ -214,7 +212,7 @@ export function SettingsForm({ initial }: { initial: Settings }) {
             errors={fieldErrors.wuLastName}
           />
           <Field
-            label="Ville"
+            label="Ville de retrait"
             name="wuCity"
             defaultValue={initial.wuCity}
             errors={fieldErrors.wuCity}
@@ -228,53 +226,58 @@ export function SettingsForm({ initial }: { initial: Settings }) {
         </div>
       </Section>
 
+      {/* Messages de retour */}
       {error && (
-        <div className="flex items-start gap-2 rounded-xl bg-red-50 p-4 text-sm text-red-700">
+        <div className="flex items-start gap-2.5 rounded-2xl border border-red-500/30 bg-red-500/10 p-5 font-mono text-xs text-red-400 backdrop-blur-md">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {success && (
-        <div className="flex items-start gap-2 rounded-xl bg-green-50 p-4 text-sm text-green-700">
+        <div className="flex items-start gap-2.5 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-5 font-mono text-xs text-emerald-400 backdrop-blur-md">
           <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
-          <span>Paramètres enregistrés avec succès.</span>
+          <span>Les paramètres système ont été sauvegardés avec succès.</span>
         </div>
       )}
 
-      <div className="flex justify-end">
+      {/* Soumission */}
+      <div className="flex justify-end pt-4">
         <button
           type="submit"
           disabled={loading}
-          className="inline-flex h-12 items-center gap-2 rounded-full bg-brand-red px-7 text-sm font-semibold uppercase tracking-wider text-white shadow-lg shadow-brand-red/30 transition hover:bg-brand-red/90 disabled:opacity-50"
+          className="group inline-flex h-14 items-center gap-2.5 rounded-full border border-brand-red/30 bg-brand-red px-9 font-mono text-xs font-bold uppercase tracking-widest text-white shadow-xl shadow-brand-red/30 transition-all duration-300 hover:bg-white hover:text-black disabled:opacity-50"
         >
           {loading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
             <Save className="h-4 w-4" />
           )}
-          Enregistrer
+          <span>Enregistrer les modifications</span>
         </button>
       </div>
 
       <style jsx global>{`
         .input {
           width: 100%;
-          height: 3rem;
-          border-radius: 0.75rem;
-          border: 1px solid rgba(26, 26, 26, 0.1);
-          background: #fff;
-          padding: 0 1rem;
+          height: 3.25rem;
+          border-radius: 1rem;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          background: rgba(0, 0, 0, 0.4);
+          padding: 0 1.25rem;
+          font-family: var(--font-mono, monospace);
           font-size: 0.875rem;
-          color: #1a1a1a;
+          color: #ffffff;
           outline: none;
-          transition: border-color 0.15s;
+          backdrop-filter: blur(12px);
+          transition: border-color 0.2s;
         }
         .input:focus {
-          border-color: #e30613;
+          border-color: #ef4444;
         }
         .input-error {
-          border-color: #dc2626 !important;
+          border-color: #ef4444 !important;
+          background: rgba(239, 68, 68, 0.05) !important;
         }
       `}</style>
     </form>
@@ -283,17 +286,27 @@ export function SettingsForm({ initial }: { initial: Settings }) {
 
 function Section({
   title,
+  subtitle,
   children,
 }: {
   title: string;
+  subtitle?: string;
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-3xl border border-brand-black/5 bg-white p-6 md:p-8">
-      <h2 className="font-display text-2xl tracking-wide text-brand-black">
+    <section className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-8 backdrop-blur-2xl md:p-10">
+      <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-brand-red">
+        [ Module de configuration ]
+      </span>
+      <h2 className="mt-1 font-display text-2xl font-light tracking-wide text-white">
         {title}
       </h2>
-      <div className="mt-6">{children}</div>
+      {subtitle && (
+        <p className="mt-1 font-mono text-xs text-neutral-400 leading-relaxed">
+          {subtitle}
+        </p>
+      )}
+      <div className="mt-6 pt-4 border-t border-white/5">{children}</div>
     </section>
   );
 }
@@ -318,7 +331,7 @@ function Field({
   const hasError = errors && errors.length > 0;
   return (
     <div className={className}>
-      <label className="mb-2 block text-sm font-medium text-brand-black">
+      <label className="mb-2 block font-mono text-xs uppercase tracking-widest text-neutral-300">
         {label}
       </label>
       <input
@@ -329,7 +342,7 @@ function Field({
         className={`input ${hasError ? "input-error" : ""}`}
       />
       {hasError && (
-        <p className="mt-1.5 text-xs text-red-600">{errors[0]}</p>
+        <p className="mt-2 font-mono text-xs text-red-400">{errors[0]}</p>
       )}
     </div>
   );

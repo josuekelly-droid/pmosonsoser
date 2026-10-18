@@ -18,15 +18,15 @@ type UserRow = {
 };
 
 const TYPE_BADGES: Record<string, { label: string; class: string; icon: any }> = {
-  B2C: { label: "Particulier", class: "bg-gray-100 text-gray-700", icon: User },
-  B2B: { label: "Pro", class: "bg-blue-100 text-blue-700", icon: Store },
-  PREMIUM: { label: "Premium", class: "bg-purple-100 text-purple-700", icon: Crown },
+  B2C: { label: "Particulier", class: "border-white/10 bg-white/5 text-neutral-300", icon: User },
+  B2B: { label: "Pro", class: "border-blue-500/30 bg-blue-500/10 text-blue-400", icon: Store },
+  PREMIUM: { label: "Premium", class: "border-purple-500/30 bg-purple-500/10 text-purple-400", icon: Crown },
 };
 
 const STATUT_BADGES: Record<string, { label: string; class: string; icon: any }> = {
-  EN_ATTENTE: { label: "En attente", class: "bg-amber-100 text-amber-700", icon: Clock },
-  VALIDE: { label: "Validé", class: "bg-green-100 text-green-700", icon: CheckCircle2 },
-  REJETE: { label: "Rejeté", class: "bg-red-100 text-red-700", icon: XCircle },
+  EN_ATTENTE: { label: "En attente", class: "border-amber-500/30 bg-amber-500/10 text-amber-400", icon: Clock },
+  VALIDE: { label: "Validé", class: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400", icon: CheckCircle2 },
+  REJETE: { label: "Rejeté", class: "border-red-500/30 bg-red-500/10 text-red-400", icon: XCircle },
 };
 
 export function UsersTable({ initialUsers }: { initialUsers: UserRow[] }) {
@@ -67,7 +67,7 @@ export function UsersTable({ initialUsers }: { initialUsers: UserRow[] }) {
           prev.map((u) => (u.id === id ? { ...u, ...updates } : u))
         );
       } else {
-        alert(data.error || "Erreur");
+        alert(data.error || "Erreur lors de la mise à jour");
       }
     } finally {
       setLoading(null);
@@ -83,7 +83,7 @@ export function UsersTable({ initialUsers }: { initialUsers: UserRow[] }) {
       if (res.ok) {
         setUsers((prev) => prev.filter((u) => u.id !== id));
       } else {
-        alert(data.error || "Erreur");
+        alert(data.error || "Erreur lors de la suppression");
       }
     } finally {
       setLoading(null);
@@ -91,47 +91,51 @@ export function UsersTable({ initialUsers }: { initialUsers: UserRow[] }) {
   }
 
   return (
-    <div className="space-y-5">
-      {/* Filtres */}
-      <div className="flex flex-col gap-3 md:flex-row">
-        <div className="relative flex-1 md:max-w-sm">
-          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-black/40" />
+    <div className="space-y-6">
+      {/* FILTRES & RECHERCHE HUD */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-center">
+        <div className="relative flex-1 md:max-w-md">
+          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Rechercher par nom, email, téléphone…"
-            className="h-11 w-full rounded-full border border-brand-black/10 bg-white pl-11 pr-4 text-sm outline-none focus:border-brand-red"
+            className="h-12 w-full rounded-full border border-white/10 bg-neutral-900/40 pl-12 pr-5 font-mono text-xs md:text-sm text-white placeholder-neutral-500 outline-none backdrop-blur-md transition-colors focus:border-brand-red"
           />
         </div>
+        
         <select
           value={typeFilter}
           onChange={(e) => setTypeFilter(e.target.value)}
-          className="h-11 rounded-full border border-brand-black/10 bg-white px-4 text-sm outline-none focus:border-brand-red"
+          className="h-12 rounded-full border border-white/10 bg-neutral-900/40 px-5 font-mono text-xs uppercase tracking-wider text-white outline-none backdrop-blur-md transition-colors focus:border-brand-red cursor-pointer"
         >
-          <option value="">Tous les types</option>
-          <option value="B2C">Particulier</option>
-          <option value="B2B">Professionnel</option>
-          <option value="PREMIUM">Premium</option>
+          <option value="" className="bg-neutral-900 text-neutral-400">Tous les types</option>
+          <option value="B2C" className="bg-neutral-900 text-white">Particulier</option>
+          <option value="B2B" className="bg-neutral-900 text-white">Professionnel</option>
+          <option value="PREMIUM" className="bg-neutral-900 text-white">Premium</option>
         </select>
+        
         <select
           value={statutFilter}
           onChange={(e) => setStatutFilter(e.target.value)}
-          className="h-11 rounded-full border border-brand-black/10 bg-white px-4 text-sm outline-none focus:border-brand-red"
+          className="h-12 rounded-full border border-white/10 bg-neutral-900/40 px-5 font-mono text-xs uppercase tracking-wider text-white outline-none backdrop-blur-md transition-colors focus:border-brand-red cursor-pointer"
         >
-          <option value="">Tous les statuts</option>
-          <option value="EN_ATTENTE">En attente</option>
-          <option value="VALIDE">Validé</option>
-          <option value="REJETE">Rejeté</option>
+          <option value="" className="bg-neutral-900 text-neutral-400">Tous les statuts</option>
+          <option value="EN_ATTENTE" className="bg-neutral-900 text-amber-400">En attente</option>
+          <option value="VALIDE" className="bg-neutral-900 text-emerald-400">Validé</option>
+          <option value="REJETE" className="bg-neutral-900 text-red-400">Rejeté</option>
         </select>
       </div>
 
-      {/* Table */}
-      <div className="overflow-hidden rounded-2xl border border-brand-black/5 bg-white">
+      {/* TABLEAU GLASSMORPHISM */}
+      <div className="overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 backdrop-blur-2xl">
         {filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <User className="h-12 w-12 text-brand-black/20" />
-            <p className="mt-3 text-sm text-brand-black/50">
+          <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-neutral-400">
+              <User className="h-8 w-8" />
+            </div>
+            <p className="mt-4 font-mono text-xs md:text-sm text-neutral-400">
               Aucun utilisateur ne correspond à votre recherche.
             </p>
           </div>
@@ -139,25 +143,25 @@ export function UsersTable({ initialUsers }: { initialUsers: UserRow[] }) {
           <div className="overflow-x-auto">
             <table className="w-full min-w-[900px]">
               <thead>
-                <tr className="border-b border-brand-black/5 bg-brand-gray/40">
-                  <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-brand-black/50">
+                <tr className="border-b border-white/10 bg-black/40">
+                  <th className="px-6 py-4 text-left font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-400">
                     Utilisateur
                   </th>
-                  <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-brand-black/50">
-                    Type
+                  <th className="px-6 py-4 text-left font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-400">
+                    Type de compte
                   </th>
-                  <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-brand-black/50">
+                  <th className="px-6 py-4 text-left font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-400">
                     Statut
                   </th>
-                  <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-brand-black/50">
+                  <th className="px-6 py-4 text-left font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-400">
                     Commandes
                   </th>
-                  <th className="px-4 py-3 text-right text-[10px] font-semibold uppercase tracking-widest text-brand-black/50">
+                  <th className="px-6 py-4 text-right font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-400">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-white/5">
                 {filtered.map((u) => {
                   const typeBadge = TYPE_BADGES[u.typeCompte];
                   const statutBadge = STATUT_BADGES[u.statutValidation];
@@ -168,65 +172,67 @@ export function UsersTable({ initialUsers }: { initialUsers: UserRow[] }) {
                   return (
                     <tr
                       key={u.id}
-                      className="border-b border-brand-black/5 last:border-0 transition hover:bg-brand-gray/20"
+                      className="transition-colors hover:bg-white/[0.02]"
                     >
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-3">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-4">
                           <div
                             className={cn(
-                              "flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white",
-                              isAdmin ? "bg-brand-red" : "bg-brand-black"
+                              "flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border font-display text-sm font-light text-white shadow-md",
+                              isAdmin
+                                ? "border-brand-red/30 bg-brand-red/20 shadow-[0_0_15px_rgba(239,68,68,0.2)]"
+                                : "border-white/10 bg-black/40"
                             )}
                           >
                             {(u.name || u.email).charAt(0).toUpperCase()}
                           </div>
                           <div className="min-w-0">
-                            <p className="flex items-center gap-1.5 text-sm font-medium text-brand-black">
-                              {u.name || "—"}
+                            <p className="flex items-center gap-2 font-sans text-sm font-medium text-white">
+                              <span>{u.name || "—"}</span>
                               {isAdmin && (
                                 <Shield className="h-3.5 w-3.5 text-brand-red" />
                               )}
                             </p>
-                            <p className="truncate text-[11px] text-brand-black/50">
+                            <p className="mt-0.5 font-mono text-[11px] text-neutral-400 truncate">
                               {u.email}
                             </p>
                             {u.phone && (
-                              <p className="text-[11px] text-brand-black/50">
+                              <p className="font-mono text-[11px] text-neutral-500">
                                 {u.phone}
                               </p>
                             )}
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-6 py-4">
                         <span
                           className={cn(
-                            "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider",
+                            "inline-flex items-center gap-1.5 rounded-xl border px-3 py-1 font-mono text-[10px] uppercase tracking-wider backdrop-blur-md",
                             typeBadge.class
                           )}
                         >
-                          <TypeIcon className="h-3 w-3" />
-                          {typeBadge.label}
+                          <TypeIcon className="h-3.5 w-3.5" />
+                          <span>{typeBadge.label}</span>
                         </span>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-6 py-4">
                         <span
                           className={cn(
-                            "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider",
+                            "inline-flex items-center gap-1.5 rounded-xl border px-3 py-1 font-mono text-[10px] uppercase tracking-wider backdrop-blur-md",
                             statutBadge.class
                           )}
                         >
-                          <StatutIcon className="h-3 w-3" />
-                          {statutBadge.label}
+                          <StatutIcon className="h-3.5 w-3.5" />
+                          <span>{statutBadge.label}</span>
                         </span>
                       </td>
-                      <td className="px-4 py-3">
-                        <span className="font-display text-base text-brand-black">
+                      <td className="px-6 py-4">
+                        <span className="font-display text-lg font-light tracking-wide text-white">
                           {u._count.orders}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center justify-end gap-1.5">
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
                           {isLoading && (
                             <Loader2 className="h-4 w-4 animate-spin text-brand-red" />
                           )}
@@ -242,7 +248,8 @@ export function UsersTable({ initialUsers }: { initialUsers: UserRow[] }) {
                                     })
                                   }
                                   title="Valider le compte pro"
-                                  className="flex h-8 w-8 items-center justify-center rounded-lg text-green-600 transition hover:bg-green-50"
+                                  aria-label="Valider le compte pro"
+                                  className="flex h-9 w-9 items-center justify-center rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 backdrop-blur-md transition-all hover:bg-emerald-600 hover:text-white"
                                 >
                                   <CheckCircle2 className="h-4 w-4" />
                                 </button>
@@ -255,7 +262,8 @@ export function UsersTable({ initialUsers }: { initialUsers: UserRow[] }) {
                                     })
                                   }
                                   title="Rejeter la demande"
-                                  className="flex h-8 w-8 items-center justify-center rounded-lg text-amber-600 transition hover:bg-amber-50"
+                                  aria-label="Rejeter la demande"
+                                  className="flex h-9 w-9 items-center justify-center rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-400 backdrop-blur-md transition-all hover:bg-amber-600 hover:text-white"
                                 >
                                   <XCircle className="h-4 w-4" />
                                 </button>
@@ -263,7 +271,7 @@ export function UsersTable({ initialUsers }: { initialUsers: UserRow[] }) {
                             </>
                           )}
 
-                          {/* Toggle admin */}
+                          {/* Toggle Admin */}
                           {!isLoading && (
                             <button
                               onClick={() =>
@@ -271,16 +279,13 @@ export function UsersTable({ initialUsers }: { initialUsers: UserRow[] }) {
                                   role: isAdmin ? "CLIENT" : "ADMIN",
                                 })
                               }
-                              title={
-                                isAdmin
-                                  ? "Retirer le rôle admin"
-                                  : "Promouvoir admin"
-                              }
+                              title={isAdmin ? "Retirer le rôle admin" : "Promouvoir admin"}
+                              aria-label={isAdmin ? "Retirer le rôle admin" : "Promouvoir admin"}
                               className={cn(
-                                "flex h-8 w-8 items-center justify-center rounded-lg transition",
+                                "flex h-9 w-9 items-center justify-center rounded-xl border backdrop-blur-md transition-all",
                                 isAdmin
-                                  ? "text-brand-red hover:bg-red-50"
-                                  : "text-brand-black/40 hover:bg-brand-red/10 hover:text-brand-red"
+                                  ? "border-brand-red/30 bg-brand-red/20 text-brand-red hover:bg-brand-red hover:text-white"
+                                  : "border-white/10 bg-white/5 text-neutral-400 hover:border-brand-red/50 hover:bg-brand-red/10 hover:text-white"
                               )}
                             >
                               <Shield className="h-4 w-4" />
@@ -291,8 +296,9 @@ export function UsersTable({ initialUsers }: { initialUsers: UserRow[] }) {
                           {!isLoading && (
                             <button
                               onClick={() => deleteUser(u.id, u.name)}
-                              title="Supprimer"
-                              className="flex h-8 w-8 items-center justify-center rounded-lg text-brand-black/40 transition hover:bg-red-50 hover:text-red-600"
+                              title="Supprimer l'utilisateur"
+                              aria-label="Supprimer l'utilisateur"
+                              className="flex h-9 w-9 items-center justify-center rounded-xl border border-red-500/30 bg-red-500/10 text-red-400 backdrop-blur-md transition-all hover:bg-red-600 hover:text-white"
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>

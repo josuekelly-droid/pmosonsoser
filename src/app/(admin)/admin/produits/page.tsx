@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { Plus } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { ProductsTable } from "@/components/admin/products-table";
 
@@ -23,16 +21,21 @@ export default async function AdminProduitsPage() {
   ]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* HEADER DE PAGE DARK LUXURY */}
       <div>
-        <h1 className="font-display text-3xl tracking-wide text-brand-black md:text-4xl">
+        <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-brand-red">
+          [ Gestion du Stock & Catalogue ]
+        </span>
+        <h1 className="mt-1 font-display text-3xl font-light tracking-wide text-white md:text-5xl">
           Produits
         </h1>
-        <p className="mt-1 text-sm text-brand-black/60">
-          Gérez votre catalogue : ajoutez, modifiez ou supprimez des produits.
+        <p className="mt-2 font-mono text-xs text-neutral-400 max-w-xl leading-relaxed">
+          Gérez l'ensemble de votre catalogue : ajustez les prix segmentés, surveillez les niveaux de stock et gérez vos références.
         </p>
       </div>
 
+      {/* TABLEAU COMPLET ET FILTRES GLASSMORPHISM */}
       <ProductsTable
         initialProducts={products}
         initialTotal={total}

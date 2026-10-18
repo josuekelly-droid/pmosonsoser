@@ -12,6 +12,7 @@ import {
   ChevronRight,
   Loader2,
   AlertTriangle,
+  ArrowUpRight,
 } from "lucide-react";
 import { formatPrice, cn } from "@/lib/utils";
 import { DeleteProductButton } from "./delete-product-button";
@@ -80,19 +81,19 @@ export function ProductsTable({
   }, [search, categoryId, stockFilter]);
 
   return (
-    <div className="space-y-5">
-      {/* Filtres + actions */}
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+    <div className="space-y-6">
+      {/* FILTRES + ACTIONS */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex flex-1 flex-col gap-3 md:flex-row">
           {/* Recherche */}
           <div className="relative flex-1 md:max-w-xs">
-            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-black/40" />
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Rechercher un produit…"
-              className="h-11 w-full rounded-full border border-brand-black/10 bg-white pl-11 pr-4 text-sm outline-none transition focus:border-brand-red"
+              className="h-12 w-full rounded-full border border-white/10 bg-neutral-900/40 pl-12 pr-5 font-mono text-xs md:text-sm text-white placeholder-neutral-500 outline-none backdrop-blur-md transition-colors focus:border-brand-red"
             />
           </div>
 
@@ -100,11 +101,11 @@ export function ProductsTable({
           <select
             value={categoryId}
             onChange={(e) => setCategoryId(e.target.value)}
-            className="h-11 rounded-full border border-brand-black/10 bg-white px-4 text-sm outline-none transition focus:border-brand-red"
+            className="h-12 rounded-full border border-white/10 bg-neutral-900/40 px-5 font-mono text-xs uppercase tracking-wider text-white outline-none backdrop-blur-md transition-colors focus:border-brand-red cursor-pointer"
           >
-            <option value="">Toutes catégories</option>
+            <option value="" className="bg-neutral-900 text-neutral-400">Toutes catégories</option>
             {categories.map((c) => (
-              <option key={c.id} value={c.id}>
+              <option key={c.id} value={c.id} className="bg-neutral-900 text-white">
                 {c.name}
               </option>
             ))}
@@ -114,170 +115,174 @@ export function ProductsTable({
           <select
             value={stockFilter}
             onChange={(e) => setStockFilter(e.target.value)}
-            className="h-11 rounded-full border border-brand-black/10 bg-white px-4 text-sm outline-none transition focus:border-brand-red"
+            className="h-12 rounded-full border border-white/10 bg-neutral-900/40 px-5 font-mono text-xs uppercase tracking-wider text-white outline-none backdrop-blur-md transition-colors focus:border-brand-red cursor-pointer"
           >
-            <option value="">Tout le stock</option>
-            <option value="low">Stock faible (≤5)</option>
-            <option value="out">Rupture</option>
+            <option value="" className="bg-neutral-900 text-neutral-400">Tout le stock</option>
+            <option value="low" className="bg-neutral-900 text-amber-400">Stock faible (≤5)</option>
+            <option value="out" className="bg-neutral-900 text-red-400">En rupture</option>
           </select>
         </div>
 
         <Link
           href="/admin/produits/nouveau"
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-brand-red px-5 text-sm font-semibold text-white shadow-lg shadow-brand-red/30 transition hover:bg-brand-red/90"
+          className="group inline-flex h-12 items-center justify-center gap-2 rounded-full border border-brand-red/30 bg-brand-red px-7 font-mono text-xs font-bold uppercase tracking-widest text-white shadow-xl shadow-brand-red/30 transition-all hover:bg-white hover:text-black"
         >
           <Plus className="h-4 w-4" />
-          Nouveau produit
+          <span>Nouveau produit</span>
         </Link>
       </div>
 
-      {/* Table */}
-      <div className="overflow-hidden rounded-2xl border border-brand-black/5 bg-white">
+      {/* TABLEAU GLASSMORPHISM */}
+      <div className="overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 backdrop-blur-2xl">
         {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="h-6 w-6 animate-spin text-brand-red" />
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="h-8 w-8 animate-spin text-brand-red" />
           </div>
         ) : products.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <Package className="h-12 w-12 text-brand-black/20" />
-            <p className="mt-3 text-sm text-brand-black/50">
+          <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-neutral-400">
+              <Package className="h-8 w-8" />
+            </div>
+            <p className="mt-4 font-mono text-xs md:text-sm text-neutral-400">
               Aucun produit ne correspond à votre recherche.
             </p>
           </div>
         ) : (
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-brand-black/5 bg-brand-gray/40">
-                <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-brand-black/50">
-                  Produit
-                </th>
-                <th className="hidden px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-brand-black/50 md:table-cell">
-                  Marque
-                </th>
-                <th className="hidden px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-brand-black/50 lg:table-cell">
-                  Catégorie
-                </th>
-                <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-brand-black/50">
-                  Prix
-                </th>
-                <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-brand-black/50">
-                  Stock
-                </th>
-                <th className="px-4 py-3 text-right text-[10px] font-semibold uppercase tracking-widest text-brand-black/50">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.map((p) => {
-                const lowStock = p.stock > 0 && p.stock <= 5;
-                const outOfStock = p.stock === 0;
-                return (
-                  <tr
-                    key={p.id}
-                    className="border-b border-brand-black/5 last:border-0 transition hover:bg-brand-gray/20"
-                  >
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl bg-brand-gray">
-                          {p.images?.[0] ? (
-                            <Image
-                              src={p.images[0]}
-                              alt={p.name}
-                              fill
-                              sizes="44px"
-                              className="object-cover"
-                            />
-                          ) : (
-                            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand-black to-brand-red/30">
-                              <span className="font-display text-[10px] tracking-wider text-white/60">
-                                {p.brand.name.slice(0, 3).toUpperCase()}
-                              </span>
-                            </div>
-                          )}
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[780px]">
+              <thead>
+                <tr className="border-b border-white/10 bg-black/40">
+                  <th className="px-6 py-4 text-left font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-400">
+                    Produit
+                  </th>
+                  <th className="hidden px-6 py-4 text-left font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-400 md:table-cell">
+                    Marque
+                  </th>
+                  <th className="hidden px-6 py-4 text-left font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-400 lg:table-cell">
+                    Catégorie
+                  </th>
+                  <th className="px-6 py-4 text-left font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-400">
+                    Prix B2C
+                  </th>
+                  <th className="px-6 py-4 text-left font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-400">
+                    Stock
+                  </th>
+                  <th className="px-6 py-4 text-right font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-400">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {products.map((p) => {
+                  const lowStock = p.stock > 0 && p.stock <= 5;
+                  const outOfStock = p.stock === 0;
+                  return (
+                    <tr
+                      key={p.id}
+                      className="transition-colors hover:bg-white/[0.02]"
+                    >
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-4">
+                          <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-black/40">
+                            {p.images?.[0] ? (
+                              <Image
+                                src={p.images[0]}
+                                alt={p.name}
+                                fill
+                                sizes="48px"
+                                className="object-cover"
+                              />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center bg-brand-red/10 text-brand-red">
+                                <span className="font-mono text-[9px] uppercase tracking-widest font-bold">
+                                  {p.brand.name.slice(0, 3)}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          <Link
+                            href={`/admin/produits/${p.id}`}
+                            className="line-clamp-2 font-sans text-sm font-medium text-white transition-colors hover:text-brand-red"
+                          >
+                            {p.name}
+                          </Link>
                         </div>
-                        <Link
-                          href={`/admin/produits/${p.id}`}
-                          className="line-clamp-2 text-sm font-medium text-brand-black transition hover:text-brand-red"
+                      </td>
+                      <td className="hidden px-6 py-4 md:table-cell">
+                        <span className="font-mono text-xs text-neutral-300">
+                          {p.brand.name}
+                        </span>
+                      </td>
+                      <td className="hidden px-6 py-4 lg:table-cell">
+                        <span className="rounded-xl border border-white/10 bg-black/40 px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-neutral-300 backdrop-blur-md">
+                          {p.category.name}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="font-display text-lg font-light tracking-wide text-white">
+                          {formatPrice(p.priceB2C)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={cn(
+                            "inline-flex items-center gap-1.5 rounded-xl border px-3 py-1 font-mono text-xs font-semibold backdrop-blur-md",
+                            outOfStock
+                              ? "border-red-500/30 bg-red-500/10 text-red-400"
+                              : lowStock
+                              ? "border-amber-500/30 bg-amber-500/10 text-amber-400"
+                              : "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                          )}
                         >
-                          {p.name}
-                        </Link>
-                      </div>
-                    </td>
-                    <td className="hidden px-4 py-3 md:table-cell">
-                      <span className="text-sm text-brand-black/70">
-                        {p.brand.name}
-                      </span>
-                    </td>
-                    <td className="hidden px-4 py-3 lg:table-cell">
-                      <span className="rounded-full bg-brand-gray px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-brand-black/60">
-                        {p.category.name}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="font-display text-base text-brand-black">
-                        {formatPrice(p.priceB2C)}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={cn(
-                          "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold",
-                          outOfStock
-                            ? "bg-red-100 text-red-700"
-                            : lowStock
-                            ? "bg-amber-100 text-amber-700"
-                            : "bg-green-100 text-green-700"
-                        )}
-                      >
-                        {lowStock && <AlertTriangle className="h-3 w-3" />}
-                        {p.stock}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center justify-end gap-1">
-                        <Link
-                          href={`/admin/produits/${p.id}`}
-                          aria-label="Modifier"
-                          className="flex h-8 w-8 items-center justify-center rounded-lg text-brand-black/40 transition hover:bg-brand-red/10 hover:text-brand-red"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Link>
-                        <DeleteProductButton
-                          productId={p.id}
-                          productName={p.name}
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                          {lowStock && <AlertTriangle className="h-3 w-3" />}
+                          <span>{p.stock}</span>
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Link
+                            href={`/admin/produits/${p.id}`}
+                            aria-label="Modifier le produit"
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-neutral-400 transition-all hover:border-brand-red/50 hover:bg-brand-red/10 hover:text-white"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Link>
+                          <DeleteProductButton
+                            productId={p.id}
+                            productName={p.name}
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
-      {/* Pagination */}
+      {/* PAGINATION */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-xs text-brand-black/50">
-            {total} produit{total > 1 ? "s" : ""} au total
+        <div className="flex items-center justify-between px-2">
+          <p className="font-mono text-xs text-neutral-400">
+            {total} produit{total > 1 ? "s" : ""} enregistré{total > 1 ? "s" : ""} au total
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-brand-black/10 bg-white text-brand-black transition hover:border-brand-red disabled:opacity-30"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-neutral-900/40 text-white backdrop-blur-md transition-all hover:border-brand-red/50 disabled:opacity-30"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
-            <span className="text-xs text-brand-black/60">
-              Page {page} sur {totalPages}
+            <span className="font-mono text-xs text-neutral-300">
+              Page {page} / {totalPages}
             </span>
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-brand-black/10 bg-white text-brand-black transition hover:border-brand-red disabled:opacity-30"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-neutral-900/40 text-white backdrop-blur-md transition-all hover:border-brand-red/50 disabled:opacity-30"
             >
               <ChevronRight className="h-4 w-4" />
             </button>

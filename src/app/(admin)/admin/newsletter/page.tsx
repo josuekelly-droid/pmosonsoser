@@ -15,68 +15,86 @@ export default async function AdminNewsletterPage() {
   });
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <div className="space-y-8">
+      {/* HEADER DE PAGE DARK LUXURY */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="font-display text-3xl tracking-wide text-brand-black md:text-4xl">
+          <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-brand-red">
+            [ Marketing & Diffusion ]
+          </span>
+          <h1 className="mt-1 font-display text-3xl font-light tracking-wide text-white md:text-5xl">
             Newsletter
           </h1>
-          <p className="mt-1 text-sm text-brand-black/60">
-            {subscribers.length} abonné{subscribers.length > 1 ? "s" : ""} à votre liste de diffusion.
+          <p className="mt-2 font-mono text-xs text-neutral-400 max-w-xl leading-relaxed">
+            {subscribers.length} abonné{subscribers.length > 1 ? "s" : ""} inscrit{subscribers.length > 1 ? "s" : ""} à la liste de diffusion.
           </p>
         </div>
-        
-        {/* Le bouton d'export utilise l'API Route qu'on va créer juste après */}
+
+        {/* BOUTON D'EXPORTATION CSV HUD */}
         <a
           href="/api/admin/newsletter/export"
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-brand-black px-5 text-sm font-semibold text-white transition hover:bg-brand-red"
+          className="group inline-flex h-12 shrink-0 items-center justify-center gap-2.5 rounded-full border border-white/10 bg-white/5 px-7 font-mono text-xs uppercase tracking-widest text-white backdrop-blur-md transition-all duration-300 hover:border-brand-red/50 hover:bg-brand-red hover:text-white hover:shadow-lg hover:shadow-brand-red/30"
         >
-          <Download className="h-4 w-4" />
-          Exporter en CSV
+          <Download className="h-4 w-4 transition-transform group-hover:-translate-y-0.5" />
+          <span>Exporter la liste CSV</span>
         </a>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-brand-black/5 bg-white">
+      {/* TABLEAU GLASSMORPHISM */}
+      <div className="overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 backdrop-blur-2xl">
         {subscribers.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <Mail className="h-12 w-12 text-brand-black/20" />
-            <p className="mt-3 text-sm text-brand-black/50">
-              Aucun abonné pour le moment.
+          <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-neutral-400">
+              <Mail className="h-8 w-8" />
+            </div>
+            <p className="mt-4 font-mono text-xs md:text-sm text-neutral-400">
+              Aucun abonné enregistré pour le moment.
             </p>
           </div>
         ) : (
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-brand-black/5 bg-brand-gray/40">
-                <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-brand-black/50">
-                  Email
-                </th>
-                <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-brand-black/50">
-                  Date d'inscription
-                </th>
-                <th className="px-4 py-3 text-right text-[10px] font-semibold uppercase tracking-widest text-brand-black/50">
-                  Statut
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {subscribers.map((s) => (
-                <tr key={s.id} className="border-b border-brand-black/5 last:border-0 hover:bg-brand-gray/20">
-                  <td className="px-4 py-3 text-sm font-medium text-brand-black">
-                    {s.email}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-brand-black/60">
-                    {new Date(s.createdAt).toLocaleString("fr-FR")}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <span className="inline-flex rounded-full bg-green-100 px-2.5 py-1 text-[10px] font-semibold uppercase text-green-700">
-                      Actif
-                    </span>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[600px]">
+              <thead>
+                <tr className="border-b border-white/10 bg-black/40">
+                  <th className="px-6 py-4 text-left font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-400">
+                    Adresse Email
+                  </th>
+                  <th className="px-6 py-4 text-left font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-400">
+                    Date d'inscription
+                  </th>
+                  <th className="px-6 py-4 text-right font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-400">
+                    Statut
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {subscribers.map((s) => (
+                  <tr
+                    key={s.id}
+                    className="transition-colors hover:bg-white/[0.02]"
+                  >
+                    <td className="px-6 py-4 font-mono text-sm font-bold text-white">
+                      {s.email}
+                    </td>
+                    <td className="px-6 py-4 font-mono text-xs text-neutral-400">
+                      {new Date(s.createdAt).toLocaleString("fr-FR", {
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <span className="inline-flex rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-wider text-emerald-400 backdrop-blur-md">
+                        Actif
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>

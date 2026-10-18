@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Search, ShoppingCart, Loader2, ChevronRight } from "lucide-react";
 import { formatPrice, cn } from "@/lib/utils";
@@ -30,8 +30,8 @@ const PAYMENT_LABELS: Record<string, string> = {
 };
 
 export function OrdersTable({ initialOrders }: { initialOrders: Order[] }) {
-  const [orders, setOrders] = useState(initialOrders);
-  const [loading, setLoading] = useState(false);
+  const [orders] = useState(initialOrders);
+  const [loading] = useState(false);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
@@ -47,17 +47,17 @@ export function OrdersTable({ initialOrders }: { initialOrders: Order[] }) {
   });
 
   return (
-    <div className="space-y-5">
-      {/* Filtres */}
-      <div className="flex flex-col gap-3 md:flex-row md:items-center">
-        <div className="relative flex-1 md:max-w-sm">
-          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-black/40" />
+    <div className="space-y-6">
+      {/* FILTRES & RECHERCHE */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-center justify-between">
+        <div className="relative flex-1 md:max-w-md">
+          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Numéro, nom, téléphone…"
-            className="h-11 w-full rounded-full border border-brand-black/10 bg-white pl-11 pr-4 text-sm outline-none transition focus:border-brand-red"
+            placeholder="Rechercher par numéro, nom, téléphone…"
+            className="h-12 w-full rounded-full border border-white/10 bg-neutral-900/40 pl-12 pr-5 font-mono text-xs md:text-sm text-white placeholder-neutral-500 outline-none backdrop-blur-md transition-colors focus:border-brand-red"
           />
         </div>
 
@@ -65,10 +65,10 @@ export function OrdersTable({ initialOrders }: { initialOrders: Order[] }) {
           <button
             onClick={() => setStatusFilter("")}
             className={cn(
-              "rounded-full border px-3 py-2 text-xs font-medium transition",
+              "rounded-full border px-4 py-2 font-mono text-xs uppercase tracking-wider transition-all duration-300",
               !statusFilter
-                ? "border-brand-red bg-brand-red text-white"
-                : "border-brand-black/10 bg-white text-brand-black/70 hover:border-brand-red/30"
+                ? "border-brand-red bg-brand-red text-white shadow-lg shadow-brand-red/30"
+                : "border-white/10 bg-neutral-900/40 text-neutral-400 backdrop-blur-md hover:border-brand-red/50 hover:text-white"
             )}
           >
             Toutes ({orders.length})
@@ -81,10 +81,10 @@ export function OrdersTable({ initialOrders }: { initialOrders: Order[] }) {
                 key={s}
                 onClick={() => setStatusFilter(s)}
                 className={cn(
-                  "rounded-full border px-3 py-2 text-xs font-medium transition",
+                  "rounded-full border px-4 py-2 font-mono text-xs uppercase tracking-wider transition-all duration-300",
                   statusFilter === s
-                    ? "border-brand-red bg-brand-red text-white"
-                    : "border-brand-black/10 bg-white text-brand-black/70 hover:border-brand-red/30"
+                    ? "border-brand-red bg-brand-red text-white shadow-lg shadow-brand-red/30"
+                    : "border-white/10 bg-neutral-900/40 text-neutral-400 backdrop-blur-md hover:border-brand-red/50 hover:text-white"
                 )}
               >
                 {STATUS_LABELS[s as OrderStatus]} ({count})
@@ -94,56 +94,58 @@ export function OrdersTable({ initialOrders }: { initialOrders: Order[] }) {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="overflow-hidden rounded-2xl border border-brand-black/5 bg-white">
+      {/* TABLEAU GLASSMORPHISM */}
+      <div className="overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 backdrop-blur-2xl">
         {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="h-6 w-6 animate-spin text-brand-red" />
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="h-8 w-8 animate-spin text-brand-red" />
           </div>
         ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <ShoppingCart className="h-12 w-12 text-brand-black/20" />
-            <p className="mt-3 text-sm text-brand-black/50">
-              Aucune commande ne correspond à votre recherche.
+          <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-neutral-400">
+              <ShoppingCart className="h-8 w-8" />
+            </div>
+            <p className="mt-4 font-mono text-xs md:text-sm text-neutral-400">
+              Aucune commande ne correspond à vos critères de recherche.
             </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px]">
+            <table className="w-full min-w-[780px]">
               <thead>
-                <tr className="border-b border-brand-black/5 bg-brand-gray/40">
-                  <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-brand-black/50">
+                <tr className="border-b border-white/10 bg-black/40">
+                  <th className="px-6 py-4 text-left font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-400">
                     Commande
                   </th>
-                  <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-brand-black/50">
+                  <th className="px-6 py-4 text-left font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-400">
                     Client
                   </th>
-                  <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-brand-black/50">
+                  <th className="px-6 py-4 text-left font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-400">
                     Paiement
                   </th>
-                  <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-brand-black/50">
+                  <th className="px-6 py-4 text-left font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-400">
                     Statut
                   </th>
-                  <th className="px-4 py-3 text-right text-[10px] font-semibold uppercase tracking-widest text-brand-black/50">
+                  <th className="px-6 py-4 text-right font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-400">
                     Total
                   </th>
-                  <th className="w-10 px-4 py-3" />
+                  <th className="w-12 px-6 py-4" />
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-white/5">
                 {filtered.map((o) => (
                   <tr
                     key={o.id}
-                    className="border-b border-brand-black/5 last:border-0 transition hover:bg-brand-gray/20"
+                    className="transition-colors hover:bg-white/[0.02]"
                   >
-                    <td className="px-4 py-3">
+                    <td className="px-6 py-4">
                       <Link
                         href={`/admin/commandes/${o.id}`}
-                        className="text-sm font-semibold text-brand-black transition hover:text-brand-red"
+                        className="font-mono text-sm font-bold text-white transition-colors hover:text-brand-red"
                       >
                         {o.orderNumber}
                       </Link>
-                      <p className="text-[11px] text-brand-black/50">
+                      <p className="mt-0.5 font-mono text-[11px] text-neutral-400">
                         {new Date(o.createdAt).toLocaleDateString("fr-FR", {
                           day: "2-digit",
                           month: "short",
@@ -153,38 +155,38 @@ export function OrdersTable({ initialOrders }: { initialOrders: Order[] }) {
                         })}
                       </p>
                     </td>
-                    <td className="px-4 py-3">
-                      <p className="text-sm text-brand-black">
+                    <td className="px-6 py-4">
+                      <p className="font-sans text-sm font-medium text-white">
                         {o.customerName}
                       </p>
-                      <p className="text-[11px] text-brand-black/50">
+                      <p className="mt-0.5 font-mono text-[11px] text-neutral-400">
                         {o.telephone}
                       </p>
                     </td>
-                    <td className="px-4 py-3">
-                      <span className="rounded-full bg-brand-gray px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-brand-black/70">
+                    <td className="px-6 py-4">
+                      <span className="rounded-xl border border-white/10 bg-black/40 px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-neutral-300 backdrop-blur-md">
                         {PAYMENT_LABELS[o.methodePaiement] || o.methodePaiement}
                       </span>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-6 py-4">
                       <span
                         className={cn(
-                          "inline-flex rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider",
+                          "inline-flex rounded-xl px-3 py-1 font-mono text-[10px] uppercase tracking-wider border backdrop-blur-md",
                           STATUS_STYLES[o.statut as OrderStatus] ||
-                            "bg-gray-100 text-gray-700"
+                            "border-white/10 bg-white/5 text-neutral-300"
                         )}
                       >
                         {STATUS_LABELS[o.statut as OrderStatus] || o.statut}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right font-display text-base tracking-wide text-brand-black">
+                    <td className="px-6 py-4 text-right font-display text-lg font-light tracking-wide text-white">
                       {formatPrice(o.total)}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-6 py-4 text-right">
                       <Link
                         href={`/admin/commandes/${o.id}`}
-                        aria-label="Voir"
-                        className="flex h-8 w-8 items-center justify-center rounded-lg text-brand-black/40 transition hover:bg-brand-red/10 hover:text-brand-red"
+                        aria-label="Voir la commande"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-neutral-400 transition-all hover:border-brand-red/50 hover:bg-brand-red/10 hover:text-white"
                       >
                         <ChevronRight className="h-4 w-4" />
                       </Link>

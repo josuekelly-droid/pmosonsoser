@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import {
-  ArrowLeft,
+  ArrowUpRight,
   Mail,
   Phone,
   MapPin,
@@ -12,6 +12,7 @@ import {
   Send,
   Building2,
   CreditCard,
+  ExternalLink,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatPrice, cn } from "@/lib/utils";
@@ -67,59 +68,71 @@ export default async function AdminCommandeDetailPage({
   const PaymentIcon = payment.icon;
 
   return (
-    <div className="space-y-6">
-      {/* Retour + header */}
+    <div className="space-y-8">
+      {/* Retour + Header */}
       <div>
         <Link
           href="/admin/commandes"
-          className="inline-flex items-center gap-2 text-sm font-medium text-brand-black/60 transition hover:text-brand-black"
+          className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-neutral-400 transition-colors hover:text-white"
         >
-          <ArrowLeft className="h-4 w-4" />
-          Retour aux commandes
+          <ArrowUpRight className="h-4 w-4 rotate-[225deg]" />
+          <span>Retour à la liste des commandes</span>
         </Link>
 
         <div className="mt-4 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
           <div>
-            <div className="flex items-center gap-3">
-              <h1 className="font-display text-3xl tracking-wide text-brand-black md:text-4xl">
+            <div className="flex flex-wrap items-center gap-3.5">
+              <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-brand-red">
+                [ Référence commande ]
+              </span>
+            </div>
+            <div className="mt-1 flex flex-wrap items-center gap-4">
+              <h1 className="font-display text-3xl font-light tracking-wide text-white md:text-5xl">
                 {order.orderNumber}
               </h1>
               <span
                 className={cn(
-                  "inline-flex rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-wider",
-                  STATUS_STYLES[order.statut as OrderStatus]
+                  "inline-flex rounded-xl border px-3.5 py-1 font-mono text-xs uppercase tracking-wider backdrop-blur-md",
+                  STATUS_STYLES[order.statut as OrderStatus] ||
+                    "border-white/10 bg-white/5 text-neutral-300"
                 )}
               >
-                {STATUS_LABELS[order.statut as OrderStatus]}
+                {STATUS_LABELS[order.statut as OrderStatus] || order.statut}
               </span>
             </div>
-            <p className="mt-2 flex items-center gap-1.5 text-xs text-brand-black/50">
-              <Clock className="h-3.5 w-3.5" />
-              {new Date(order.createdAt).toLocaleString("fr-FR", {
-                day: "2-digit",
-                month: "long",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
+            <p className="mt-2 flex items-center gap-2 font-mono text-xs text-neutral-400">
+              <Clock className="h-3.5 w-3.5 text-neutral-500" />
+              <span>
+                {new Date(order.createdAt).toLocaleString("fr-FR", {
+                  day: "2-digit",
+                  month: "long",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </span>
             </p>
           </div>
         </div>
       </div>
 
-      {/* Grille 2 colonnes */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_400px]">
-        {/* Colonne principale */}
-        <div className="space-y-6">
-          {/* Articles */}
-          <section className="rounded-2xl border border-brand-black/5 bg-white p-6">
-            <h2 className="font-display text-xl tracking-wide text-brand-black">
+      {/* Grille Principale */}
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_380px]">
+        {/* Colonne Principale */}
+        <div className="space-y-8">
+          {/* Articles Commandés */}
+          <section className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-8 backdrop-blur-2xl">
+            <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-brand-red">
+              [ Inventaire ]
+            </span>
+            <h2 className="mt-1 font-display text-2xl font-light tracking-wide text-white">
               Articles commandés
             </h2>
-            <ul className="mt-4 divide-y divide-brand-black/5">
+
+            <ul className="mt-6 divide-y divide-white/5">
               {order.items.map((item) => (
                 <li key={item.id} className="flex gap-4 py-4 first:pt-0">
-                  <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-brand-gray">
+                  <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-black/40">
                     {item.product.images?.[0] ? (
                       <Image
                         src={item.product.images[0]}
@@ -129,9 +142,9 @@ export default async function AdminCommandeDetailPage({
                         className="object-cover"
                       />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand-black to-brand-red/30">
-                        <span className="font-display text-xs text-white/60">
-                          {item.product.brand.name.slice(0, 3).toUpperCase()}
+                      <div className="flex h-full w-full items-center justify-center bg-brand-red/10 text-brand-red">
+                        <span className="font-mono text-[10px] font-bold uppercase">
+                          {item.product.brand.name.slice(0, 3)}
                         </span>
                       </div>
                     )}
@@ -140,15 +153,15 @@ export default async function AdminCommandeDetailPage({
                     <Link
                       href={`/produits/${item.productId}`}
                       target="_blank"
-                      className="line-clamp-1 text-sm font-medium text-brand-black transition hover:text-brand-red"
+                      className="line-clamp-1 font-sans text-sm font-medium text-white transition-colors hover:text-brand-red"
                     >
                       {item.product.name}
                     </Link>
-                    <p className="text-xs text-brand-black/50">
-                      {item.product.brand.name} · x{item.quantity}
+                    <p className="mt-1 font-mono text-xs text-neutral-400">
+                      {item.product.brand.name} · Quantité : {item.quantity}
                     </p>
                   </div>
-                  <p className="shrink-0 font-display text-base text-brand-black">
+                  <p className="shrink-0 font-display text-lg font-light text-white">
                     {formatPrice(item.price * item.quantity)}
                   </p>
                 </li>
@@ -156,94 +169,100 @@ export default async function AdminCommandeDetailPage({
             </ul>
 
             {/* Totaux */}
-            <dl className="mt-4 space-y-2 border-t border-brand-black/5 pt-4 text-sm">
-              <div className="flex justify-between">
-                <dt className="text-brand-black/60">Sous-total</dt>
-                <dd className="font-medium">{formatPrice(subtotal)}</dd>
+            <dl className="mt-6 space-y-3 border-t border-white/10 pt-6 font-mono text-xs">
+              <div className="flex justify-between text-neutral-400">
+                <dt>Sous-total</dt>
+                <dd className="text-white font-medium">{formatPrice(subtotal)}</dd>
               </div>
-              <div className="flex justify-between">
-                <dt className="text-brand-black/60">
+              <div className="flex justify-between text-neutral-400">
+                <dt>
                   Livraison
                   {order.deliveryDistance != null && (
-                    <span className="ml-1 text-xs text-brand-black/40">
+                    <span className="ml-1 text-[11px] text-neutral-500">
                       ({order.deliveryDistance.toFixed(1)} km)
                     </span>
                   )}
                 </dt>
-                <dd className="font-medium">
+                <dd className="text-white font-medium">
                   {deliveryFee === 0 ? (
-                    <span className="text-green-700">Offerte</span>
+                    <span className="text-emerald-400">Offerte</span>
                   ) : (
                     formatPrice(deliveryFee)
                   )}
                 </dd>
               </div>
-              <div className="flex items-end justify-between border-t border-brand-black/5 pt-3">
-                <dt className="font-display text-base tracking-wide text-brand-black">
-                  Total
+              <div className="flex items-end justify-between border-t border-white/10 pt-4">
+                <dt className="font-mono text-xs uppercase tracking-widest text-neutral-300">
+                  Total TTC
                 </dt>
-                <dd className="font-display text-2xl text-brand-red">
+                <dd className="font-display text-3xl font-light text-brand-red">
                   {formatPrice(order.total)}
                 </dd>
               </div>
             </dl>
           </section>
 
-          {/* Client & livraison */}
-          <section className="rounded-2xl border border-brand-black/5 bg-white p-6">
-            <h2 className="font-display text-xl tracking-wide text-brand-black">
+          {/* Informations Client & Livraison */}
+          <section className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-8 backdrop-blur-2xl">
+            <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-brand-red">
+              [ Destinataire ]
+            </span>
+            <h2 className="mt-1 font-display text-2xl font-light tracking-wide text-white">
               Client & livraison
             </h2>
-            <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2">
-              <div className="space-y-3 text-sm">
-                <p className="flex items-center gap-2 text-brand-black">
+
+            <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="space-y-4 font-mono text-xs">
+                <p className="flex items-center gap-3 text-white">
                   <UserIcon className="h-4 w-4 shrink-0 text-brand-red" />
-                  <span className="font-medium">{order.customerName}</span>
+                  <span className="font-sans font-medium text-sm">{order.customerName}</span>
                 </p>
-                <p className="flex items-center gap-2 text-brand-black/70">
+                <p className="flex items-center gap-3 text-neutral-300">
                   <Mail className="h-4 w-4 shrink-0 text-brand-red" />
                   <a
                     href={`mailto:${order.customerEmail}`}
-                    className="hover:underline"
+                    className="hover:text-white hover:underline"
                   >
                     {order.customerEmail}
                   </a>
                 </p>
-                <p className="flex items-center gap-2 text-brand-black/70">
+                <p className="flex items-center gap-3 text-neutral-300">
                   <Phone className="h-4 w-4 shrink-0 text-brand-red" />
                   <a
                     href={`tel:${order.telephone}`}
-                    className="hover:underline"
+                    className="hover:text-white hover:underline"
                   >
                     {order.telephone}
                   </a>
                 </p>
               </div>
-              <div className="space-y-3 text-sm">
-                <p className="flex items-start gap-2 text-brand-black/70">
+
+              <div className="space-y-4 font-mono text-xs">
+                <p className="flex items-start gap-3 text-neutral-300">
                   <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-brand-red" />
-                  <span>{order.adresseLivraison}</span>
+                  <span className="leading-relaxed">{order.adresseLivraison}</span>
                 </p>
                 {order.deliveryLat != null && order.deliveryLng != null && (
                   <a
                     href={`https://www.google.com/maps?q=${order.deliveryLat},${order.deliveryLng}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs font-medium text-brand-red hover:underline"
+                    className="inline-flex items-center gap-1.5 text-brand-red hover:underline"
                   >
-                    Ouvrir dans Google Maps →
+                    <ExternalLink className="h-3.5 w-3.5" />
+                    <span>Ouvrir la géolocalisation dans Google Maps</span>
                   </a>
                 )}
                 {order.notes && (
-                  <p className="rounded-xl bg-brand-gray/60 p-3 text-xs italic text-brand-black/60">
-                    « {order.notes} »
-                  </p>
+                  <div className="rounded-2xl border border-white/10 bg-black/40 p-4 italic text-neutral-400">
+                    «&nbsp;{order.notes}&nbsp;»
+                  </div>
                 )}
               </div>
             </div>
           </section>
 
-          {/* Panel paiement (WU / virement) */}
+          {/* Panneau de Validation Paiement (WU / Virement) */}
           {order.statut === "EN_ATTENTE" && order.methodePaiement !== "FEDAPAY" && (
             <OrderPaymentPanel
               orderId={order.id}
@@ -254,28 +273,32 @@ export default async function AdminCommandeDetailPage({
           )}
         </div>
 
-        {/* Colonne latérale */}
-        <aside className="space-y-6">
-          {/* Paiement */}
-          <div className="rounded-2xl border border-brand-black/5 bg-white p-6">
-            <h3 className="font-display text-lg tracking-wide text-brand-black">
-              Paiement
+        {/* Colonne Latérale */}
+        <aside className="space-y-8">
+          {/* Détails du Mode de Règlement */}
+          <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-8 backdrop-blur-2xl">
+            <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-brand-red">
+              [ Transaction ]
+            </span>
+            <h3 className="mt-1 font-display text-xl font-light tracking-wide text-white">
+              Méthode de paiement
             </h3>
-            <div className="mt-4 flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-gray text-brand-black">
-                <PaymentIcon className="h-5 w-5" />
+
+            <div className="mt-5 flex items-center gap-3.5">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-black/40 text-brand-red backdrop-blur-md">
+                <PaymentIcon className="h-6 w-6" />
               </div>
-              <p className="text-sm font-medium text-brand-black">
+              <p className="font-mono text-xs font-bold uppercase tracking-wider text-white">
                 {payment.label}
               </p>
             </div>
 
             {order.codeMTCN && (
-              <div className="mt-4 rounded-xl bg-brand-gray/60 p-3">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-brand-black/50">
+              <div className="mt-5 rounded-2xl border border-white/10 bg-black/40 p-4">
+                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-400">
                   Code MTCN
                 </p>
-                <p className="mt-1 font-mono text-sm text-brand-black">
+                <p className="mt-1 font-mono text-sm font-bold text-amber-400">
                   {order.codeMTCN}
                 </p>
               </div>
@@ -286,14 +309,15 @@ export default async function AdminCommandeDetailPage({
                 href={order.preuvePaiement}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-brand-gray/60 p-3 text-xs font-medium text-brand-red transition hover:bg-brand-gray"
+                className="mt-5 inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 p-4 font-mono text-xs text-brand-red backdrop-blur-md transition-all hover:bg-white/10 hover:underline"
               >
-                Voir la preuve de paiement →
+                <ExternalLink className="h-4 w-4 shrink-0" />
+                <span>Consulter la preuve de virement</span>
               </a>
             )}
           </div>
 
-          {/* Actions statut */}
+          {/* Composant de Changement de Statut */}
           <OrderStatusChanger
             orderId={order.id}
             currentStatus={order.statut as OrderStatus}

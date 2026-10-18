@@ -27,16 +27,21 @@ export default async function AdminCommandesPage() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* HEADER DE PAGE DARK LUXURY */}
       <div>
-        <h1 className="font-display text-3xl tracking-wide text-brand-black md:text-4xl">
+        <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-brand-red">
+          [ Suivi des flux & Ventes ]
+        </span>
+        <h1 className="mt-1 font-display text-3xl font-light tracking-wide text-white md:text-5xl">
           Commandes
         </h1>
-        <p className="mt-1 text-sm text-brand-black/60">
-          Suivez et faites avancer les commandes de vos clients.
+        <p className="mt-2 font-mono text-xs text-neutral-400 max-w-xl leading-relaxed">
+          Supervisez le traitement des commandes, validez les paiements manuels et gérez l'avancement de l'expédition.
         </p>
       </div>
 
+      {/* TABLEAU COMPLET ET FILTRES GLASSMORPHISM */}
       <OrdersTable initialOrders={orders} />
     </div>
   );

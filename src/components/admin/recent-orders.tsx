@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { formatPrice } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import { ShoppingCart } from "lucide-react";
 
 const STATUS_LABELS: Record<string, string> = {
   EN_ATTENTE: "En attente",
@@ -11,11 +12,11 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const STATUS_STYLES: Record<string, string> = {
-  EN_ATTENTE: "bg-amber-100 text-amber-700",
-  PAYE: "bg-blue-100 text-blue-700",
-  EXPEDIE: "bg-purple-100 text-purple-700",
-  LIVRE: "bg-green-100 text-green-700",
-  ANNULE: "bg-red-100 text-red-700",
+  EN_ATTENTE: "border-amber-500/30 bg-amber-500/10 text-amber-400",
+  PAYE: "border-blue-500/30 bg-blue-500/10 text-blue-400",
+  EXPEDIE: "border-purple-500/30 bg-purple-500/10 text-purple-400",
+  LIVRE: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
+  ANNULE: "border-red-500/30 bg-red-500/10 text-red-400",
 };
 
 type Order = {
@@ -30,73 +31,76 @@ type Order = {
 export function RecentOrders({ orders }: { orders: Order[] }) {
   if (orders.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-brand-black/10 bg-white py-12 text-center">
-        <p className="text-sm text-brand-black/50">Aucune commande pour le moment.</p>
+      <div className="flex flex-col items-center justify-center rounded-[2.5rem] border border-dashed border-white/10 bg-neutral-900/40 py-16 px-4 text-center backdrop-blur-2xl">
+        <ShoppingCart className="h-10 w-10 text-neutral-600" />
+        <p className="mt-3 font-mono text-xs text-neutral-400">Aucune commande récente pour le moment.</p>
       </div>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-brand-black/5 bg-white">
-      <table className="w-full">
-        <thead>
-          <tr className="border-b border-brand-black/5 bg-brand-gray/40">
-            <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-brand-black/50">
-              Commande
-            </th>
-            <th className="hidden px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-brand-black/50 md:table-cell">
-              Client
-            </th>
-            <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-brand-black/50">
-              Statut
-            </th>
-            <th className="px-4 py-3 text-right text-[10px] font-semibold uppercase tracking-widest text-brand-black/50">
-              Total
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {orders.map((o) => (
-            <tr
-              key={o.id}
-              className="border-b border-brand-black/5 last:border-0 transition hover:bg-brand-gray/30"
-            >
-              <td className="px-4 py-3">
-                <Link
-                  href={`/admin/commandes/${o.id}`}
-                  className="text-sm font-semibold text-brand-black transition hover:text-brand-red"
-                >
-                  {o.orderNumber}
-                </Link>
-                <p className="text-[11px] text-brand-black/50">
-                  {new Date(o.createdAt).toLocaleDateString("fr-FR", {
-                    day: "2-digit",
-                    month: "short",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </p>
-              </td>
-              <td className="hidden px-4 py-3 md:table-cell">
-                <p className="text-sm text-brand-black">{o.customerName}</p>
-              </td>
-              <td className="px-4 py-3">
-                <span
-                  className={cn(
-                    "inline-flex rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider",
-                    STATUS_STYLES[o.statut] || "bg-gray-100 text-gray-700"
-                  )}
-                >
-                  {STATUS_LABELS[o.statut] || o.statut}
-                </span>
-              </td>
-              <td className="px-4 py-3 text-right font-display text-base tracking-wide text-brand-black">
-                {formatPrice(o.total)}
-              </td>
+    <div className="overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 backdrop-blur-2xl">
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[600px]">
+          <thead>
+            <tr className="border-b border-white/10 bg-black/40">
+              <th className="px-6 py-4 text-left font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-400">
+                Commande
+              </th>
+              <th className="hidden px-6 py-4 text-left font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-400 md:table-cell">
+                Client
+              </th>
+              <th className="px-6 py-4 text-left font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-400">
+                Statut
+              </th>
+              <th className="px-6 py-4 text-right font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-400">
+                Total
+              </th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-y divide-white/5">
+            {orders.map((o) => (
+              <tr
+                key={o.id}
+                className="transition-colors hover:bg-white/[0.02]"
+              >
+                <td className="px-6 py-4">
+                  <Link
+                    href={`/admin/commandes/${o.id}`}
+                    className="font-mono text-sm font-bold text-white transition-colors hover:text-brand-red"
+                  >
+                    {o.orderNumber}
+                  </Link>
+                  <p className="mt-0.5 font-mono text-[11px] text-neutral-400">
+                    {new Date(o.createdAt).toLocaleDateString("fr-FR", {
+                      day: "2-digit",
+                      month: "short",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                </td>
+                <td className="hidden px-6 py-4 md:table-cell">
+                  <p className="font-sans text-sm font-medium text-white">{o.customerName}</p>
+                </td>
+                <td className="px-6 py-4">
+                  <span
+                    className={cn(
+                      "inline-flex rounded-xl border px-3 py-1 font-mono text-[10px] uppercase tracking-wider backdrop-blur-md",
+                      STATUS_STYLES[o.statut] || "border-white/10 bg-white/5 text-neutral-300"
+                    )}
+                  >
+                    {STATUS_LABELS[o.statut] || o.statut}
+                  </span>
+                </td>
+                <td className="px-6 py-4 text-right font-display text-lg font-light tracking-wide text-white">
+                  {formatPrice(o.total)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

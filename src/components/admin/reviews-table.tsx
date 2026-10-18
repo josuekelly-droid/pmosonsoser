@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Star, Check, X, Star as StarFill, Trash2, MessageSquare, Eye, EyeOff } from "lucide-react";
+import { Star, Check, Trash2, MessageSquare, EyeOff, LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type ReviewRow = {
@@ -74,10 +74,10 @@ export function ReviewsTable({ initialReviews }: { initialReviews: ReviewRow[] }
   }
 
   return (
-    <div className="space-y-5">
-      {/* Stats */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <StatPill label="Total" value={reviews.length} icon={MessageSquare} />
+    <div className="space-y-6">
+      {/* STATISTIQUES */}
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+        <StatPill label="Total avis" value={reviews.length} icon={MessageSquare} />
         <StatPill label="Approuvés" value={stats.approved} icon={Check} accent="green" />
         <StatPill label="En attente" value={stats.pending} icon={EyeOff} accent="amber" />
         <StatPill
@@ -88,7 +88,7 @@ export function ReviewsTable({ initialReviews }: { initialReviews: ReviewRow[] }
         />
       </div>
 
-      {/* Filtres */}
+      {/* FILTRES */}
       <div className="flex flex-wrap gap-2">
         <FilterBtn active={filter === "all"} onClick={() => setFilter("all")}>
           Tous ({reviews.length})
@@ -107,12 +107,14 @@ export function ReviewsTable({ initialReviews }: { initialReviews: ReviewRow[] }
         </FilterBtn>
       </div>
 
-      {/* Liste */}
+      {/* LISTE D'AVIS */}
       {filtered.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-brand-black/10 bg-white py-16 text-center">
-          <MessageSquare className="mx-auto h-12 w-12 text-brand-black/20" />
-          <p className="mt-3 text-sm text-brand-black/50">
-            Aucun avis dans cette catégorie.
+        <div className="flex flex-col items-center justify-center rounded-[2.5rem] border border-dashed border-white/10 bg-neutral-900/40 py-20 px-4 text-center backdrop-blur-2xl">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-neutral-400">
+            <MessageSquare className="h-8 w-8" />
+          </div>
+          <p className="mt-4 font-mono text-xs md:text-sm text-neutral-400">
+            Aucun avis trouvé dans cette catégorie.
           </p>
         </div>
       ) : (
@@ -123,85 +125,87 @@ export function ReviewsTable({ initialReviews }: { initialReviews: ReviewRow[] }
               <article
                 key={r.id}
                 className={cn(
-                  "relative flex flex-col rounded-2xl border bg-white p-5 transition",
+                  "relative flex flex-col justify-between rounded-[2.5rem] border bg-neutral-900/40 p-6 backdrop-blur-2xl transition-all duration-300",
                   r.isApproved
-                    ? "border-brand-black/5"
-                    : "border-amber-300 bg-amber-50/30",
-                  isLoading && "opacity-50"
+                    ? "border-white/10"
+                    : "border-amber-500/30 bg-amber-500/[0.03]",
+                  isLoading && "opacity-50 pointer-events-none"
                 )}
               >
-                {/* Header */}
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-red/10 font-display text-base text-brand-red">
-                      {r.name.charAt(0)}
+                <div>
+                  {/* Header */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3.5">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-brand-red/30 bg-brand-red/10 font-display text-lg font-light text-brand-red shadow-[0_0_15px_rgba(239,68,68,0.2)]">
+                        {r.name.charAt(0)}
+                      </div>
+                      <div>
+                        <p className="font-sans text-sm font-medium text-white">
+                          {r.name}
+                        </p>
+                        <p className="mt-0.5 font-mono text-[11px] text-neutral-400">
+                          {r.role}
+                          {r.city ? ` · ${r.city}` : ""} ·{" "}
+                          {new Date(r.createdAt).toLocaleDateString("fr-FR")}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-semibold text-brand-black">
-                        {r.name}
-                      </p>
-                      <p className="text-[11px] text-brand-black/50">
-                        {r.role}
-                        {r.city ? ` · ${r.city}` : ""} ·{" "}
-                        {new Date(r.createdAt).toLocaleDateString("fr-FR")}
-                      </p>
-                    </div>
-                  </div>
 
-                  {/* Badges */}
-                  <div className="flex flex-col items-end gap-1">
-                    {!r.isApproved && (
-                      <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-amber-700">
-                        En attente
-                      </span>
-                    )}
-                    {r.isFeatured && (
-                      <span className="rounded-full bg-brand-red/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-brand-red">
-                        Vedette
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Étoiles */}
-                <div className="mt-3 flex gap-0.5">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star
-                      key={i}
-                      className={cn(
-                        "h-4 w-4",
-                        i < r.rating
-                          ? "fill-brand-red text-brand-red"
-                          : "text-brand-black/15"
+                    {/* Badges */}
+                    <div className="flex flex-col items-end gap-1.5">
+                      {!r.isApproved && (
+                        <span className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-widest text-amber-400 backdrop-blur-md">
+                          En attente
+                        </span>
                       )}
-                    />
-                  ))}
-                </div>
+                      {r.isFeatured && (
+                        <span className="rounded-xl border border-brand-red/30 bg-brand-red/10 px-2.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-widest text-brand-red backdrop-blur-md">
+                          Vedette
+                        </span>
+                      )}
+                    </div>
+                  </div>
 
-                {/* Texte */}
-                <p className="mt-3 flex-1 text-sm leading-relaxed text-brand-black/80">
-                  "{r.text}"
-                </p>
+                  {/* Étoiles */}
+                  <div className="mt-4 flex gap-1">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star
+                        key={i}
+                        className={cn(
+                          "h-4 w-4",
+                          i < r.rating
+                            ? "fill-amber-400 text-amber-400"
+                            : "text-neutral-700"
+                        )}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Texte */}
+                  <p className="mt-4 font-mono text-xs md:text-sm leading-relaxed text-neutral-300 italic">
+                    «&nbsp;{r.text}&nbsp;»
+                  </p>
+                </div>
 
                 {/* Actions */}
-                <div className="mt-4 flex flex-wrap gap-2 border-t border-brand-black/5 pt-4">
+                <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-white/10 pt-4">
                   {!r.isApproved ? (
                     <button
                       onClick={() => updateReview(r.id, { isApproved: true })}
                       disabled={isLoading}
-                      className="inline-flex items-center gap-1.5 rounded-full bg-green-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-green-700 disabled:opacity-50"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-600 px-4 py-2 font-mono text-xs font-bold uppercase tracking-widest text-white shadow-lg shadow-emerald-600/20 transition-all hover:bg-emerald-700 disabled:opacity-50"
                     >
                       <Check className="h-3.5 w-3.5" />
-                      Approuver
+                      <span>Approuver</span>
                     </button>
                   ) : (
                     <button
                       onClick={() => updateReview(r.id, { isApproved: false })}
                       disabled={isLoading}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-white px-3 py-1.5 text-xs font-medium text-amber-700 transition hover:bg-amber-50 disabled:opacity-50"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-2 font-mono text-xs uppercase tracking-widest text-amber-400 backdrop-blur-md transition-all hover:bg-white/10 disabled:opacity-50"
                     >
                       <EyeOff className="h-3.5 w-3.5" />
-                      Masquer
+                      <span>Masquer</span>
                     </button>
                   )}
 
@@ -211,25 +215,25 @@ export function ReviewsTable({ initialReviews }: { initialReviews: ReviewRow[] }
                     }
                     disabled={isLoading}
                     className={cn(
-                      "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition disabled:opacity-50",
+                      "inline-flex items-center gap-1.5 rounded-full border px-4 py-2 font-mono text-xs uppercase tracking-widest transition-all duration-300 disabled:opacity-50",
                       r.isFeatured
-                        ? "border-brand-red bg-brand-red/10 text-brand-red"
-                        : "border-brand-black/10 bg-white text-brand-black/70 hover:border-brand-red/30"
+                        ? "border-brand-red/30 bg-brand-red/10 text-brand-red backdrop-blur-md"
+                        : "border-white/10 bg-white/5 text-neutral-300 backdrop-blur-md hover:border-brand-red/50 hover:text-white"
                     )}
                   >
-                    <StarFill
+                    <Star
                       className={cn("h-3.5 w-3.5", r.isFeatured && "fill-current")}
                     />
-                    {r.isFeatured ? "Vedette" : "Mettre en vedette"}
+                    <span>{r.isFeatured ? "Vedette" : "Mettre en vedette"}</span>
                   </button>
 
                   <button
                     onClick={() => deleteReview(r.id)}
                     disabled={isLoading}
-                    className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-600 transition hover:bg-red-50 disabled:opacity-50"
+                    className="ml-auto inline-flex h-9 w-9 items-center justify-center rounded-xl border border-red-500/30 bg-red-500/10 text-red-400 transition-all hover:bg-red-600 hover:text-white disabled:opacity-50"
+                    aria-label="Supprimer l'avis"
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
-                    Supprimer
+                    <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
               </article>
@@ -249,27 +253,28 @@ function StatPill({
 }: {
   label: string;
   value: string | number;
-  icon: any;
+  icon: LucideIcon;
   accent?: "red" | "green" | "amber";
 }) {
   const color =
     accent === "green"
-      ? "text-green-600 bg-green-500/10"
+      ? "text-emerald-400 border-emerald-500/30 bg-emerald-500/10"
       : accent === "amber"
-      ? "text-amber-600 bg-amber-500/10"
+      ? "text-amber-400 border-amber-500/30 bg-amber-500/10"
       : accent === "red"
-      ? "text-brand-red bg-brand-red/10"
-      : "text-brand-black bg-brand-gray";
+      ? "text-brand-red border-brand-red/30 bg-brand-red/10"
+      : "text-white border-white/10 bg-white/5";
+
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-brand-black/5 bg-white p-4">
-      <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl", color)}>
-        <Icon className="h-5 w-5" />
+    <div className="flex items-center gap-4 rounded-[2rem] border border-white/10 bg-neutral-900/40 p-5 backdrop-blur-2xl">
+      <div className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border backdrop-blur-md", color)}>
+        <Icon className="h-6 w-6" />
       </div>
       <div>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-brand-black/50">
+        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-400">
           {label}
         </p>
-        <p className="font-display text-xl text-brand-black">{value}</p>
+        <p className="font-display text-2xl font-light tracking-wide text-white mt-0.5">{value}</p>
       </div>
     </div>
   );
@@ -288,10 +293,10 @@ function FilterBtn({
     <button
       onClick={onClick}
       className={cn(
-        "rounded-full border px-4 py-2 text-xs font-medium transition",
+        "rounded-full border px-5 py-2.5 font-mono text-xs uppercase tracking-wider transition-all duration-300",
         active
-          ? "border-brand-red bg-brand-red text-white"
-          : "border-brand-black/10 bg-white text-brand-black/70 hover:border-brand-red/30"
+          ? "border-brand-red bg-brand-red text-white shadow-lg shadow-brand-red/30"
+          : "border-white/10 bg-neutral-900/40 text-neutral-400 backdrop-blur-md hover:border-brand-red/50 hover:text-white"
       )}
     >
       {children}

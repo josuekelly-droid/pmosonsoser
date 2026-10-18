@@ -7,9 +7,10 @@ import {
   TrendingUp,
   ArrowRight,
   AlertTriangle,
+  LucideIcon,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { formatPrice, cn } from "@/lib/utils";
+import { formatPrice } from "@/lib/utils";
 import { SalesChart } from "@/components/admin/sales-chart";
 
 export const metadata: Metadata = {
@@ -69,7 +70,7 @@ export default async function AdminDashboardPage() {
 
   const revenue = revenueAgg._sum.total || 0;
 
-  // Préparer les données du graphique
+  // Préparer les données du graphique analytique
   const chartDataMap = new Map();
   for (let i = 6; i >= 0; i--) {
     const d = new Date();
@@ -89,76 +90,134 @@ export default async function AdminDashboardPage() {
   }));
 
   return (
-    <div className="space-y-6 md:space-y-8">
-      {/* Header */}
+    <div className="space-y-8">
+      {/* HEADER DE PAGE DARK LUXURY */}
       <div>
-        <h1 className="font-display text-3xl tracking-wide text-brand-black md:text-4xl">
+        <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-brand-red">
+          [ Console de pilotage ]
+        </span>
+        <h1 className="mt-1 font-display text-3xl font-light tracking-wide text-white md:text-5xl">
           Vue d'ensemble
         </h1>
-        <p className="mt-1 text-sm text-brand-black/60">
-          Résumé de l'activité PM Osons Oser.
+        <p className="mt-2 font-mono text-xs text-neutral-400 max-w-xl leading-relaxed">
+          Synthèse en temps réel des performances commerciales et de l'activité globale PM Osons Oser.
         </p>
       </div>
 
-      {/* Alerte stock */}
+      {/* ALERTE STOCK FAIBLE */}
       {lowStockProducts.length > 0 && (
-        <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 md:p-5">
-          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+        <div className="flex items-center gap-4 rounded-[2rem] border border-amber-500/30 bg-amber-500/10 p-5 text-amber-400 backdrop-blur-2xl">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-amber-500/30 bg-amber-500/20">
+            <AlertTriangle className="h-5 w-5 text-amber-400" />
+          </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-amber-900">Alerte stock faible</p>
-            <p className="mt-1 text-xs text-amber-800/80">
-              {lowStockProducts.map((p) => `${p.name} (${p.stock})`).join(" · ")}
+            <p className="font-mono text-xs font-bold uppercase tracking-wider text-amber-400">Alerte stock critique</p>
+            <p className="mt-1 font-mono text-xs text-amber-300/80 truncate">
+              {lowStockProducts.map((p) => `${p.name} (${p.stock} restant${p.stock > 1 ? "s" : ""})`).join(" · ")}
             </p>
           </div>
-          <Link href="/admin/produits?stock=low" className="hidden shrink-0 items-center gap-1 rounded-full bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-amber-700 md:inline-flex">
-            Voir <ArrowRight className="h-3 w-3" />
+          <Link
+            href="/admin/produits?stock=low"
+            className="hidden shrink-0 items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/20 px-4 py-2 font-mono text-xs uppercase tracking-widest text-amber-300 transition-all hover:bg-amber-500 hover:text-black md:inline-flex"
+          >
+            <span>Gérer le stock</span>
+            <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
       )}
 
-      {/* Stat cards */}
+      {/* CARTES STATISTIQUES GLASSMORPHISM */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCardLight label="Chiffre d'affaires" value={formatPrice(revenue)} icon={TrendingUp} trend="+12.5% ce mois" />
-        <StatCardLight label="Commandes" value={totalOrders} icon={ShoppingCart} badge={pendingOrdersCount > 0 ? `${pendingOrdersCount} en attente` : undefined} />
-        <StatCardLight label="Produits" value={totalProducts} icon={Package} />
-        <StatCardLight label="Clients" value={totalUsers} icon={Users} />
+        <StatCardDark
+          label="Chiffre d'affaires"
+          value={formatPrice(revenue)}
+          icon={TrendingUp}
+          trend="+12.5% ce mois"
+        />
+        <StatCardDark
+          label="Commandes totales"
+          value={totalOrders}
+          icon={ShoppingCart}
+          badge={pendingOrdersCount > 0 ? `${pendingOrdersCount} en attente` : undefined}
+        />
+        <StatCardDark
+          label="Produits en catalogue"
+          value={totalProducts}
+          icon={Package}
+        />
+        <StatCardDark
+          label="Clients enregistrés"
+          value={totalUsers}
+          icon={Users}
+        />
       </div>
 
-      {/* Graphique + Dernières commandes */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Graphique */}
-        <div className="rounded-3xl border border-brand-black/5 bg-white p-6 shadow-sm lg:col-span-2">
+      {/* GRAPHIQUE + DERNIÈRES COMMANDES */}
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        {/* Graphique Ventes */}
+        <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-8 backdrop-blur-2xl lg:col-span-2">
           <div className="mb-6 flex items-center justify-between">
             <div>
-              <h2 className="font-display text-xl tracking-wide text-brand-black">Ventes des 7 derniers jours</h2>
-              <p className="mt-1 text-xs text-brand-black/50">Évolution du chiffre d'affaires</p>
+              <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-brand-red">
+                [ Performance hebdomadaire ]
+              </span>
+              <h2 className="mt-0.5 font-display text-2xl font-light tracking-wide text-white">
+                Ventes des 7 derniers jours
+              </h2>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-red/10 text-brand-red">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-brand-red/30 bg-brand-red/10 text-brand-red shadow-[0_0_15px_rgba(239,68,68,0.2)]">
               <TrendingUp className="h-5 w-5" />
             </div>
           </div>
           <SalesChart data={chartData} />
         </div>
 
-        {/* Dernières commandes */}
-        <div className="rounded-3xl border border-brand-black/5 bg-white p-6 shadow-sm">
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="font-display text-xl tracking-wide text-brand-black">Dernières commandes</h2>
-            <Link href="/admin/commandes" className="text-xs font-semibold text-brand-red transition hover:text-brand-black">Tout voir</Link>
-          </div>
-          <div className="space-y-4">
-            {recentOrders.map((o) => (
-              <Link key={o.id} href={`/admin/commandes/${o.id}`} className="group flex items-center justify-between gap-3 rounded-2xl border border-brand-black/5 bg-brand-gray/30 p-3 transition hover:border-brand-red/20 hover:bg-brand-red/5">
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-brand-black group-hover:text-brand-red">{o.customerName}</p>
-                  <p className="text-[11px] text-brand-black/50">{o.orderNumber}</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-display text-sm text-brand-black">{formatPrice(o.total)}</p>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-brand-red">{o.statut.replace("_", " ")}</p>
-                </div>
+        {/* Dernières Commandes */}
+        <div className="relative flex flex-col justify-between overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-8 backdrop-blur-2xl">
+          <div>
+            <div className="mb-6 flex items-center justify-between">
+              <div>
+                <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-brand-red">
+                  [ Flux en direct ]
+                </span>
+                <h2 className="mt-0.5 font-display text-2xl font-light tracking-wide text-white">
+                  Dernières commandes
+                </h2>
+              </div>
+              <Link
+                href="/admin/commandes"
+                className="font-mono text-xs uppercase tracking-widest text-brand-red transition-colors hover:text-white"
+              >
+                Tout voir
               </Link>
-            ))}
+            </div>
+
+            <div className="space-y-3">
+              {recentOrders.map((o) => (
+                <Link
+                  key={o.id}
+                  href={`/admin/commandes/${o.id}`}
+                  className="group flex items-center justify-between gap-3 rounded-2xl border border-white/5 bg-black/40 p-4 backdrop-blur-md transition-all duration-300 hover:border-brand-red/40 hover:bg-white/[0.03]"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate font-sans text-sm font-medium text-white group-hover:text-brand-red transition-colors">
+                      {o.customerName}
+                    </p>
+                    <p className="mt-0.5 font-mono text-[11px] text-neutral-400">
+                      {o.orderNumber}
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="font-display text-base font-light text-white">
+                      {formatPrice(o.total)}
+                    </p>
+                    <p className="mt-0.5 font-mono text-[9px] font-bold uppercase tracking-wider text-brand-red">
+                      {o.statut.replace("_", " ")}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -166,19 +225,44 @@ export default async function AdminDashboardPage() {
   );
 }
 
-function StatCardLight({ label, value, icon: Icon, trend, badge }: { label: string, value: string | number, icon: any, trend?: string, badge?: string }) {
+function StatCardDark({
+  label,
+  value,
+  icon: Icon,
+  trend,
+  badge,
+}: {
+  label: string;
+  value: string | number;
+  icon: LucideIcon;
+  trend?: string;
+  badge?: string;
+}) {
   return (
-    <div className="group relative overflow-hidden rounded-3xl border border-brand-black/5 bg-white p-5 shadow-sm transition hover:border-brand-red/20 hover:shadow-md md:p-6">
+    <div className="group relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-6 backdrop-blur-2xl transition-all duration-300 hover:-translate-y-1 hover:border-brand-red/50 hover:bg-neutral-900/60 hover:shadow-[0_0_30px_rgba(239,68,68,0.15)] md:p-8">
       <div className="flex items-start justify-between">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-gray text-brand-black/60 transition group-hover:bg-brand-red group-hover:text-white">
-          <Icon className="h-5 w-5" />
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-brand-red/30 bg-brand-red/10 text-brand-red shadow-[0_0_15px_rgba(239,68,68,0.2)] backdrop-blur-md transition-all duration-300 group-hover:bg-brand-red group-hover:text-white group-hover:shadow-[0_0_25px_rgba(239,68,68,0.5)]">
+          <Icon className="h-6 w-6" />
         </div>
-        {trend && <span className="rounded-full bg-green-100 px-2.5 py-1 text-[10px] font-semibold text-green-700">{trend}</span>}
-        {badge && <span className="rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-semibold text-amber-700">{badge}</span>}
+        {trend && (
+          <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 font-mono text-[10px] uppercase tracking-wider text-emerald-400 backdrop-blur-md">
+            {trend}
+          </span>
+        )}
+        {badge && (
+          <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 font-mono text-[10px] uppercase tracking-wider text-amber-400 backdrop-blur-md">
+            {badge}
+          </span>
+        )}
       </div>
-      <div className="mt-5">
-        <p className="text-[11px] font-medium uppercase tracking-widest text-brand-black/50">{label}</p>
-        <p className="mt-1 font-display text-3xl tracking-wide text-brand-black">{value}</p>
+
+      <div className="mt-6">
+        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-400">
+          {label}
+        </p>
+        <p className="mt-1 font-display text-3xl font-light tracking-wide text-white md:text-4xl">
+          {value}
+        </p>
       </div>
     </div>
   );

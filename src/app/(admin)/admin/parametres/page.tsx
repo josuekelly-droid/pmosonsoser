@@ -16,16 +16,21 @@ export default async function AdminParametresPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* HEADER DE PAGE DARK LUXURY */}
       <div>
-        <h1 className="font-display text-3xl tracking-wide text-brand-black md:text-4xl">
+        <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-brand-red">
+          [ Configuration Générale ]
+        </span>
+        <h1 className="mt-1 font-display text-3xl font-light tracking-wide text-white md:text-5xl">
           Paramètres
         </h1>
-        <p className="mt-1 text-sm text-brand-black/60">
-          Configurez les coordonnées de l'entreprise, la livraison et les moyens de paiement.
+        <p className="mt-2 font-mono text-xs text-neutral-400 max-w-xl leading-relaxed">
+          Configurez les coordonnées de la plateforme, les barèmes de livraison géolocalisée et les paramètres des canaux de règlement.
         </p>
       </div>
 
+      {/* FORMULAIRE CONFIGURATION COMPLET */}
       <SettingsForm
         initial={{
           phone: settings.phone,

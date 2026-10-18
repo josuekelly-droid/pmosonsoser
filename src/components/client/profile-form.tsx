@@ -12,6 +12,8 @@ import {
   AlertCircle,
   Eye,
   EyeOff,
+  Sparkles,
+  ArrowUpRight,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
@@ -53,10 +55,9 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
       });
       const data = await res.json();
 
-            if (!res.ok) {
-        // Si erreur de validation spécifique (ex: mot de passe requis)
+      if (!res.ok) {
         let firstError: string | null = null;
-        
+
         if (data.details) {
           const details = data.details as Record<string, string[]>;
           const firstField = Object.keys(details)[0];
@@ -64,16 +65,16 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
             firstError = details[firstField][0];
           }
         }
-        
+
         setError(firstError || data.error || "Erreur lors de la mise à jour");
         return;
       }
 
       setSuccess(true);
-      (e.target as HTMLFormElement).reset(); // Vide les champs (surtout les mots de passe)
-      router.refresh(); // Met à jour l'interface (avatar, nom dans la sidebar)
-      
-      setTimeout(() => setSuccess(false), 3000);
+      (e.target as HTMLFormElement).reset();
+      router.refresh();
+
+      setTimeout(() => setSuccess(false), 4000);
     } catch {
       setError("Connexion impossible. Vérifiez votre réseau.");
     } finally {
@@ -82,87 +83,95 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Section 1 : Infos personnelles */}
-      <section className="rounded-3xl border border-brand-black/5 bg-white p-6 md:p-8">
-        <h2 className="font-display text-xl tracking-wide text-brand-black">
+    <form onSubmit={handleSubmit} className="space-y-8">
+      {/* SECTION 1 : INFORMATIONS PERSONNELLES */}
+      <section className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-6 backdrop-blur-xl md:p-8">
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-xs uppercase tracking-[0.25em] text-brand-red">
+            [ Profil ]
+          </span>
+        </div>
+        <h2 className="mt-1 font-display text-2xl font-light text-white">
           Informations personnelles
         </h2>
-        
-        <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2">
+
+        <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
           {/* Nom */}
           <div>
-            <label className="mb-2 flex items-center gap-1.5 text-sm font-medium text-brand-black">
-              <UserIcon className="h-3.5 w-3.5 text-brand-black/40" />
-              Nom complet
+            <label className="mb-2 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-neutral-400">
+              <UserIcon className="h-3.5 w-3.5 text-neutral-500" />
+              <span>Nom complet</span>
             </label>
             <Input
               name="name"
               required
               defaultValue={initialData.name || ""}
-              className="border-brand-black/10 bg-brand-gray/30 focus:border-brand-red"
             />
           </div>
 
           {/* Téléphone */}
           <div>
-            <label className="mb-2 flex items-center gap-1.5 text-sm font-medium text-brand-black">
-              <Phone className="h-3.5 w-3.5 text-brand-black/40" />
-              Téléphone
+            <label className="mb-2 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-neutral-400">
+              <Phone className="h-3.5 w-3.5 text-neutral-500" />
+              <span>Téléphone</span>
             </label>
             <Input
               name="phone"
               defaultValue={initialData.phone || ""}
               placeholder="+229 97 00 00 00"
-              className="border-brand-black/10 bg-brand-gray/30 focus:border-brand-red"
             />
           </div>
 
-          {/* Email (lecture seule) */}
+          {/* Email (Lecture seule) */}
           <div className="md:col-span-2">
-            <label className="mb-2 flex items-center gap-1.5 text-sm font-medium text-brand-black">
-              <Mail className="h-3.5 w-3.5 text-brand-black/40" />
-              Adresse email
+            <label className="mb-2 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-neutral-400">
+              <Mail className="h-3.5 w-3.5 text-neutral-500" />
+              <span>Adresse email</span>
             </label>
             <Input
               disabled
               defaultValue={initialData.email}
-              className="cursor-not-allowed border-brand-black/5 bg-brand-gray text-brand-black/50"
+              className="cursor-not-allowed border-white/5 bg-white/[0.02] text-neutral-500 opacity-60"
             />
-            <p className="mt-1.5 text-xs text-brand-black/40">
+            <p className="mt-2 font-mono text-[11px] text-neutral-500">
               L'adresse email ne peut pas être modifiée pour des raisons de sécurité.
             </p>
           </div>
         </div>
       </section>
 
-      {/* Section 2 : Sécurité */}
-      <section className="rounded-3xl border border-brand-black/5 bg-white p-6 md:p-8">
-        <h2 className="font-display text-xl tracking-wide text-brand-black">
-          Sécurité (Changer de mot de passe)
+      {/* SECTION 2 : SÉCURITÉ */}
+      <section className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-6 backdrop-blur-xl md:p-8">
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-xs uppercase tracking-[0.25em] text-brand-red">
+            [ Sécurité ]
+          </span>
+        </div>
+        <h2 className="mt-1 font-display text-2xl font-light text-white">
+          Changer de mot de passe
         </h2>
-        <p className="mt-1 text-xs text-brand-black/50">
-          Laissez vide si vous ne souhaitez pas modifier votre mot de passe.
+        <p className="mt-1 font-mono text-xs text-neutral-500">
+          Laissez ces champs vides si vous ne souhaitez pas modifier votre mot de passe.
         </p>
 
-        <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2">
+        <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
           {/* Ancien mot de passe */}
           <div>
-            <label className="mb-2 flex items-center gap-1.5 text-sm font-medium text-brand-black">
-              <Lock className="h-3.5 w-3.5 text-brand-black/40" />
-              Mot de passe actuel
+            <label className="mb-2 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-neutral-400">
+              <Lock className="h-3.5 w-3.5 text-neutral-500" />
+              <span>Mot de passe actuel</span>
             </label>
             <div className="relative">
               <Input
                 type={showCurrent ? "text" : "password"}
                 name="currentPassword"
                 placeholder="••••••••"
-                className="border-brand-black/10 bg-brand-gray/30 pr-10 focus:border-brand-red"
+                className="pr-12"
               />
               <button
                 type="button"
                 onClick={() => setShowCurrent(!showCurrent)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-black/40 hover:text-brand-black"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 transition-colors hover:text-white"
               >
                 {showCurrent ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
@@ -171,21 +180,21 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
 
           {/* Nouveau mot de passe */}
           <div>
-            <label className="mb-2 flex items-center gap-1.5 text-sm font-medium text-brand-black">
-              <Lock className="h-3.5 w-3.5 text-brand-black/40" />
-              Nouveau mot de passe
+            <label className="mb-2 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-neutral-400">
+              <Lock className="h-3.5 w-3.5 text-neutral-500" />
+              <span>Nouveau mot de passe</span>
             </label>
             <div className="relative">
               <Input
                 type={showNew ? "text" : "password"}
                 name="newPassword"
                 placeholder="8 caractères min."
-                className="border-brand-black/10 bg-brand-gray/30 pr-10 focus:border-brand-red"
+                className="pr-12"
               />
               <button
                 type="button"
                 onClick={() => setShowNew(!showNew)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-black/40 hover:text-brand-black"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 transition-colors hover:text-white"
               >
                 {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
@@ -194,34 +203,37 @@ export function ProfileForm({ initialData }: { initialData: ProfileData }) {
         </div>
       </section>
 
-      {/* Feedback */}
+      {/* FEEDBACKS */}
       {error && (
-        <div className="flex items-start gap-2 rounded-xl bg-red-50 p-4 text-sm text-red-700">
-          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+        <div className="flex items-center gap-3 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 font-mono text-xs text-red-400 backdrop-blur-md">
+          <AlertCircle className="h-4 w-4 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {success && (
-        <div className="flex items-start gap-2 rounded-xl bg-green-50 p-4 text-sm text-green-700">
-          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
+        <div className="flex items-center gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 font-mono text-xs text-emerald-400 backdrop-blur-md">
+          <CheckCircle2 className="h-4 w-4 shrink-0" />
           <span>Profil mis à jour avec succès.</span>
         </div>
       )}
 
-      {/* Bouton */}
+      {/* BOUTON ENREGISTRER */}
       <div className="flex justify-end">
         <button
           type="submit"
           disabled={loading}
-          className="inline-flex h-12 items-center gap-2 rounded-full bg-brand-red px-8 text-sm font-semibold uppercase tracking-wider text-white shadow-lg shadow-brand-red/30 transition hover:bg-brand-red/90 disabled:opacity-50"
+          className="group relative inline-flex h-14 items-center justify-center gap-3 overflow-hidden rounded-full bg-brand-red px-8 font-mono text-xs font-bold uppercase tracking-widest text-white shadow-xl shadow-brand-red/25 transition-all duration-500 hover:bg-white hover:text-black hover:shadow-brand-red/40 disabled:opacity-50"
         >
           {loading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className="h-4 w-4 animate-spin text-current" />
           ) : (
-            <CheckCircle2 className="h-4 w-4" />
+            <>
+              <CheckCircle2 className="h-4 w-4 transition-transform duration-500 group-hover:scale-110" />
+              <span>Enregistrer les modifications</span>
+              <ArrowUpRight className="h-4 w-4 transition-transform duration-500 group-hover:rotate-45" />
+            </>
           )}
-          Enregistrer les modifications
         </button>
       </div>
     </form>

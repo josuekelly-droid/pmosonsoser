@@ -19,5 +19,17 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
 
 export default async function MotosPage({ searchParams }: Props) {
   const params = await searchParams;
-  return <CatalogPage config={CATALOG_CONFIGS.motos} searchParams={params} />;
+
+  return (
+    <div className="relative min-h-screen w-full overflow-hidden bg-[#0A0A0B] text-white">
+      {/* Éléments de fond décoratifs Dark Luxury */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(239,68,68,0.15),rgba(255,255,255,0))]" />
+      <div className="absolute right-1/4 top-1/4 h-[600px] w-[600px] rounded-full bg-brand-red/10 blur-[180px] pointer-events-none" />
+
+      {/* Composant principal du catalogue de motos */}
+      <div className="relative z-10">
+        <CatalogPage config={CATALOG_CONFIGS.motos} searchParams={params} />
+      </div>
+    </div>
+  );
 }

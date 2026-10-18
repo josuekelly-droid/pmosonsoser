@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Package } from "lucide-react";
+import { Package, ArrowUpRight } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/utils";
 import { constructMetadata } from "@/lib/seo";
@@ -98,8 +98,11 @@ export async function CatalogPage({
 
   if (!category) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center pt-32">
-        <p className="text-brand-black/50">Catégorie introuvable.</p>
+      <div className="flex min-h-[60vh] items-center justify-center pt-32 bg-[#0A0A0B] text-white">
+        <div className="text-center">
+          <p className="font-mono text-xs uppercase tracking-widest text-neutral-500">404 · Erreur</p>
+          <h2 className="mt-2 font-display text-2xl font-light">Catégorie introuvable</h2>
+        </div>
       </div>
     );
   }
@@ -179,31 +182,42 @@ export async function CatalogPage({
   };
 
   return (
-    <>
+    <div className="min-h-screen bg-[#0A0A0B] text-white selection:bg-brand-red selection:text-white">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      <section className="relative overflow-hidden bg-brand-black pt-32 pb-16 md:pt-40 md:pb-20">
-        <div className="pointer-events-none absolute -top-40 right-0 h-[400px] w-[500px] rounded-full bg-brand-red/15 blur-[120px]" />
-        <div className="relative mx-auto max-w-7xl px-4 md:px-8">
-          <nav aria-label="Fil d'Ariane" className="text-xs text-white/50">
-            <Link href="/" className="hover:text-white">Accueil</Link>
-            <span className="mx-2">/</span>
+      {/* HERO CATALOGUE */}
+      <section className="relative isolate overflow-hidden border-b border-white/10 pt-36 pb-20 md:pt-48 md:pb-28">
+        <div className="pointer-events-none absolute -top-40 right-0 h-[500px] w-[600px] rounded-full bg-brand-red/15 blur-[150px]" />
+        
+        <div className="relative mx-auto max-w-7xl px-6 lg:px-12">
+          {/* Fil d'Ariane */}
+          <nav aria-label="Fil d'Ariane" className="font-mono text-xs uppercase tracking-widest text-neutral-500">
+            <Link href="/" className="transition-colors hover:text-white">Accueil</Link>
+            <span className="mx-2.5 text-neutral-700">/</span>
             <span className="text-white">{config.title}</span>
           </nav>
 
-          <h1 className="mt-4 font-display text-4xl tracking-wide text-white sm:text-5xl md:text-6xl">
+          <h1 className="mt-6 font-display text-5xl font-extralight uppercase tracking-tight sm:text-6xl md:text-7xl lg:text-8xl">
             {config.title}
           </h1>
-          <p className="mt-3 max-w-2xl text-white/60 md:text-lg">{config.description}</p>
-          <p className="mt-2 text-xs font-semibold uppercase tracking-[0.3em] text-brand-red">
-            {config.heroSubtitle}
+
+          <p className="mt-5 max-w-2xl text-base leading-relaxed text-neutral-400 md:text-lg">
+            {config.description}
           </p>
+
+          <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-brand-red/30 bg-brand-red/10 px-4 py-1.5 font-mono text-xs uppercase tracking-widest text-brand-red">
+            <span className="h-1.5 w-1.5 rounded-full bg-brand-red animate-pulse" />
+            {config.heroSubtitle}
+          </div>
         </div>
       </section>
 
-      <section className="bg-brand-gray py-12 md:py-16">
-        <div className="mx-auto max-w-7xl px-4 md:px-8">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-[220px_1fr] md:gap-8 lg:grid-cols-[280px_1fr]">
+      {/* CONTENU PRINCIPAL : FILTRES + GRILLE */}
+      <section className="relative py-16 md:py-24">
+        <div className="mx-auto max-w-7xl px-6 lg:px-12">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-[240px_1fr] md:gap-10 lg:grid-cols-[300px_1fr]">
+            
+            {/* SIDEBAR DESKTOP */}
             <div className="hidden md:block">
               <CatalogSidebar
                 brands={allBrandsInCategory.map((b) => ({ id: b.id, name: b.name, slug: slugify(b.name) }))}
@@ -211,6 +225,7 @@ export async function CatalogPage({
               />
             </div>
 
+            {/* COLONNE PRODUITS */}
             <div className="min-w-0">
               <CatalogToolbar
                 brands={allBrandsInCategory.map((b) => ({ id: b.id, name: b.name, slug: slugify(b.name) }))}
@@ -218,47 +233,56 @@ export async function CatalogPage({
               />
 
               {products.length === 0 ? (
-                <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-brand-black/10 bg-white py-20 text-center">
-                  <Package className="h-12 w-12 text-brand-black/20" />
-                  <h2 className="mt-4 font-display text-2xl tracking-wide text-brand-black">Aucun produit trouvé</h2>
-                  <p className="mt-2 max-w-sm text-sm text-brand-black/50">Essayez de modifier vos filtres ou de revenir plus tard.</p>
+                <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-16 text-center backdrop-blur-xl">
+                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-neutral-500">
+                    <Package className="h-8 w-8" />
+                  </div>
+                  <h2 className="mt-6 font-display text-2xl font-light text-white">
+                    Aucun produit <span className="italic font-serif font-normal text-neutral-400">trouvé</span>
+                  </h2>
+                  <p className="mx-auto mt-3 max-w-sm text-sm text-neutral-400">
+                    Essayez de modifier vos critères de filtrage ou réinitialisez votre recherche.
+                  </p>
                 </div>
               ) : (
                 <>
-                  <div className="grid grid-cols-2 gap-4 md:grid-cols-2 md:gap-5 lg:grid-cols-3 lg:gap-6 xl:grid-cols-4">
+                  <div className="grid grid-cols-2 gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-3 xl:grid-cols-4">
                     {products.map((p) => (
-                      <ProductCard
-                        key={p.id}
-                        id={p.id}
-                        name={p.name}
-                        priceB2C={p.priceB2C}
-                        priceB2B={p.priceB2B}
-                        isB2B={isB2B}
-                        images={p.images}
-                        brandName={p.brand.name}
-                        categoryName={p.category.name}
-                        stock={p.stock}
-                      />
+                      <div key={p.id} className="transition-transform duration-500 hover:-translate-y-1.5">
+                        <ProductCard
+                          id={p.id}
+                          name={p.name}
+                          priceB2C={p.priceB2C}
+                          priceB2B={p.priceB2B}
+                          isB2B={isB2B}
+                          images={p.images}
+                          brandName={p.brand.name}
+                          categoryName={p.category.name}
+                          stock={p.stock}
+                        />
+                      </div>
                     ))}
                   </div>
 
-                  <Pagination
-                    currentPage={page}
-                    totalPages={totalPages}
-                    baseUrl={`/${config.slug}`}
-                    searchParams={{
-                      marque: brandSlug,
-                      min: getString(searchParams.min),
-                      max: getString(searchParams.max),
-                      tri: sort !== "recent" ? sort : undefined,
-                    }}
-                  />
+                  <div className="mt-16">
+                    <Pagination
+                      currentPage={page}
+                      totalPages={totalPages}
+                      baseUrl={`/${config.slug}`}
+                      searchParams={{
+                        marque: brandSlug,
+                        min: getString(searchParams.min),
+                        max: getString(searchParams.max),
+                        tri: sort !== "recent" ? sort : undefined,
+                      }}
+                    />
+                  </div>
                 </>
               )}
             </div>
           </div>
         </div>
       </section>
-    </>
+    </div>
   );
 }

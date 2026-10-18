@@ -24,11 +24,10 @@ export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
+    statusBarStyle: "black-translucent",
     title: "PM Osons Oser",
   },
   
-  // AJOUT DES FAVICONS ICI
   icons: {
     icon: [
       { url: "/icons/favicon-16x16.png", sizes: "16x16", type: "image/png" },
@@ -42,7 +41,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#1A1A1A",
+  themeColor: "#0A0A0B",
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
@@ -65,9 +64,9 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="fr" suppressHydrationWarning>
+    <html lang="fr" suppressHydrationWarning className="bg-[#0A0A0B]">
       <body
-        className={`${inter.variable} ${bebasNeue.variable} font-sans antialiased bg-background text-foreground`}
+        className={`${inter.variable} ${bebasNeue.variable} font-sans antialiased bg-[#0A0A0B] text-white selection:bg-brand-red selection:text-white min-h-screen`}
       >
         <script
           type="application/ld+json"

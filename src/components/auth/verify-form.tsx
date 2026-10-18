@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Loader2, Mail, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Loader2, Mail, AlertCircle, CheckCircle2, ArrowLeft } from "lucide-react";
 
 const CODE_LENGTH = 6;
 
@@ -112,7 +112,7 @@ export function VerifyForm() {
         setError(data.error || "Impossible de renvoyer le code");
         return;
       }
-      setResendInfo("Nouveau code envoyé !");
+      setResendInfo("Nouveau code envoyé avec succès !");
       setDigits(Array(CODE_LENGTH).fill(""));
       inputsRef.current[0]?.focus();
     } catch {
@@ -124,12 +124,14 @@ export function VerifyForm() {
 
   if (success) {
     return (
-      <div className="rounded-3xl border border-white/10 bg-white/5 p-8 text-center backdrop-blur-xl">
-        <CheckCircle2 className="mx-auto h-14 w-14 text-green-500" />
-        <h1 className="mt-4 font-display text-3xl tracking-wide text-white">
+      <div className="relative overflow-hidden rounded-[2.5rem] border border-emerald-500/30 bg-neutral-900/40 p-8 text-center backdrop-blur-2xl">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-emerald-500/30 bg-emerald-500/20 text-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.3)]">
+          <CheckCircle2 className="h-8 w-8" />
+        </div>
+        <h1 className="mt-6 font-display text-3xl font-light text-white">
           Compte vérifié !
         </h1>
-        <p className="mt-2 text-sm text-white/60">
+        <p className="mt-2 font-mono text-xs uppercase tracking-widest text-neutral-400">
           Redirection vers la page de connexion…
         </p>
       </div>
@@ -137,21 +139,29 @@ export function VerifyForm() {
   }
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl md:p-8">
-      <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-brand-red/10">
-        <Mail className="h-6 w-6 text-brand-red" />
+    <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-6 backdrop-blur-2xl md:p-10">
+      {/* Halo lumineux ambiant */}
+      <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-brand-red/10 blur-[100px]" />
+
+      <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-brand-red/30 bg-brand-red/10 text-brand-red shadow-[0_0_20px_rgba(239,68,68,0.2)]">
+        <Mail className="h-7 w-7" />
       </div>
 
-      <h1 className="text-center font-display text-3xl tracking-wide text-white">
-        Vérifiez votre email
-      </h1>
-      <p className="mt-2 text-center text-sm text-white/60">
-        Nous avons envoyé un code à 6 chiffres à{" "}
-        <strong className="text-white">{emailFromUrl}</strong>.
-      </p>
+      <div className="text-center">
+        <span className="font-mono text-xs uppercase tracking-[0.25em] text-brand-red">
+          [ Sécurité ]
+        </span>
+        <h1 className="mt-2 font-display text-3xl font-light text-white">
+          Vérifiez votre email
+        </h1>
+        <p className="mt-2 font-mono text-xs text-neutral-400 leading-relaxed">
+          Nous avons envoyé un code à 6 chiffres à{" "}
+          <strong className="text-white font-sans">{emailFromUrl}</strong>.
+        </p>
+      </div>
 
-      {/* Cases du code */}
-      <div className="mt-8 flex justify-center gap-2">
+      {/* CASES DU CODE OTP */}
+      <div className="mt-8 flex justify-center gap-3">
         {digits.map((d, i) => (
           <input
             key={i}
@@ -166,49 +176,54 @@ export function VerifyForm() {
             onKeyDown={(e) => handleKeyDown(i, e)}
             onPaste={handlePaste}
             disabled={loading}
-            className="h-14 w-12 rounded-xl border-2 border-white/10 bg-white/5 text-center font-display text-2xl text-white outline-none transition focus:border-brand-red focus:bg-white/10 disabled:opacity-50 md:h-16 md:w-14 md:text-3xl"
+            className="h-16 w-12 rounded-2xl border border-white/15 bg-white/[0.03] text-center font-display text-2xl font-light text-white outline-none transition-all duration-300 hover:border-white/30 focus:border-brand-red focus:bg-brand-red/10 focus:shadow-[0_0_20px_rgba(239,68,68,0.25)] disabled:opacity-40 md:h-20 md:w-16 md:text-3xl"
           />
         ))}
       </div>
 
       {loading && (
-        <div className="mt-4 flex items-center justify-center gap-2 text-sm text-white/60">
-          <Loader2 className="h-4 w-4 animate-spin" />
-          Vérification…
+        <div className="mt-6 flex items-center justify-center gap-2.5 font-mono text-xs uppercase tracking-widest text-neutral-400">
+          <Loader2 className="h-4 w-4 animate-spin text-brand-red" />
+          <span>Vérification du code...</span>
         </div>
       )}
 
       {error && (
-        <div className="mt-5 flex items-start gap-2 rounded-xl bg-red-500/10 p-3 text-xs text-red-400">
-          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+        <div className="mt-6 flex items-center gap-3 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 font-mono text-xs text-red-400 backdrop-blur-md">
+          <AlertCircle className="h-4 w-4 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {resendInfo && (
-        <div className="mt-5 flex items-start gap-2 rounded-xl bg-green-500/10 p-3 text-xs text-green-400">
-          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
+        <div className="mt-6 flex items-center gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 font-mono text-xs text-emerald-400 backdrop-blur-md">
+          <CheckCircle2 className="h-4 w-4 shrink-0" />
           <span>{resendInfo}</span>
         </div>
       )}
 
-      <div className="mt-6 space-y-3 text-center text-xs">
-        <p className="text-white/60">
-          Pas reçu le code ?{" "}
+      <div className="mt-8 space-y-4 text-center font-mono text-xs">
+        <p className="text-neutral-400">
+          Vous n'avez pas reçu le code ?{" "}
           <button
             type="button"
             onClick={resend}
             disabled={resending}
-            className="font-semibold text-brand-red hover:underline disabled:opacity-50"
+            className="font-bold text-brand-red transition-colors hover:text-white disabled:opacity-50"
           >
-            {resending ? "Envoi…" : "Renvoyer"}
+            {resending ? "Envoi..." : "Renvoyer"}
           </button>
         </p>
-        <p className="text-white/40">
-          <Link href="/inscription" className="hover:text-white">
-            ← Utiliser un autre email
+        
+        <div>
+          <Link
+            href="/inscription"
+            className="inline-flex items-center gap-2 text-neutral-500 transition-colors hover:text-white"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            <span>Utiliser un autre email</span>
           </Link>
-        </p>
+        </div>
       </div>
     </div>
   );

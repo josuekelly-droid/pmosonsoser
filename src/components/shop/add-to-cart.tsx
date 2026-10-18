@@ -9,6 +9,8 @@ import {
   Zap,
   Heart,
   Share2,
+  ArrowUpRight,
+  AlertTriangle,
 } from "lucide-react";
 import { useCart } from "@/store/cart";
 import { cn } from "@/lib/utils";
@@ -68,111 +70,131 @@ export function AddToCart({ product }: Props) {
 
   if (outOfStock) {
     return (
-      <div className="rounded-2xl border border-red-200 bg-red-50 p-5">
-        <p className="text-sm font-semibold text-red-700">
-          Produit momentanément indisponible
-        </p>
-        <p className="mt-1 text-xs text-red-600/80">
-          Contactez-nous pour être prévenu dès le réapprovisionnement.
-        </p>
+      <div className="relative overflow-hidden rounded-3xl border border-red-500/30 bg-red-500/5 p-6 backdrop-blur-xl">
+        <div className="flex items-start gap-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-red-500/30 bg-red-500/10 text-red-400">
+            <AlertTriangle className="h-5 w-5" />
+          </div>
+          <div>
+            <h4 className="font-mono text-xs font-semibold uppercase tracking-widest text-red-400">
+              Rupture de Stock
+            </h4>
+            <p className="mt-1 text-xs text-neutral-400 leading-relaxed">
+              Ce produit est temporairement indisponible. Contactez notre équipe pour être informé dès le réapprovisionnement.
+            </p>
+          </div>
+        </div>
+        
         <button
           onClick={handleShare}
-          className="mt-4 inline-flex items-center gap-2 rounded-full border border-red-200 bg-white px-4 py-2 text-xs font-medium text-red-700 transition hover:bg-red-100"
+          type="button"
+          className="mt-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-2.5 font-mono text-xs uppercase tracking-widest text-white transition-all duration-300 hover:border-white/30 hover:bg-white/10"
         >
           <Share2 className="h-3.5 w-3.5" />
-          Partager ce produit
+          <span>Partager la fiche produit</span>
         </button>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      {/* Actions secondaires (favoris + partage) */}
-      <div className="flex items-center gap-2">
+    <div className="space-y-5">
+      {/* ACTIONS SECONDAIRES (FAVORIS + PARTAGE) */}
+      <div className="flex items-center gap-3">
         <button
+          type="button"
           onClick={() => setSaved((v) => !v)}
           className={cn(
-            "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-medium transition",
+            "group inline-flex items-center gap-2 rounded-full border px-4 py-2 font-mono text-xs uppercase tracking-widest backdrop-blur-md transition-all duration-300",
             saved
               ? "border-brand-red bg-brand-red/10 text-brand-red"
-              : "border-brand-black/10 bg-white text-brand-black/70 hover:border-brand-red/30 hover:text-brand-black"
+              : "border-white/10 bg-white/5 text-neutral-400 hover:border-white/30 hover:text-white"
           )}
         >
           <Heart
-            className={cn("h-3.5 w-3.5", saved && "fill-brand-red text-brand-red")}
+            className={cn(
+              "h-3.5 w-3.5 transition-transform duration-300 group-hover:scale-110",
+              saved ? "fill-brand-red text-brand-red" : "text-current"
+            )}
           />
-          {saved ? "Sauvegardé" : "Sauvegarder"}
+          <span>{saved ? "Sauvegardé" : "Favoris"}</span>
         </button>
+
         <button
+          type="button"
           onClick={handleShare}
-          className="inline-flex items-center gap-2 rounded-full border border-brand-black/10 bg-white px-4 py-2 text-xs font-medium text-brand-black/70 transition hover:border-brand-red/30 hover:text-brand-black"
+          className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 font-mono text-xs uppercase tracking-widest text-neutral-400 backdrop-blur-md transition-all duration-300 hover:border-white/30 hover:text-white"
         >
           <Share2 className="h-3.5 w-3.5" />
-          Partager
+          <span>Partager</span>
         </button>
       </div>
 
-      {/* Sélecteur quantité */}
-      <div className="flex items-center justify-between gap-4 rounded-2xl border border-brand-black/5 bg-brand-gray/50 p-2">
-        <span className="pl-3 text-sm font-medium text-brand-black">
+      {/* SÉLECTEUR DE QUANTITÉ HUD */}
+      <div className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-neutral-900/60 p-2.5 backdrop-blur-xl">
+        <span className="pl-3 font-mono text-xs uppercase tracking-widest text-neutral-400">
           Quantité
         </span>
-        <div className="flex items-center rounded-full border border-brand-black/10 bg-white">
+        <div className="flex items-center rounded-full border border-white/10 bg-black/40 p-1">
           <button
+            type="button"
             onClick={() => setQty((q) => Math.max(1, q - 1))}
             disabled={qty <= 1}
-            aria-label="Diminuer"
-            className="flex h-9 w-9 items-center justify-center rounded-full text-brand-black transition hover:bg-brand-gray disabled:opacity-30"
+            aria-label="Diminuer la quantité"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-neutral-300 transition-colors hover:bg-white/10 hover:text-white disabled:opacity-20"
           >
             <Minus className="h-3.5 w-3.5" />
           </button>
-          <span className="w-10 text-center text-sm font-semibold text-brand-black">
+          
+          <span className="w-10 text-center font-mono text-sm font-bold text-white">
             {qty}
           </span>
+
           <button
+            type="button"
             onClick={() => setQty((q) => Math.min(maxQty, q + 1))}
             disabled={qty >= maxQty}
-            aria-label="Augmenter"
-            className="flex h-9 w-9 items-center justify-center rounded-full text-brand-black transition hover:bg-brand-gray disabled:opacity-30"
+            aria-label="Augmenter la quantité"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-neutral-300 transition-colors hover:bg-white/10 hover:text-white disabled:opacity-20"
           >
             <Plus className="h-3.5 w-3.5" />
           </button>
         </div>
       </div>
 
-      {/* Bouton principal */}
-      <div className="flex gap-3">
-        <button
-          onClick={handleAdd}
-          className={cn(
-            "group inline-flex h-14 flex-1 items-center justify-center gap-3 rounded-full text-sm font-semibold uppercase tracking-wider text-white shadow-xl transition-all",
-            added
-              ? "bg-green-600 shadow-green-600/30"
-              : "bg-brand-red shadow-brand-red/30 hover:bg-brand-red/90 hover:shadow-2xl hover:shadow-brand-red/40"
-          )}
-        >
-          {added ? (
-            <>
-              <Check className="h-5 w-5" />
-              Ajouté au panier
-            </>
-          ) : (
-            <>
-              <ShoppingCart className="h-5 w-5" />
-              Ajouter au panier
-            </>
-          )}
-        </button>
-      </div>
-
-      {/* Achat express */}
+      {/* BOUTON PRINCIPAL D'AJOUT AU PANIER */}
       <button
+        type="button"
         onClick={handleAdd}
-        className="group inline-flex h-12 w-full items-center justify-center gap-2 rounded-full border-2 border-brand-black bg-white text-sm font-semibold uppercase tracking-wider text-brand-black transition hover:bg-brand-black hover:text-white"
+        className={cn(
+          "group relative inline-flex h-14 w-full items-center justify-center gap-3 overflow-hidden rounded-full font-mono text-xs font-bold uppercase tracking-widest text-white shadow-xl transition-all duration-500",
+          added
+            ? "bg-emerald-600 shadow-emerald-600/30"
+            : "bg-brand-red shadow-brand-red/25 hover:bg-white hover:text-black hover:shadow-brand-red/40"
+        )}
       >
-        <Zap className="h-4 w-4 transition group-hover:fill-brand-red group-hover:text-brand-red" />
-        Achat express
+        {added ? (
+          <>
+            <Check className="h-4 w-4" />
+            <span>Ajouté avec succès</span>
+          </>
+        ) : (
+          <>
+            <ShoppingCart className="h-4 w-4 transition-transform duration-500 group-hover:scale-110" />
+            <span>Ajouter au panier</span>
+          </>
+        )}
+      </button>
+
+      {/* BOUTON ACHAT EXPRESS */}
+      <button
+        type="button"
+        onClick={handleAdd}
+        className="group relative inline-flex h-12 w-full items-center justify-center gap-3 overflow-hidden rounded-full border border-white/20 bg-white/5 font-mono text-xs font-semibold uppercase tracking-widest text-white backdrop-blur-md transition-all duration-500 hover:border-white hover:bg-white hover:text-black"
+      >
+        <Zap className="h-4 w-4 text-brand-red transition-colors duration-500 group-hover:text-black" />
+        <span>Commander Immédiatement</span>
+        <ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-500 group-hover:rotate-45" />
       </button>
     </div>
   );

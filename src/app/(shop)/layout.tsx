@@ -8,11 +8,11 @@ export default function ShopLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
+    <div className="relative min-h-screen w-full bg-[#0A0A0B] text-white overflow-x-hidden selection:bg-brand-red selection:text-white">
       <Navbar />
       <main className="min-h-screen">{children}</main>
       <Footer />
       <WhatsAppFloat />
-    </>
+    </div>
   );
 }

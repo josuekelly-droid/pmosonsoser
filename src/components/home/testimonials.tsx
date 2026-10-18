@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Star, Quote, ArrowRight } from "lucide-react";
+import { Star, Quote, ArrowUpRight } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 
 function ReviewCard({
@@ -16,33 +16,38 @@ function ReviewCard({
   text: string;
 }) {
   return (
-    <article className="relative flex w-[320px] shrink-0 flex-col rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-sm transition hover:border-brand-red/30 hover:bg-white/[0.07] md:w-[360px]">
-      <Quote className="absolute right-4 top-4 h-7 w-7 text-brand-red/20" />
+    <article className="group relative flex w-[340px] shrink-0 flex-col justify-between rounded-3xl border border-white/10 bg-neutral-900/40 p-7 backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 hover:border-brand-red/40 hover:bg-neutral-900/80 hover:shadow-[0_15px_30px_rgba(239,68,68,0.1)] md:w-[380px]">
+      <Quote className="absolute right-6 top-6 h-8 w-8 text-brand-red/15 transition-transform duration-500 group-hover:scale-110 group-hover:text-brand-red/30" />
 
-      <div className="flex items-center gap-0.5">
-        {Array.from({ length: 5 }).map((_, idx) => (
-          <Star
-            key={idx}
-            className={
-              idx < rating
-                ? "h-4 w-4 fill-brand-red text-brand-red"
-                : "h-4 w-4 text-white/20"
-            }
-          />
-        ))}
+      <div>
+        {/* Étoiles */}
+        <div className="flex items-center gap-1">
+          {Array.from({ length: 5 }).map((_, idx) => (
+            <Star
+              key={idx}
+              className={
+                idx < rating
+                  ? "h-3.5 w-3.5 fill-brand-red text-brand-red"
+                  : "h-3.5 w-3.5 text-white/15"
+              }
+            />
+          ))}
+        </div>
+
+        {/* Texte du témoignage */}
+        <p className="mt-5 line-clamp-4 text-sm font-light leading-relaxed text-neutral-300">
+          &ldquo;{text}&rdquo;
+        </p>
       </div>
 
-      <p className="mt-3 line-clamp-4 flex-1 text-sm leading-relaxed text-white/80">
-        "{text}"
-      </p>
-
-      <div className="mt-4 flex items-center gap-3 border-t border-white/10 pt-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-red/20 font-display text-base text-brand-red">
+      {/* Auteur */}
+      <div className="mt-8 flex items-center gap-3.5 border-t border-white/10 pt-4">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-brand-red/30 bg-brand-red/10 font-display text-base font-semibold text-brand-red shadow-inner">
           {name.charAt(0)}
         </div>
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-white">{name}</p>
-          <p className="truncate text-xs text-white/50">
+          <p className="truncate text-sm font-medium text-white">{name}</p>
+          <p className="truncate font-mono text-[11px] text-neutral-400">
             {role}
             {city ? ` · ${city}` : ""}
           </p>
@@ -66,13 +71,12 @@ function Row({
   }>;
   reverse?: boolean;
 }) {
-  // On duplique la liste pour un défilement continu
   const doubled = [...reviews, ...reviews];
 
   return (
-    <div className="marquee-container relative flex overflow-hidden">
+    <div className="relative flex overflow-hidden py-2">
       <div
-        className={`flex gap-4 ${
+        className={`flex gap-6 ${
           reverse ? "animate-marquee-reverse" : "animate-marquee"
         }`}
       >
@@ -101,53 +105,52 @@ export async function Testimonials() {
 
   if (reviews.length === 0) return null;
 
-  // Split en 2 rangées
   const mid = Math.ceil(reviews.length / 2);
   const row1 = reviews.slice(0, mid);
   const row2 = reviews.slice(mid);
 
   return (
-    <section className="relative overflow-hidden bg-brand-black py-20 md:py-28">
-      <div className="pointer-events-none absolute -top-40 left-1/2 h-[400px] w-[600px] -translate-x-1/2 rounded-full bg-brand-red/10 blur-[120px]" />
+    <section className="relative overflow-hidden border-t border-white/10 bg-brand-black py-28 md:py-40 selection:bg-brand-red selection:text-white">
+      {/* Background Ambient Glow */}
+      <div className="pointer-events-none absolute -top-48 left-1/2 h-[500px] w-[700px] -translate-x-1/2 rounded-full bg-brand-red/15 blur-[150px]" />
 
-      <div className="relative mx-auto max-w-7xl px-4 md:px-8">
-        <div className="text-center">
-          <span className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-red">
-            Témoignages
+      <div className="relative mx-auto max-w-7xl px-6 lg:px-12">
+        <div className="max-w-2xl">
+          <span className="font-mono text-xs uppercase tracking-[0.3em] text-brand-red">
+            [ Témoignages & Confiance ]
           </span>
-          <h2 className="mt-3 font-display text-4xl tracking-wide text-white md:text-5xl">
-            Ils nous font <span className="text-brand-red">confiance</span>
+          <h2 className="mt-4 font-display text-4xl font-extralight tracking-tight text-white md:text-6xl">
+            Ce que disent nos <span className="italic font-serif font-normal text-brand-red">partenaires</span>
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-white/60">
-            Plus de 500 clients satisfaits au Bénin nous recommandent pour la qualité,
-            la rapidité et la fiabilité.
+          <p className="mt-4 text-base text-neutral-400 md:text-lg">
+            Plus de 500 clients et professionnels au Bénin recommandent notre exigence de qualité, notre rapidité de livraison et notre service client.
           </p>
         </div>
       </div>
 
-      {/* Marquee 2 rangées */}
-      <div className="relative mt-14 space-y-4">
-        {/* Masques dégradés sur les bords */}
-        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-20 bg-gradient-to-r from-brand-black to-transparent md:w-40" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-20 bg-gradient-to-l from-brand-black to-transparent md:w-40" />
+      {/* Marquee 2 rangées avec masques de fondu */}
+      <div className="relative mt-16 space-y-6">
+        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-brand-black via-brand-black/80 to-transparent md:w-52" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-brand-black via-brand-black/80 to-transparent md:w-52" />
 
         <Row reviews={row1} />
         <Row reviews={row2} reverse />
       </div>
 
-      <div className="relative mx-auto mt-14 flex max-w-7xl flex-col items-center gap-4 px-4 md:px-8">
+      {/* CTAs Bas de section */}
+      <div className="relative mx-auto mt-16 flex max-w-7xl flex-col items-center gap-4 px-6 text-center lg:px-12">
         <Link
           href="/avis"
-          className="group inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-6 py-3 text-sm font-semibold uppercase tracking-wider text-white backdrop-blur-sm transition hover:bg-brand-red hover:border-brand-red"
+          className="group relative inline-flex items-center gap-3 overflow-hidden rounded-full border border-white/20 bg-white/5 px-8 py-4 text-xs font-bold uppercase tracking-widest text-white backdrop-blur-md transition-all duration-500 hover:border-brand-red hover:bg-brand-red hover:text-white"
         >
-          Lire tous les avis
-          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          <span>Lire l'ensemble des avis clients</span>
+          <ArrowUpRight className="h-4 w-4 transition-transform duration-500 group-hover:rotate-45" />
         </Link>
         <Link
           href="/avis#laisser-un-avis"
-          className="text-sm text-brand-red hover:text-white transition"
+          className="font-mono text-xs text-neutral-400 transition-colors duration-300 hover:text-white"
         >
-          Laisser mon avis →
+          Vous avez commandé ? <span className="text-brand-red underline underline-offset-4">Laisser votre avis →</span>
         </Link>
       </div>
     </section>

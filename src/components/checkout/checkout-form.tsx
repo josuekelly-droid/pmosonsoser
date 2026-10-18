@@ -16,12 +16,16 @@ import {
   AlertCircle,
   ShieldCheck,
   Truck,
+  ArrowUpRight,
+  ShoppingBag,
+  Sparkles,
 } from "lucide-react";
 import { useCart } from "@/store/cart";
 import { formatPrice, cn } from "@/lib/utils";
 import { DELIVERY_PRICING, type DeliveryPoint } from "@/lib/delivery";
 import { PaymentBadges } from "@/components/shop/payment-badges";
 import { MapPicker } from "@/components/shop/map-picker";
+import { Input } from "@/components/ui/input";
 
 type Method = "FEDAPAY" | "WESTERN_UNION" | "VIREMENT";
 
@@ -72,8 +76,6 @@ export function CheckoutForm() {
 
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
-  // Frais de livraison : on utilise DIRECTEMENT le fee retourné par MapPicker
-  // (calculé par l'API ORS + calculateDeliveryFee côté serveur).
   const isFreeDelivery = subtotal >= DELIVERY_PRICING.freeDeliveryThreshold;
   const deliveryFee = isFreeDelivery ? 0 : (delivery?.fee ?? 0);
   const total = subtotal + deliveryFee;
@@ -133,16 +135,23 @@ export function CheckoutForm() {
 
   if (items.length === 0) {
     return (
-      <div className="rounded-3xl border border-dashed border-brand-black/10 bg-white p-10 text-center">
-        <p className="text-brand-black/70">
-          Votre panier est vide.{" "}
-          <Link
-            href="/motos"
-            className="font-semibold text-brand-red hover:underline"
-          >
-            Retourner au catalogue
-          </Link>
+      <div className="relative overflow-hidden rounded-[2.5rem] border border-dashed border-white/10 bg-neutral-900/40 p-12 text-center backdrop-blur-xl">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-neutral-400">
+          <ShoppingBag className="h-8 w-8" />
+        </div>
+        <p className="mt-4 font-display text-xl text-white">
+          Votre panier est actuellement vide.
         </p>
+        <p className="mt-2 font-mono text-xs text-neutral-500">
+          Ajoutez des pièces ou accessoires pour poursuivre le paiement.
+        </p>
+        <Link
+          href="/motos"
+          className="group mt-6 inline-flex items-center gap-2 rounded-full border border-brand-red/30 bg-brand-red/10 px-6 py-3 font-mono text-xs font-bold uppercase tracking-widest text-brand-red transition-all duration-300 hover:bg-brand-red hover:text-white"
+        >
+          <span>Retourner au catalogue</span>
+          <ArrowUpRight className="h-4 w-4 transition-transform group-hover:rotate-45" />
+        </Link>
       </div>
     );
   }
@@ -150,98 +159,113 @@ export function CheckoutForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_380px]"
+      className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_400px]"
     >
-      {/* Colonne formulaire */}
-      <div className="space-y-6">
-        {/* Coordonnées */}
-        <section className="rounded-3xl border border-brand-black/5 bg-white p-6 md:p-8">
-          <h2 className="flex items-center gap-2 font-display text-2xl tracking-wide text-brand-black">
-            <UserIcon className="h-5 w-5 text-brand-red" />
-            Vos coordonnées
+      {/* COLONNE FORMULAIRE */}
+      <div className="space-y-8">
+        {/* SECTION 1: COORDONNÉES */}
+        <section className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-6 backdrop-blur-2xl md:p-8">
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-xs uppercase tracking-[0.25em] text-brand-red">
+              [ Étape 01 ]
+            </span>
+          </div>
+          <h2 className="mt-1 font-display text-2xl font-light text-white">
+            Vos Coordonnées
           </h2>
 
-          <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
             <Field label="Nom complet *" icon={UserIcon}>
-              <input
+              <Input
                 name="customerName"
                 required
                 minLength={2}
                 maxLength={100}
                 placeholder="Ex: Amadou Kouassi"
-                className="input"
               />
             </Field>
 
             <Field label="Téléphone *" icon={Phone}>
-              <input
+              <Input
                 name="telephone"
                 type="tel"
                 required
                 placeholder="+229 97 00 00 00"
-                className="input"
               />
             </Field>
 
             <div className="md:col-span-2">
-              <Field label="Email *" icon={Mail}>
-                <input
+              <Field label="Adresse Email *" icon={Mail}>
+                <Input
                   name="customerEmail"
                   type="email"
                   required
                   placeholder="vous@email.com"
-                  className="input"
                 />
               </Field>
             </div>
           </div>
         </section>
 
-        {/* Livraison (carte) */}
-        <section className="rounded-3xl border border-brand-black/5 bg-white p-6 md:p-8">
-          <h2 className="flex items-center gap-2 font-display text-2xl tracking-wide text-brand-black">
-            <MapPin className="h-5 w-5 text-brand-red" />
-            Adresse de livraison
+        {/* SECTION 2: LIVRAISON */}
+        <section className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-6 backdrop-blur-2xl md:p-8">
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-xs uppercase tracking-[0.25em] text-brand-red">
+              [ Étape 02 ]
+            </span>
+          </div>
+          <h2 className="mt-1 font-display text-2xl font-light text-white">
+            Adresse de Livraison
           </h2>
 
-          <p className="mt-2 text-xs text-brand-black/60">
-            Cliquez sur la carte pour indiquer votre position exacte. Les frais
-            de livraison sont calculés en temps réel selon la distance.
+          <p className="mt-1 font-mono text-xs text-neutral-400">
+            Cliquez sur la carte interactive pour désigner votre point de livraison. Le tarif est calculé instantanément.
           </p>
 
-          <div className="mt-5">
+          <div className="mt-6">
             <MapPicker subtotal={subtotal} onDeliveryChangeAction={setDelivery} />
           </div>
 
-          <div className="mt-4">
-            <Field label="Notes (facultatif)" icon={MessageSquare}>
+          <div className="mt-6">
+            <Field label="Instructions particulières (facultatif)" icon={MessageSquare}>
               <textarea
                 name="notes"
                 maxLength={500}
-                rows={2}
-                placeholder="Instructions particulières, préférence horaire…"
-                className="input resize-none"
+                rows={3}
+                placeholder="Remarques, repères de livraison, horaires préférentiels…"
+                className="w-full rounded-2xl border border-white/10 bg-white/[0.03] p-4 font-sans text-sm text-white placeholder:text-neutral-600 outline-none transition-all duration-300 hover:border-white/20 focus:border-brand-red focus:bg-white/[0.06] focus:ring-1 focus:ring-brand-red/50 resize-none"
               />
             </Field>
           </div>
 
           {!isFreeDelivery ? (
-            <p className="mt-4 rounded-xl bg-amber-50 px-4 py-3 text-xs text-amber-800">
-              💡 Livraison offerte dès{" "}
-              {formatPrice(DELIVERY_PRICING.freeDeliveryThreshold)} d'achat.
-            </p>
+            <div className="mt-6 flex items-center gap-2.5 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 font-mono text-xs text-amber-400">
+              <Sparkles className="h-4 w-4 shrink-0" />
+              <span>
+                Livraison offerte dès{" "}
+                <strong className="text-amber-300">
+                  {formatPrice(DELIVERY_PRICING.freeDeliveryThreshold)}
+                </strong>{" "}
+                d'achat.
+              </span>
+            </div>
           ) : (
-            <p className="mt-4 rounded-xl bg-green-50 px-4 py-3 text-xs text-green-800">
-              🎉 Vous bénéficiez de la livraison offerte !
-            </p>
+            <div className="mt-6 flex items-center gap-2.5 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 font-mono text-xs text-emerald-400">
+              <Sparkles className="h-4 w-4 shrink-0" />
+              <span>Livraison offerte sur cette commande !</span>
+            </div>
           )}
         </section>
 
-        {/* Paiement */}
-        <section className="rounded-3xl border border-brand-black/5 bg-white p-6 md:p-8">
-          <h2 className="flex items-center gap-2 font-display text-2xl tracking-wide text-brand-black">
-            <CreditCard className="h-5 w-5 text-brand-red" />
-            Moyen de paiement
+        {/* SECTION 3: PAIEMENT */}
+        <section className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-6 backdrop-blur-2xl md:p-8">
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-xs uppercase tracking-[0.25em] text-brand-red">
+              [ Étape 03 ]
+            </span>
+          </div>
+          <h2 className="mt-1 font-display text-2xl font-light text-white">
+            Moyen de Paiement
           </h2>
 
           <div className="mt-6 space-y-3">
@@ -254,116 +278,118 @@ export function CheckoutForm() {
                   type="button"
                   onClick={() => setMethod(m.value)}
                   className={cn(
-                    "flex w-full items-center gap-4 rounded-2xl border-2 p-4 text-left transition",
+                    "flex w-full items-center gap-4 rounded-2xl border p-4 text-left backdrop-blur-md transition-all duration-300",
                     active
-                      ? "border-brand-red bg-brand-red/5"
-                      : "border-brand-black/5 hover:border-brand-black/20"
+                      ? "border-brand-red bg-brand-red/10 shadow-[0_0_20px_rgba(239,68,68,0.15)]"
+                      : "border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.05]"
                   )}
                 >
                   <div
                     className={cn(
-                      "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition",
+                      "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border transition-all duration-300",
                       active
-                        ? "bg-brand-red text-white"
-                        : "bg-brand-gray text-brand-black"
+                        ? "border-brand-red bg-brand-red text-white shadow-[0_0_12px_rgba(239,68,68,0.5)]"
+                        : "border-white/10 bg-black/40 text-neutral-400"
                     )}
                   >
                     <Icon className="h-5 w-5" />
                   </div>
+
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-brand-black">
+                    <p className="font-sans text-sm font-medium text-white">
                       {m.label}
                     </p>
-                    <p className="text-xs text-brand-black/60">{m.desc}</p>
+                    <p className="font-mono text-xs text-neutral-400">{m.desc}</p>
                   </div>
+
                   <div
                     className={cn(
-                      "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition",
-                      active ? "border-brand-red" : "border-brand-black/20"
+                      "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-all duration-300",
+                      active ? "border-brand-red bg-brand-red" : "border-white/20"
                     )}
                   >
-                    {active && (
-                      <span className="h-2.5 w-2.5 rounded-full bg-brand-red" />
-                    )}
+                    {active && <span className="h-2 w-2 rounded-full bg-white" />}
                   </div>
                 </button>
               );
             })}
           </div>
 
-          <div className="mt-6 rounded-2xl bg-brand-gray/50 p-4">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-brand-black/50">
-              Moyens acceptés
-            </p>
+          {/* BADGES REGLEMENT */}
+          <div className="mt-6 rounded-2xl border border-white/10 bg-black/30 p-5 backdrop-blur-md">
+            <span className="mb-3 block font-mono text-[10px] font-semibold uppercase tracking-widest text-neutral-500">
+              Moyens de Paiement Acceptés
+            </span>
             <PaymentBadges />
           </div>
         </section>
       </div>
 
-      {/* Colonne récap */}
+      {/* COLONNE RÉCAPITULATIF COMMANDE */}
       <aside className="lg:sticky lg:top-32 lg:self-start">
-        <div className="rounded-3xl border border-brand-black/5 bg-white p-6 md:p-7">
-          <h2 className="font-display text-2xl tracking-wide text-brand-black">
-            Votre commande
+        <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-6 backdrop-blur-2xl md:p-8">
+          <span className="font-mono text-xs uppercase tracking-[0.25em] text-brand-red block">
+            [ Synthèse ]
+          </span>
+          <h2 className="mt-1 font-display text-2xl font-light text-white">
+            Votre Commande
           </h2>
 
-          <ul className="mt-5 max-h-64 space-y-3 overflow-y-auto pr-1">
+          <ul className="mt-6 max-h-64 space-y-3 overflow-y-auto pr-1 scrollbar-none">
             {items.map((i) => (
               <li
                 key={i.id}
-                className="flex items-start justify-between gap-3 text-sm"
+                className="flex items-start justify-between gap-3 border-b border-white/5 pb-3 font-mono text-xs"
               >
                 <div className="min-w-0">
-                  <p className="truncate font-medium text-brand-black">
+                  <p className="truncate font-sans text-sm font-medium text-white">
                     {i.name}
                   </p>
-                  <p className="text-xs text-brand-black/50">x{i.quantity}</p>
+                  <p className="text-neutral-500">Quantité : {i.quantity}</p>
                 </div>
-                <span className="shrink-0 font-medium text-brand-black">
+                <span className="shrink-0 text-white font-medium">
                   {formatPrice(i.price * i.quantity)}
                 </span>
               </li>
             ))}
           </ul>
 
-          <dl className="mt-5 space-y-3 border-t border-brand-black/10 pt-5 text-sm">
-            <div className="flex justify-between">
-              <dt className="text-brand-black/60">Sous-total</dt>
-              <dd className="font-medium">{formatPrice(subtotal)}</dd>
+          <dl className="mt-6 space-y-3 border-t border-white/10 pt-5 font-mono text-xs">
+            <div className="flex justify-between text-neutral-400">
+              <dt>Sous-total</dt>
+              <dd className="text-white font-medium">{formatPrice(subtotal)}</dd>
             </div>
-            <div className="flex justify-between">
-              <dt className="text-brand-black/60">Livraison</dt>
-              <dd className="font-medium">
+            <div className="flex justify-between text-neutral-400">
+              <dt>Livraison</dt>
+              <dd className="font-medium text-white">
                 {!delivery ? (
-                  <span className="text-xs text-brand-black/50">
-                    À calculer
-                  </span>
+                  <span className="text-neutral-500">Sélectionner sur la carte</span>
                 ) : deliveryFee === 0 ? (
-                  <span className="text-green-700">Offerte</span>
+                  <span className="text-emerald-400">Offerte</span>
                 ) : (
                   formatPrice(deliveryFee)
                 )}
               </dd>
             </div>
             {delivery && (
-              <div className="flex justify-between text-xs text-brand-black/50">
-                <dt>Distance</dt>
+              <div className="flex justify-between text-[11px] text-neutral-500">
+                <dt>Distance calculée</dt>
                 <dd>{delivery.distanceKm.toFixed(1)} km</dd>
               </div>
             )}
           </dl>
 
-          <div className="mt-5 flex items-end justify-between border-t border-brand-black/10 pt-5">
-            <span className="font-display text-lg tracking-wide text-brand-black">
-              Total
+          <div className="mt-6 flex items-end justify-between border-t border-white/10 pt-5">
+            <span className="font-mono text-xs uppercase tracking-widest text-neutral-400">
+              Total à Régler
             </span>
-            <span className="font-display text-3xl tracking-wide text-brand-red">
+            <span className="font-display text-3xl font-light text-brand-red">
               {formatPrice(total)}
             </span>
           </div>
 
           {error && (
-            <div className="mt-5 flex items-start gap-2 rounded-xl bg-red-50 p-3 text-xs text-red-700">
+            <div className="mt-6 flex items-start gap-3 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 font-mono text-xs text-red-400">
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
               <span>{error}</span>
             </div>
@@ -372,55 +398,33 @@ export function CheckoutForm() {
           <button
             type="submit"
             disabled={loading || !delivery}
-            className="group mt-6 inline-flex h-14 w-full items-center justify-center gap-2 rounded-full bg-brand-red text-sm font-semibold uppercase tracking-wider text-white shadow-xl shadow-brand-red/30 transition hover:bg-brand-red/90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="group relative mt-8 flex h-14 w-full items-center justify-center gap-3 overflow-hidden rounded-full bg-brand-red font-mono text-xs font-bold uppercase tracking-widest text-white shadow-xl shadow-brand-red/25 transition-all duration-500 hover:bg-white hover:text-black hover:shadow-brand-red/40 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {loading ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Traitement…
+                <Loader2 className="h-4 w-4 animate-spin text-current" />
+                <span>Traitement en cours...</span>
               </>
             ) : (
-              <>Confirmer la commande</>
+              <>
+                <span>Confirmer la commande</span>
+                <ArrowUpRight className="h-4 w-4 transition-transform duration-500 group-hover:rotate-45" />
+              </>
             )}
           </button>
 
-          <ul className="mt-5 space-y-2.5 text-xs text-brand-black/60">
+          <ul className="mt-6 space-y-2.5 font-mono text-[11px] uppercase tracking-widest text-neutral-500">
             <li className="flex items-center gap-2">
               <ShieldCheck className="h-3.5 w-3.5 text-brand-red" />
-              Données chiffrées et sécurisées
+              <span>Paiement chiffré & sécurisé</span>
             </li>
             <li className="flex items-center gap-2">
               <Truck className="h-3.5 w-3.5 text-brand-red" />
-              Livraison partout au Bénin
+              <span>Livraison express au Bénin</span>
             </li>
           </ul>
         </div>
       </aside>
-
-      <style jsx global>{`
-        .input {
-          width: 100%;
-          height: 3rem;
-          border-radius: 0.75rem;
-          border: 1px solid rgba(26, 26, 26, 0.1);
-          background: #fff;
-          padding: 0 1rem;
-          font-size: 0.875rem;
-          color: #1a1a1a;
-          outline: none;
-          transition: border-color 0.15s;
-        }
-        .input:focus {
-          border-color: #e30613;
-        }
-        textarea.input {
-          height: auto;
-          padding: 0.75rem 1rem;
-        }
-        .leaflet-container {
-          font-family: inherit;
-        }
-      `}</style>
     </form>
   );
 }
@@ -436,9 +440,9 @@ function Field({
 }) {
   return (
     <div>
-      <label className="mb-2 flex items-center gap-1.5 text-sm font-medium text-brand-black">
-        <Icon className="h-3.5 w-3.5 text-brand-black/40" />
-        {label}
+      <label className="mb-2 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-neutral-400">
+        <Icon className="h-3.5 w-3.5 text-neutral-500" />
+        <span>{label}</span>
       </label>
       {children}
     </div>

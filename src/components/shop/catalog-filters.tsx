@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
-import { X, SlidersHorizontal, ChevronDown } from "lucide-react";
+import { X, SlidersHorizontal, ChevronDown, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Brand = { id: string; name: string; slug: string };
@@ -16,7 +16,7 @@ const SORT_OPTIONS = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* Hook : centralise la logique URL / filtres                          */
+/* Hook : centralise la logique URL / filtres                         */
 /* ------------------------------------------------------------------ */
 function useFilters() {
   const router = useRouter();
@@ -68,7 +68,7 @@ function useFilters() {
 }
 
 /* ------------------------------------------------------------------ */
-/* Contenu des filtres (partagé sidebar + drawer mobile)               */
+/* Contenu des filtres (partagé sidebar + drawer mobile)              */
 /* ------------------------------------------------------------------ */
 function FilterContent({
   brands,
@@ -87,86 +87,93 @@ function FilterContent({
   }, [currentMin, currentMax]);
 
   return (
-    <div className="space-y-8">
-      {/* Marques */}
+    <div className="space-y-8 text-white">
+      {/* SECTION MARQUES */}
       <div>
-        <h3 className="mb-3 font-display text-lg tracking-wide text-brand-black">
-          Marque
+        <h3 className="mb-4 font-mono text-xs font-semibold uppercase tracking-[0.25em] text-neutral-400">
+          [ Filtrer par Marque ]
         </h3>
-        <ul className="space-y-1.5">
+        <ul className="space-y-2">
           <li>
             <button
+              type="button"
               onClick={() => apply({ marque: null })}
               className={cn(
-                "w-full rounded-lg px-3 py-2 text-left text-sm transition",
+                "group flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left font-sans text-sm transition-all duration-300",
                 !currentBrand
-                  ? "bg-brand-red/10 font-semibold text-brand-red"
-                  : "text-brand-black/70 hover:bg-brand-gray"
+                  ? "border border-brand-red/30 bg-brand-red/10 font-medium text-white shadow-lg shadow-brand-red/10"
+                  : "border border-white/5 bg-white/[0.02] text-neutral-400 hover:border-white/20 hover:bg-white/5 hover:text-white"
               )}
             >
-              Toutes les marques
+              <span>Toutes les marques</span>
+              {!currentBrand && <Check className="h-4 w-4 text-brand-red" />}
             </button>
           </li>
-          {brands.map((b) => (
-            <li key={b.id}>
-              <button
-                onClick={() => apply({ marque: b.slug })}
-                className={cn(
-                  "w-full rounded-lg px-3 py-2 text-left text-sm transition",
-                  currentBrand === b.slug
-                    ? "bg-brand-red/10 font-semibold text-brand-red"
-                    : "text-brand-black/70 hover:bg-brand-gray"
-                )}
-              >
-                {b.name}
-              </button>
-            </li>
-          ))}
+          {brands.map((b) => {
+            const isActive = currentBrand === b.slug;
+            return (
+              <li key={b.id}>
+                <button
+                  type="button"
+                  onClick={() => apply({ marque: b.slug })}
+                  className={cn(
+                    "group flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left font-sans text-sm transition-all duration-300",
+                    isActive
+                      ? "border border-brand-red/30 bg-brand-red/10 font-medium text-white shadow-lg shadow-brand-red/10"
+                      : "border border-white/5 bg-white/[0.02] text-neutral-400 hover:border-white/20 hover:bg-white/5 hover:text-white"
+                  )}
+                >
+                  <span>{b.name}</span>
+                  {isActive && <Check className="h-4 w-4 text-brand-red" />}
+                </button>
+              </li>
+            );
+          })}
         </ul>
       </div>
 
-      {/* Prix */}
+      {/* SECTION PRIX */}
       <div>
-        <h3 className="mb-3 font-display text-lg tracking-wide text-brand-black">
-          Prix (FCFA)
+        <h3 className="mb-4 font-mono text-xs font-semibold uppercase tracking-[0.25em] text-neutral-400">
+          [ Fourchette de Prix (FCFA) ]
         </h3>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <input
             type="number"
             inputMode="numeric"
             placeholder="Min"
             value={minPrice}
             onChange={(e) => setMinPrice(e.target.value)}
-            className="h-10 w-full rounded-lg border border-brand-black/10 bg-white px-3 text-sm outline-none focus:border-brand-red"
+            className="h-12 w-full rounded-2xl border border-white/10 bg-white/[0.02] px-4 font-sans text-sm text-white placeholder:text-neutral-600 outline-none transition-all duration-300 focus:border-brand-red focus:bg-white/[0.05]"
           />
-          <span className="text-brand-black/40">—</span>
+          <span className="text-neutral-600">—</span>
           <input
             type="number"
             inputMode="numeric"
             placeholder="Max"
             value={maxPrice}
             onChange={(e) => setMaxPrice(e.target.value)}
-            className="h-10 w-full rounded-lg border border-brand-black/10 bg-white px-3 text-sm outline-none focus:border-brand-red"
+            className="h-12 w-full rounded-2xl border border-white/10 bg-white/[0.02] px-4 font-sans text-sm text-white placeholder:text-neutral-600 outline-none transition-all duration-300 focus:border-brand-red focus:bg-white/[0.05]"
           />
         </div>
         <button
-          onClick={() =>
-            apply({ min: minPrice || null, max: maxPrice || null })
-          }
-          className="mt-3 w-full rounded-lg bg-brand-black px-4 py-2.5 text-sm font-medium text-white transition hover:bg-brand-red"
+          type="button"
+          onClick={() => apply({ min: minPrice || null, max: maxPrice || null })}
+          className="mt-4 w-full rounded-full border border-white/15 bg-white/5 py-3 font-mono text-xs font-bold uppercase tracking-widest text-white backdrop-blur-md transition-all duration-300 hover:border-brand-red hover:bg-brand-red"
         >
-          Appliquer
+          Appliquer le prix
         </button>
       </div>
 
-      {/* Reset */}
+      {/* RÉINITIALISATION */}
       {hasFilters && (
         <button
+          type="button"
           onClick={reset}
-          className="flex w-full items-center justify-center gap-2 rounded-lg border border-brand-black/10 px-4 py-2.5 text-sm font-medium text-brand-black/70 transition hover:bg-brand-gray"
+          className="flex w-full items-center justify-center gap-2 rounded-full border border-red-500/20 bg-red-500/10 py-3 font-mono text-xs font-semibold uppercase tracking-widest text-red-400 transition-all duration-300 hover:bg-red-500/20"
         >
           <X className="h-4 w-4" />
-          Réinitialiser les filtres
+          <span>Réinitialiser les filtres</span>
         </button>
       )}
     </div>
@@ -174,7 +181,7 @@ function FilterContent({
 }
 
 /* ------------------------------------------------------------------ */
-/* SIDEBAR (desktop / tablette) — uniquement les filtres               */
+/* SIDEBAR (desktop / tablette)                                        */
 /* ------------------------------------------------------------------ */
 export function CatalogSidebar({
   brands,
@@ -186,13 +193,13 @@ export function CatalogSidebar({
   const filters = useFilters();
 
   return (
-    <aside className="sticky top-28 rounded-2xl border border-brand-black/5 bg-white p-6">
-      <div className="mb-6 flex items-center justify-between border-b border-brand-black/5 pb-4">
-        <h2 className="font-display text-xl tracking-wide text-brand-black">
+    <aside className="sticky top-28 rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-8 backdrop-blur-xl">
+      <div className="mb-6 flex items-center justify-between border-b border-white/10 pb-5">
+        <h2 className="font-display text-xl font-light text-white">
           Filtres
         </h2>
-        <span className="text-xs text-brand-black/50">
-          {totalCount} produit{totalCount > 1 ? "s" : ""}
+        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 font-mono text-xs text-neutral-400">
+          {totalCount} {totalCount > 1 ? "produits" : "produit"}
         </span>
       </div>
       <FilterContent brands={brands} filters={filters} />
@@ -201,7 +208,7 @@ export function CatalogSidebar({
 }
 
 /* ------------------------------------------------------------------ */
-/* TOOLBAR (au-dessus de la grille) — bouton filtre mobile + tri        */
+/* TOOLBAR (au-dessus de la grille)                                   */
 /* ------------------------------------------------------------------ */
 export function CatalogToolbar({
   brands,
@@ -216,16 +223,17 @@ export function CatalogToolbar({
 
   return (
     <>
-      {/* ---- Barre mobile (< md) ---- */}
+      {/* ---- BARRE MOBILE (< md) ---- */}
       <div className="mb-6 flex items-center justify-between gap-3 md:hidden">
         <button
+          type="button"
           onClick={() => setOpen(true)}
-          className="inline-flex items-center gap-2 rounded-full border border-brand-black/10 bg-white px-4 py-2.5 text-sm font-medium text-brand-black shadow-sm"
+          className="relative inline-flex items-center gap-2.5 rounded-full border border-white/15 bg-neutral-900/60 px-5 py-3 font-mono text-xs uppercase tracking-widest text-white backdrop-blur-xl"
         >
-          <SlidersHorizontal className="h-4 w-4" />
-          Filtres
+          <SlidersHorizontal className="h-4 w-4 text-brand-red" />
+          <span>Filtres</span>
           {hasFilters && (
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-red text-[10px] font-bold text-white">
+            <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-brand-red text-[9px] font-bold text-white animate-pulse">
               !
             </span>
           )}
@@ -235,61 +243,61 @@ export function CatalogToolbar({
           <select
             value={currentSort}
             onChange={(e) => apply({ tri: e.target.value })}
-            className="appearance-none rounded-full border border-brand-black/10 bg-white px-4 py-2.5 pr-9 text-sm font-medium text-brand-black shadow-sm outline-none focus:border-brand-red"
+            className="appearance-none rounded-full border border-white/15 bg-neutral-900/60 px-5 py-3 pr-10 font-mono text-xs uppercase tracking-widest text-white backdrop-blur-xl outline-none"
           >
             {SORT_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
+              <option key={o.value} value={o.value} className="bg-neutral-950 text-white">
                 {o.label}
               </option>
             ))}
           </select>
-          <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-black/50" />
+          <ChevronDown className="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
         </div>
       </div>
 
-      {/* ---- Barre desktop (md+) : compteur + tri ---- */}
-      <div className="mb-6 hidden items-center justify-between md:flex">
-        <p className="text-sm text-brand-black/60">
-          <span className="font-semibold text-brand-black">{totalCount}</span>{" "}
-          produit{totalCount > 1 ? "s" : ""} trouvé
-          {totalCount > 1 ? "s" : ""}
+      {/* ---- BARRE DESKTOP (md+) ---- */}
+      <div className="mb-8 hidden items-center justify-between md:flex">
+        <p className="font-mono text-xs uppercase tracking-widest text-neutral-400">
+          <span className="font-bold text-white">{totalCount}</span> produit{totalCount > 1 ? "s" : ""} référencé{totalCount > 1 ? "s" : ""}
         </p>
+
         <div className="relative">
           <select
             value={currentSort}
             onChange={(e) => apply({ tri: e.target.value })}
-            className="appearance-none rounded-full border border-brand-black/10 bg-white px-5 py-3 pr-10 text-sm font-medium text-brand-black shadow-sm outline-none focus:border-brand-red"
+            className="appearance-none rounded-full border border-white/15 bg-neutral-900/40 px-6 py-3.5 pr-12 font-mono text-xs uppercase tracking-widest text-white backdrop-blur-xl outline-none transition-all duration-300 hover:border-white/30 focus:border-brand-red"
           >
             {SORT_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
+              <option key={o.value} value={o.value} className="bg-neutral-950 text-white">
                 Trier : {o.label}
               </option>
             ))}
           </select>
-          <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-black/50" />
+          <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
         </div>
       </div>
 
-      {/* ---- Drawer mobile (< md) ---- */}
+      {/* ---- DRAWER MOBILE (< md) ---- */}
       {open && (
         <div
-          className="fixed inset-0 z-50 bg-black/50 md:hidden"
+          className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md md:hidden"
           onClick={() => setOpen(false)}
         >
           <div
-            className="absolute bottom-0 left-0 right-0 max-h-[85vh] overflow-y-auto rounded-t-3xl bg-white p-6"
+            className="absolute bottom-0 left-0 right-0 max-h-[85vh] overflow-y-auto rounded-t-[2.5rem] border-t border-white/15 bg-neutral-950 p-8 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="mb-5 flex items-center justify-between">
-              <h2 className="font-display text-xl tracking-wide text-brand-black">
-                Filtres
+            <div className="mb-6 flex items-center justify-between border-b border-white/15 pb-4">
+              <h2 className="font-display text-2xl font-light text-white">
+                Filtres & Tri
               </h2>
               <button
+                type="button"
                 onClick={() => setOpen(false)}
                 aria-label="Fermer"
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-gray"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white transition-colors hover:bg-white/10"
               >
-                <X className="h-5 w-5 text-brand-black" />
+                <X className="h-5 w-5" />
               </button>
             </div>
             <FilterContent brands={brands} filters={filters} />

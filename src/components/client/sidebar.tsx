@@ -34,32 +34,37 @@ export function ClientSidebar({
   const isB2B = typeCompte === "B2B" || typeCompte === "PREMIUM";
 
   return (
-    <div className="rounded-3xl border border-brand-black/5 bg-white p-4 shadow-sm">
-      {/* Profil résumé */}
-      <div className="flex items-center gap-3 border-b border-brand-black/5 pb-4">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand-red text-lg font-bold text-white shadow-md shadow-brand-red/20">
+    <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-6 backdrop-blur-xl">
+      {/* Halo lumineux ambiant */}
+      <div className="pointer-events-none absolute -right-20 -top-20 h-40 w-40 rounded-full bg-brand-red/10 blur-[80px]" />
+
+      {/* PROFIL RÉSUMÉ */}
+      <div className="flex items-center gap-3.5 border-b border-white/10 pb-5">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-brand-red/30 bg-brand-red font-mono text-base font-bold text-white shadow-[0_0_15px_rgba(239,68,68,0.5)]">
           {userName.charAt(0).toUpperCase()}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-brand-black">
+          <p className="truncate font-sans text-sm font-medium text-white">
             {userName}
           </p>
-          <p className="truncate text-[11px] text-brand-black/50">{userEmail}</p>
+          <p className="truncate font-mono text-[11px] text-neutral-500">
+            {userEmail}
+          </p>
         </div>
       </div>
 
-      {/* Badge B2B */}
+      {/* BADGE B2B / GROSSISTE */}
       {isB2B && (
-        <div className="mt-4 flex items-center gap-2 rounded-xl bg-brand-red/5 p-2.5">
-          <Store className="h-4 w-4 text-brand-red" />
-          <span className="text-xs font-semibold text-brand-red">
+        <div className="mt-4 flex items-center gap-2.5 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3 font-mono text-xs text-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.15)]">
+          <Store className="h-4 w-4 shrink-0 text-amber-400" />
+          <span className="font-semibold uppercase tracking-wider">
             Compte Professionnel
           </span>
         </div>
       )}
 
-      {/* Navigation */}
-      <nav className="mt-4 space-y-1">
+      {/* NAVIGATION */}
+      <nav className="mt-5 space-y-2">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           const active = pathname === item.href;
@@ -67,54 +72,59 @@ export function ClientSidebar({
             <Link
               key={item.href}
               href={item.href}
+              aria-current={active ? "page" : undefined}
               className={cn(
-                "group relative flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors",
+                "group relative flex items-center gap-3.5 rounded-2xl px-4 py-3.5 font-mono text-xs uppercase tracking-widest transition-all duration-300",
                 active
-                  ? "text-brand-red"
-                  : "text-brand-black/60 hover:bg-brand-gray hover:text-brand-black"
+                  ? "font-bold text-white"
+                  : "text-neutral-400 hover:text-white"
               )}
             >
               {active && (
                 <motion.span
                   layoutId="client-nav-active"
-                  className="absolute inset-0 rounded-xl bg-brand-red/5 shadow-[0_0_15px_rgba(227,6,19,0.05)]"
+                  className="absolute inset-0 rounded-2xl border border-brand-red/40 bg-brand-red/10 shadow-[0_0_20px_rgba(239,68,68,0.15)]"
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 />
               )}
+
+              {/* Barre néon latérale ajustée */}
+              {active && (
+                <span className="absolute left-1 top-1/2 h-5 w-1 -translate-y-1/2 rounded-full bg-brand-red shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
+              )}
+
               <Icon
                 className={cn(
-                  "relative z-10 h-5 w-5",
-                  active ? "text-brand-red" : "text-brand-black/40"
+                  "relative z-10 h-4 w-4 transition-colors duration-300",
+                  active ? "text-brand-red" : "text-neutral-500 group-hover:text-white"
                 )}
               />
               <span className="relative z-10">{item.label}</span>
-              {active && (
-                <span className="absolute -left-4 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-brand-red" />
-              )}
             </Link>
           );
         })}
 
-        {/* Lien Premium si pas encore B2B/Premium */}
+        {/* LIEN DEVENIR PRO (si B2C) */}
         {!isB2B && (
           <Link
             href="/compte/devenir-pro"
-            className="mt-2 flex items-center gap-3 rounded-xl border border-dashed border-brand-red/30 px-4 py-3 text-sm font-medium text-brand-red transition hover:bg-brand-red/5"
+            className="group mt-3 flex items-center gap-3 rounded-2xl border border-dashed border-brand-red/40 bg-brand-red/5 px-4 py-3.5 font-mono text-xs font-bold uppercase tracking-widest text-brand-red transition-all duration-300 hover:border-brand-red hover:bg-brand-red hover:text-white"
           >
-            <Crown className="h-5 w-5" />
-            Devenir Professionnel
+            <Crown className="h-4 w-4 shrink-0 transition-transform duration-300 group-hover:rotate-12" />
+            <span>Devenir Professionnel</span>
           </Link>
         )}
       </nav>
 
-      {/* Déconnexion */}
-      <div className="mt-6 border-t border-brand-black/5 pt-4">
+      {/* DÉCONNEXION */}
+      <div className="mt-8 border-t border-white/10 pt-5">
         <button
+          type="button"
           onClick={() => signOut({ callbackUrl: "/" })}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-gray py-2.5 text-xs font-medium text-brand-black/60 transition hover:bg-red-50 hover:text-red-600"
+          className="flex w-full items-center justify-center gap-2.5 rounded-2xl border border-white/10 bg-white/5 py-3 font-mono text-xs uppercase tracking-widest text-neutral-400 transition-all duration-300 hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400"
         >
           <LogOut className="h-3.5 w-3.5" />
-          Se déconnecter
+          <span>Se déconnecter</span>
         </button>
       </div>
     </div>

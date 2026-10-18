@@ -15,13 +15,18 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-brand-gray">
+    <div className="relative min-h-screen flex flex-col bg-[#0A0A0B] text-white overflow-hidden">
+      {/* Éléments de fond décoratifs Dark Luxury haute immersion */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(239,68,68,0.1),rgba(255,255,255,0))]" />
+      <div className="absolute -left-40 top-1/4 h-96 w-96 rounded-full bg-brand-red/10 blur-[140px] pointer-events-none" />
+
+      {/* Topbar */}
       <ClientTopbar
         userName={session.user.name || "Client"}
         userEmail={session.user.email || ""}
       />
 
-      <main className="flex-1">
+      <main className="relative z-10 flex-1">
         <div className="mx-auto max-w-7xl px-4 py-8 md:px-8 md:py-12">
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-[280px_1fr]">
             {/* Sidebar Client */}
@@ -33,7 +38,7 @@ export default async function DashboardLayout({
               />
             </aside>
 
-            {/* Contenu */}
+            {/* Contenu principal de la page courante */}
             <div className="min-w-0">
               {children}
             </div>
@@ -41,10 +46,10 @@ export default async function DashboardLayout({
         </div>
       </main>
 
-      {/* Mini Footer Client */}
-      <footer className="border-t border-brand-black/5 bg-white py-6">
-        <div className="mx-auto max-w-7xl px-4 text-center text-xs text-brand-black/40 md:px-8">
-          © {new Date().getFullYear()} PM Osons Oser — Espace client privé
+      {/* Mini Footer Client Dark Luxury */}
+      <footer className="relative z-10 border-t border-white/10 bg-neutral-900/40 py-6 backdrop-blur-2xl">
+        <div className="mx-auto max-w-7xl px-4 text-center font-mono text-xs text-neutral-500 md:px-8">
+          &copy; {new Date().getFullYear()} PM Osons Oser — Espace client sécurisé
         </div>
       </footer>
     </div>

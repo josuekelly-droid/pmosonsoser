@@ -8,35 +8,97 @@ export const metadata: Metadata = constructMetadata({
 
 export default function CGVPage() {
   return (
-    <section className="bg-brand-gray py-20 pt-32">
-      <div className="mx-auto max-w-4xl px-4 md:px-8">
-        <h1 className="font-display text-4xl tracking-wide text-brand-black mb-8">Conditions Générales de Vente</h1>
-        
-        <div className="prose prose-gray max-w-none rounded-3xl border border-brand-black/5 bg-white p-8 md:p-12 shadow-sm">
-          <p className="text-sm text-brand-black/50 mb-8">Dernière mise à jour : {new Date().toLocaleDateString("fr-FR")}</p>
+    <div className="relative min-h-screen w-full overflow-hidden bg-[#0A0A0B] text-white">
+      {/* Éléments de fond décoratifs Dark Luxury */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(239,68,68,0.15),rgba(255,255,255,0))]" />
+      <div className="absolute right-1/4 top-1/4 h-[500px] w-[500px] rounded-full bg-brand-red/10 blur-[150px] pointer-events-none" />
 
-          <h2 className="text-xl font-display tracking-wide text-brand-black mt-8 mb-3">1. Objet</h2>
-          <p className="text-brand-black/70 text-sm leading-relaxed">Les présentes Conditions Générales de Vente (CGV) régissent les relations contractuelles entre PM Osons Oser (le Vendeur) et toute personne effectuant un achat sur le site pmosonsoser.com (le Client).</p>
+      <section className="relative pt-32 pb-24 md:pt-44 md:pb-32">
+        <div className="mx-auto max-w-4xl px-4 md:px-8">
+          
+          {/* En-tête de section */}
+          <div className="mb-10 text-center">
+            <span className="font-mono text-xs uppercase tracking-[0.3em] text-brand-red">
+              [ Juridique ]
+            </span>
+            <h1 className="mt-3 font-display text-4xl font-light tracking-wide text-white sm:text-5xl">
+              Conditions Générales de <span className="italic font-serif text-brand-red">Vente</span>
+            </h1>
+          </div>
+          
+          {/* Conteneur principal Glassmorphism */}
+          <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-8 backdrop-blur-2xl md:p-12">
+            <p className="font-mono text-xs text-neutral-400 mb-8 pb-6 border-b border-white/10">
+              Dernière mise à jour : {new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })}
+            </p>
 
-          <h2 className="text-xl font-display tracking-wide text-brand-black mt-8 mb-3">2. Produits et Prix</h2>
-          <p className="text-brand-black/70 text-sm leading-relaxed">Les produits proposés sont ceux qui figurent sur le site au moment de la consultation. Les prix sont indiqués en Francs CFA (FCFA). PM Osons Oser se réserve le droit de modifier ses prix à tout moment, mais le produit sera facturé sur la base du tarif en vigueur au moment de la validation de la commande.</p>
+            <div className="space-y-8 font-mono text-xs md:text-sm text-neutral-300 leading-relaxed">
+              <div>
+                <h2 className="font-display text-xl font-light text-white mb-3 tracking-wide">
+                  1. Objet
+                </h2>
+                <p>
+                  Les présentes Conditions Générales de Vente (CGV) régissent les relations contractuelles entre PM Osons Oser (le Vendeur) et toute personne effectuant un achat sur le site pmosonsoser.com (le Client).
+                </p>
+              </div>
 
-          <h2 className="text-xl font-display tracking-wide text-brand-black mt-8 mb-3">3. Commandes</h2>
-          <p className="text-brand-black/70 text-sm leading-relaxed">Le Client passe commande via notre plateforme sécurisée. La validation de la commande implique l'acceptation des présentes CGV. Une confirmation est envoyée par email au Client.</p>
+              <div>
+                <h2 className="font-display text-xl font-light text-white mb-3 tracking-wide">
+                  2. Produits et Prix
+                </h2>
+                <p>
+                  Les produits proposés sont ceux qui figurent sur le site au moment de la consultation. Les prix sont indiqués en Francs CFA (FCFA). PM Osons Oser se réserve le droit de modifier ses prix à tout moment, mais le produit sera facturé sur la base du tarif en vigueur au moment de la validation de la commande.
+                </p>
+              </div>
 
-          <h2 className="text-xl font-display tracking-wide text-brand-black mt-8 mb-3">4. Paiement</h2>
-          <p className="text-brand-black/70 text-sm leading-relaxed">Le paiement s'effectue en ligne par Mobile Money (FedaPay), par virement bancaire ou par Western Union. La commande ne sera traitée qu'après confirmation effective du paiement par nos services.</p>
+              <div>
+                <h2 className="font-display text-xl font-light text-white mb-3 tracking-wide">
+                  3. Commandes
+                </h2>
+                <p>
+                  Le Client passe commande via notre plateforme sécurisée. La validation de la commande implique l'acceptation entière et sans réserve des présentes CGV. Une confirmation officielle est envoyée par email au Client.
+                </p>
+              </div>
 
-          <h2 className="text-xl font-display tracking-wide text-brand-black mt-8 mb-3">5. Livraison</h2>
-          <p className="text-brand-black/70 text-sm leading-relaxed">Les produits sont livrés dans les zones desservies par PM Osons Oser. Les frais de livraison sont calculés en fonction de la distance. Les délais de livraison sont donnés à titre indicatif (24h à 48h pour Cotonou et environs).</p>
+              <div>
+                <h2 className="font-display text-xl font-light text-white mb-3 tracking-wide">
+                  4. Paiement
+                </h2>
+                <p>
+                  Le paiement s'effectue en ligne par Mobile Money (FedaPay), par virement bancaire ou par Western Union. La commande ne sera traitée et validée qu'après confirmation effective du règlement par nos services financiers.
+                </p>
+              </div>
 
-          <h2 className="text-xl font-display tracking-wide text-brand-black mt-8 mb-3">6. Retours et Garantie</h2>
-          <p className="text-brand-black/70 text-sm leading-relaxed">Tout produit non utilisé peut faire l'objet d'un retour sous 7 jours. Les véhicules et pièces détachées bénéficient des garanties constructeur ou de nos garanties spécifiques. Contactez notre SAV en cas de problème.</p>
+              <div>
+                <h2 className="font-display text-xl font-light text-white mb-3 tracking-wide">
+                  5. Livraison
+                </h2>
+                <p>
+                  Les produits sont livrés dans les zones géographiques desservies par PM Osons Oser au Bénin. Les frais de livraison sont calculés en fonction de la distance. Les délais de livraison sont donnés à titre indicatif (24h à 48h pour Cotonou et ses environs).
+                </p>
+              </div>
 
-          <h2 className="text-xl font-display tracking-wide text-brand-black mt-8 mb-3">7. Litiges</h2>
-          <p className="text-brand-black/70 text-sm leading-relaxed">Tout litige relatif à l'interprétation ou à l'exécution des présentes CGV sera soumis aux tribunaux compétents de Cotonou, Bénin.</p>
+              <div>
+                <h2 className="font-display text-xl font-light text-white mb-3 tracking-wide">
+                  6. Retours et Garantie
+                </h2>
+                <p>
+                  Tout produit non utilisé peut faire l'objet d'un retour sous 7 jours ouvrés. Les véhicules et pièces détachées bénéficient des garanties constructeur ou de nos garanties spécifiques. Contactez notre service après-vente (SAV) en cas de réclamation.
+                </p>
+              </div>
+
+              <div>
+                <h2 className="font-display text-xl font-light text-white mb-3 tracking-wide">
+                  7. Litiges
+                </h2>
+                <p>
+                  Tout litige relatif à l'interprétation ou à l'exécution des présentes CGV sera soumis à une conciliation amiable, à défaut de quoi les tribunaux compétents de Cotonou (Bénin) seront saisis.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
   );
 }

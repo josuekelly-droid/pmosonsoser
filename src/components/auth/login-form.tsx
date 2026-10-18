@@ -11,6 +11,7 @@ import {
   AlertCircle,
   Eye,
   EyeOff,
+  ArrowUpRight,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
@@ -35,9 +36,8 @@ export function LoginForm() {
     const honeypot = formData.get("website") as string; // 🍯 Honeypot
 
     if (honeypot) {
-       // Si le bot a rempli le champ caché, on fait semblant de réussir sans rien faire
-       setTimeout(() => setError("Email ou mot de passe incorrect."), 1000);
-       return;
+      setTimeout(() => setError("Email ou mot de passe incorrect."), 1000);
+      return;
     }
 
     try {
@@ -57,7 +57,7 @@ export function LoginForm() {
         return;
       }
 
-      // ⬇️ NOUVEAU : Récupérer le rôle et rediriger intelligemment
+      // Récupérer le rôle et rediriger intelligemment
       const sessionRes = await fetch("/api/auth/session");
       const session = await sessionRes.json();
       
@@ -71,59 +71,64 @@ export function LoginForm() {
       
       router.refresh();
     } catch {
-      setError("Erreur de connexion. Réessayez.");
+      setError("Erreur de connexion. Veuillez réessayer.");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl md:p-8">
-      <h1 className="font-display text-3xl tracking-wide text-white">
-        Se connecter
+    <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-6 backdrop-blur-2xl md:p-10">
+      {/* Halo lumineux ambiant */}
+      <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-brand-red/10 blur-[100px]" />
+
+      <span className="font-mono text-xs uppercase tracking-[0.25em] text-brand-red block">
+        [ Authentification ]
+      </span>
+      <h1 className="mt-2 font-display text-3xl font-light text-white">
+        Se Connecter
       </h1>
-      <p className="mt-2 text-sm text-white/60">
-        Accédez à votre compte PM Osons Oser.
+      <p className="mt-1 font-mono text-xs text-neutral-400">
+        Accédez à votre espace sécurisé PM Osons Oser.
       </p>
 
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+      <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+        {/* 🍯 Honeypot - Invisible pour l'utilisateur, ne pas supprimer */}
+        <input 
+          type="text" 
+          name="website" 
+          tabIndex={-1} 
+          autoComplete="off" 
+          className="hidden" 
+          aria-hidden="true" 
+        />
 
-        {/* 🍯 Honeypot - Ne pas supprimer. Invisible pour l'utilisateur. */}
-  <input 
-    type="text" 
-    name="website" 
-    tabIndex={-1} 
-    autoComplete="off" 
-    className="hidden" 
-    aria-hidden="true" 
-  />
-
-
+        {/* EMAIL */}
         <div>
-          <label className="mb-2 flex items-center gap-1.5 text-xs font-medium text-white/70">
-            <Mail className="h-3.5 w-3.5" />
-            Email
+          <label className="mb-2 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-neutral-400">
+            <Mail className="h-3.5 w-3.5 text-neutral-500" />
+            <span>Adresse email</span>
           </label>
           <Input
             name="email"
             type="email"
             required
             placeholder="vous@email.com"
-            className="border-white/10 bg-white/5 text-white placeholder:text-white/30"
           />
         </div>
 
+        {/* MOT DE PASSE */}
         <div>
           <div className="mb-2 flex items-center justify-between">
-            <label className="flex items-center gap-1.5 text-xs font-medium text-white/70">
-              <Lock className="h-3.5 w-3.5" />
-              Mot de passe
+            <label className="flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-neutral-400">
+              <Lock className="h-3.5 w-3.5 text-neutral-500" />
+              <span>Mot de passe</span>
             </label>
             <Link
               href="/mot-de-passe-oublie"
-              className="text-xs text-brand-red hover:underline"
+              className="font-mono text-xs text-brand-red transition-colors hover:text-white"
             >
-              Oublié ?
+              Mot de passe oublié ?
             </Link>
           </div>
           <div className="relative">
@@ -132,26 +137,22 @@ export function LoginForm() {
               type={showPassword ? "text" : "password"}
               required
               placeholder="••••••••"
-              className="border-white/10 bg-white/5 pr-11 text-white placeholder:text-white/30"
+              className="pr-12"
             />
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
               aria-label="Afficher le mot de passe"
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 transition hover:text-white"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 transition-colors hover:text-white"
             >
-              {showPassword ? (
-                <EyeOff className="h-4 w-4" />
-              ) : (
-                <Eye className="h-4 w-4" />
-              )}
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
         </div>
 
         {error && (
-          <div className="flex items-start gap-2 rounded-xl bg-red-500/10 p-3 text-xs text-red-400">
-            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+          <div className="flex items-center gap-3 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 font-mono text-xs text-red-400 backdrop-blur-md">
+            <AlertCircle className="h-4 w-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
@@ -159,23 +160,26 @@ export function LoginForm() {
         <button
           type="submit"
           disabled={loading}
-          className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-brand-red text-sm font-semibold uppercase tracking-wider text-white shadow-xl shadow-brand-red/30 transition hover:bg-brand-red/90 disabled:opacity-50"
+          className="group relative flex h-14 w-full items-center justify-center gap-3 overflow-hidden rounded-full bg-brand-red font-mono text-xs font-bold uppercase tracking-widest text-white shadow-xl shadow-brand-red/25 transition-all duration-500 hover:bg-white hover:text-black hover:shadow-brand-red/40 disabled:opacity-50"
         >
           {loading ? (
             <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Connexion…
+              <Loader2 className="h-4 w-4 animate-spin text-current" />
+              <span>Connexion en cours...</span>
             </>
           ) : (
-            "Se connecter"
+            <>
+              <span>Se connecter</span>
+              <ArrowUpRight className="h-4 w-4 transition-transform duration-500 group-hover:rotate-45" />
+            </>
           )}
         </button>
 
-        <p className="text-center text-xs text-white/60">
+        <p className="text-center font-mono text-xs text-neutral-400">
           Pas encore de compte ?{" "}
           <Link
             href="/inscription"
-            className="font-semibold text-brand-red hover:underline"
+            className="font-bold text-brand-red transition-colors hover:text-white"
           >
             Créer un compte
           </Link>

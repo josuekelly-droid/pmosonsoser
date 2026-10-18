@@ -14,36 +14,43 @@ export const metadata: Metadata = constructMetadata({
 
 export default function PanierPage() {
   return (
-    <>
-      {/* HERO */}
-      <section className="relative overflow-hidden bg-brand-black pt-28 pb-12 md:pt-32 md:pb-16">
-        <div className="pointer-events-none absolute -top-32 right-0 h-[300px] w-[400px] rounded-full bg-brand-red/10 blur-[100px]" />
-        <div className="relative mx-auto max-w-7xl px-4 md:px-8">
+    <div className="relative min-h-screen w-full overflow-hidden bg-[#0A0A0B] text-white">
+      {/* Éléments de fond décoratifs Dark Luxury */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(239,68,68,0.15),rgba(255,255,255,0))]" />
+      <div className="absolute -right-40 top-1/4 h-[500px] w-[500px] rounded-full bg-brand-red/10 blur-[150px] pointer-events-none" />
+
+      {/* HERO & FIL D'ARIANE */}
+      <section className="relative pt-28 pb-12 md:pt-36 md:pb-16">
+        <div className="mx-auto max-w-7xl px-4 md:px-8">
           <nav
             aria-label="Fil d'Ariane"
-            className="flex flex-wrap items-center gap-1.5 text-xs text-white/50"
+            className="flex flex-wrap items-center gap-2 font-mono text-xs uppercase tracking-widest text-neutral-400"
           >
             <Link href="/" className="transition-colors hover:text-white">
               Accueil
             </Link>
-            <ChevronRight className="h-3 w-3" />
+            <ChevronRight className="h-3 w-3 text-brand-red" />
             <span className="text-white">Panier</span>
           </nav>
-          <h1 className="mt-4 font-display text-4xl tracking-wide text-white sm:text-5xl md:text-6xl">
-            Mon panier
+
+          <span className="mt-6 inline-block font-mono text-xs uppercase tracking-[0.25em] text-brand-red">
+            [ Espace d'achat ]
+          </span>
+          <h1 className="mt-1 font-display text-4xl font-light tracking-wide text-white sm:text-5xl md:text-6xl">
+            Mon <span className="italic font-serif text-brand-red">panier</span>
           </h1>
-          <p className="mt-3 max-w-xl text-sm text-white/60">
-            Vérifiez vos articles avant de passer commande.
+          <p className="mt-2 font-mono text-xs md:text-sm text-neutral-400">
+            Vérifiez vos articles et options avant de procéder à la validation de votre commande.
           </p>
         </div>
       </section>
 
-      {/* CONTENU */}
-      <section className="bg-brand-gray py-12 md:py-16">
+      {/* CONTENU PRINCIPAL (CART VIEW) */}
+      <section className="relative pb-24 md:pb-32">
         <div className="mx-auto max-w-7xl px-4 md:px-8">
           <CartView />
         </div>
       </section>
-    </>
+    </div>
   );
 }

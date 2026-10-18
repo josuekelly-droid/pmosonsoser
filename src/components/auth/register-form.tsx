@@ -14,6 +14,7 @@ import {
   EyeOff,
   Store,
   ShoppingBag,
+  ArrowUpRight,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -65,29 +66,33 @@ export function RegisterForm() {
   }
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl md:p-8">
-      <h1 className="font-display text-3xl tracking-wide text-white">
-        Créer un compte
+    <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-6 backdrop-blur-2xl md:p-10">
+      {/* Halo lumineux ambiant */}
+      <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-brand-red/10 blur-[100px]" />
+
+      <span className="font-mono text-xs uppercase tracking-[0.25em] text-brand-red block">
+        [ Inscription ]
+      </span>
+      <h1 className="mt-2 font-display text-3xl font-light text-white">
+        Créer un Compte
       </h1>
-      <p className="mt-2 text-sm text-white/60">
-        Rejoignez PM Osons Oser en quelques secondes.
+      <p className="mt-1 font-mono text-xs text-neutral-400">
+        Rejoignez l'écosystème PM Osons Oser en quelques secondes.
       </p>
 
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+      <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+        {/* 🍯 Honeypot - Invisible pour l'utilisateur, ne pas supprimer */}
+        <input 
+          type="text" 
+          name="website" 
+          tabIndex={-1} 
+          autoComplete="off" 
+          className="hidden" 
+          aria-hidden="true" 
+        />
 
-        {/* 🍯 Honeypot - Ne pas supprimer. Invisible pour l'utilisateur. */}
-  <input 
-    type="text" 
-    name="website" 
-    tabIndex={-1} 
-    autoComplete="off" 
-    className="hidden" 
-    aria-hidden="true" 
-  />
-
-
-        {/* Type de compte */}
-        <div className="grid grid-cols-2 gap-3">
+        {/* TYPE DE COMPTE */}
+        <div className="grid grid-cols-2 gap-4">
           <TypeCard
             active={typeCompte === "B2C"}
             onClick={() => setTypeCompte("B2C")}
@@ -100,11 +105,11 @@ export function RegisterForm() {
             onClick={() => setTypeCompte("B2B")}
             icon={Store}
             title="Professionnel"
-            desc="Prix dégressifs"
+            desc="Tarifs grossistes"
           />
         </div>
 
-        {/* Nom */}
+        {/* NOM */}
         <Field icon={UserIcon} label="Nom complet">
           <Input
             name="name"
@@ -112,33 +117,30 @@ export function RegisterForm() {
             minLength={2}
             maxLength={100}
             placeholder="Ex: Amadou Kouassi"
-            className="border-white/10 bg-white/5 text-white placeholder:text-white/30"
           />
         </Field>
 
-        {/* Email */}
-        <Field icon={Mail} label="Email">
+        {/* EMAIL */}
+        <Field icon={Mail} label="Adresse email">
           <Input
             name="email"
             type="email"
             required
             placeholder="vous@email.com"
-            className="border-white/10 bg-white/5 text-white placeholder:text-white/30"
           />
         </Field>
 
-        {/* Téléphone */}
+        {/* TÉLÉPHONE */}
         <Field icon={Phone} label="Téléphone">
           <Input
             name="phone"
             type="tel"
             required
             placeholder="+229 97 00 00 00"
-            className="border-white/10 bg-white/5 text-white placeholder:text-white/30"
           />
         </Field>
 
-        {/* Mot de passe */}
+        {/* MOT DE PASSE */}
         <Field icon={Lock} label="Mot de passe">
           <div className="relative">
             <Input
@@ -146,30 +148,26 @@ export function RegisterForm() {
               type={showPassword ? "text" : "password"}
               required
               minLength={8}
-              placeholder="8 caractères min."
-              className="border-white/10 bg-white/5 pr-11 text-white placeholder:text-white/30"
+              placeholder="••••••••"
+              className="pr-12"
             />
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
               aria-label="Afficher le mot de passe"
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 transition hover:text-white"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 transition-colors hover:text-white"
             >
-              {showPassword ? (
-                <EyeOff className="h-4 w-4" />
-              ) : (
-                <Eye className="h-4 w-4" />
-              )}
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
-          <p className="mt-1.5 text-[11px] text-white/40">
-            Au moins 8 caractères, une majuscule, une minuscule, un chiffre.
+          <p className="mt-2 font-mono text-[11px] text-neutral-500">
+            Au moins 8 caractères, incluant majuscules, minuscules et chiffres.
           </p>
         </Field>
 
         {error && (
-          <div className="flex items-start gap-2 rounded-xl bg-red-500/10 p-3 text-xs text-red-400">
-            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+          <div className="flex items-center gap-3 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 font-mono text-xs text-red-400 backdrop-blur-md">
+            <AlertCircle className="h-4 w-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
@@ -177,23 +175,26 @@ export function RegisterForm() {
         <button
           type="submit"
           disabled={loading}
-          className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-brand-red text-sm font-semibold uppercase tracking-wider text-white shadow-xl shadow-brand-red/30 transition hover:bg-brand-red/90 disabled:opacity-50"
+          className="group relative flex h-14 w-full items-center justify-center gap-3 overflow-hidden rounded-full bg-brand-red font-mono text-xs font-bold uppercase tracking-widest text-white shadow-xl shadow-brand-red/25 transition-all duration-500 hover:bg-white hover:text-black hover:shadow-brand-red/40 disabled:opacity-50"
         >
           {loading ? (
             <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Création…
+              <Loader2 className="h-4 w-4 animate-spin text-current" />
+              <span>Création du compte...</span>
             </>
           ) : (
-            "Créer mon compte"
+            <>
+              <span>Créer mon compte</span>
+              <ArrowUpRight className="h-4 w-4 transition-transform duration-500 group-hover:rotate-45" />
+            </>
           )}
         </button>
 
-        <p className="text-center text-xs text-white/60">
+        <p className="text-center font-mono text-xs text-neutral-400">
           Déjà inscrit ?{" "}
           <Link
             href="/connexion"
-            className="font-semibold text-brand-red hover:underline"
+            className="font-bold text-brand-red transition-colors hover:text-white"
           >
             Se connecter
           </Link>
@@ -214,9 +215,9 @@ function Field({
 }) {
   return (
     <div>
-      <label className="mb-2 flex items-center gap-1.5 text-xs font-medium text-white/70">
-        <Icon className="h-3.5 w-3.5" />
-        {label}
+      <label className="mb-2 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-neutral-400">
+        <Icon className="h-3.5 w-3.5 text-neutral-500" />
+        <span>{label}</span>
       </label>
       {children}
     </div>
@@ -241,17 +242,28 @@ function TypeCard({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex flex-col items-start gap-1 rounded-2xl border-2 p-3 text-left transition",
+        "flex flex-col items-start gap-2 rounded-2xl border p-4 text-left backdrop-blur-md transition-all duration-300",
         active
-          ? "border-brand-red bg-brand-red/10"
-          : "border-white/10 hover:border-white/20"
+          ? "border-brand-red bg-brand-red/10 shadow-[0_0_20px_rgba(239,68,68,0.15)]"
+          : "border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.05]"
       )}
     >
-      <Icon
-        className={cn("h-4 w-4", active ? "text-brand-red" : "text-white/60")}
-      />
-      <p className="text-xs font-semibold text-white">{title}</p>
-      <p className="text-[10px] text-white/50">{desc}</p>
+      <div
+        className={cn(
+          "flex h-10 w-10 items-center justify-center rounded-xl border transition-all duration-300",
+          active
+            ? "border-brand-red bg-brand-red text-white shadow-[0_0_10px_rgba(239,68,68,0.5)]"
+            : "border-white/10 bg-black/40 text-neutral-400"
+        )}
+      >
+        <Icon className="h-4 w-4" />
+      </div>
+      <div>
+        <p className="font-sans text-sm font-medium text-white">{title}</p>
+        <p className="font-mono text-[10px] uppercase tracking-widest text-neutral-500">
+          {desc}
+        </p>
+      </div>
     </button>
   );
 }

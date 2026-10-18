@@ -10,6 +10,8 @@ import {
   Eye,
   EyeOff,
   CheckCircle2,
+  ArrowUpRight,
+  ShieldAlert,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
@@ -26,19 +28,25 @@ export function ResetForm() {
 
   if (!token) {
     return (
-      <div className="rounded-3xl border border-white/10 bg-white/5 p-8 text-center backdrop-blur-xl">
-        <AlertCircle className="mx-auto h-12 w-12 text-red-500" />
-        <h1 className="mt-4 font-display text-2xl tracking-wide text-white">
-          Lien invalide
+      <div className="relative overflow-hidden rounded-[2.5rem] border border-red-500/30 bg-neutral-900/40 p-8 text-center backdrop-blur-2xl">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-red-500/30 bg-red-500/10 text-red-400 shadow-[0_0_20px_rgba(239,68,68,0.2)]">
+          <ShieldAlert className="h-8 w-8" />
+        </div>
+        <span className="mt-4 block font-mono text-xs uppercase tracking-[0.25em] text-red-400">
+          [ Erreur de Jeton ]
+        </span>
+        <h1 className="mt-2 font-display text-2xl font-light text-white">
+          Lien Invalide ou Expiré
         </h1>
-        <p className="mt-2 text-sm text-white/60">
-          Ce lien est invalide ou a expiré.
+        <p className="mt-2 font-mono text-xs text-neutral-400 leading-relaxed">
+          Le lien de réinitialisation que vous avez utilisé n'est plus valide.
         </p>
         <Link
           href="/mot-de-passe-oublie"
-          className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-brand-red hover:underline"
+          className="group mt-6 inline-flex items-center gap-2 rounded-full border border-brand-red/30 bg-brand-red/10 px-6 py-3 font-mono text-xs font-bold uppercase tracking-widest text-brand-red transition-all duration-300 hover:bg-brand-red hover:text-white"
         >
-          Refaire une demande
+          <span>Refaire une demande</span>
+          <ArrowUpRight className="h-4 w-4 transition-transform group-hover:rotate-45" />
         </Link>
       </div>
     );
@@ -68,13 +76,13 @@ export function ResetForm() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Erreur");
+        setError(data.error || "Erreur lors de la modification");
         return;
       }
       setSuccess(true);
       setTimeout(() => router.push("/connexion"), 2500);
     } catch {
-      setError("Connexion impossible.");
+      setError("Connexion impossible. Vérifiez votre réseau.");
     } finally {
       setLoading(false);
     }
@@ -82,32 +90,40 @@ export function ResetForm() {
 
   if (success) {
     return (
-      <div className="rounded-3xl border border-white/10 bg-white/5 p-8 text-center backdrop-blur-xl">
-        <CheckCircle2 className="mx-auto h-14 w-14 text-green-500" />
-        <h1 className="mt-4 font-display text-3xl tracking-wide text-white">
+      <div className="relative overflow-hidden rounded-[2.5rem] border border-emerald-500/30 bg-neutral-900/40 p-8 text-center backdrop-blur-2xl">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-emerald-500/30 bg-emerald-500/20 text-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.3)]">
+          <CheckCircle2 className="h-8 w-8" />
+        </div>
+        <h1 className="mt-6 font-display text-3xl font-light text-white">
           Mot de passe modifié !
         </h1>
-        <p className="mt-2 text-sm text-white/60">
-          Redirection vers la connexion…
+        <p className="mt-2 font-mono text-xs uppercase tracking-widest text-neutral-400">
+          Redirection vers la page de connexion…
         </p>
       </div>
     );
   }
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl md:p-8">
-      <h1 className="font-display text-3xl tracking-wide text-white">
-        Nouveau mot de passe
+    <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-6 backdrop-blur-2xl md:p-10">
+      {/* Halo lumineux ambiant */}
+      <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-brand-red/10 blur-[100px]" />
+
+      <span className="font-mono text-xs uppercase tracking-[0.25em] text-brand-red block">
+        [ Sécurité ]
+      </span>
+      <h1 className="mt-2 font-display text-3xl font-light text-white">
+        Nouveau Mot de Passe
       </h1>
-      <p className="mt-2 text-sm text-white/60">
-        Choisissez un mot de passe sécurisé.
+      <p className="mt-1 font-mono text-xs text-neutral-400">
+        Choisissez un nouveau mot de passe sécurisé à 8 caractères minimum.
       </p>
 
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+      <form onSubmit={handleSubmit} className="mt-8 space-y-6">
         <div>
-          <label className="mb-2 flex items-center gap-1.5 text-xs font-medium text-white/70">
-            <Lock className="h-3.5 w-3.5" />
-            Nouveau mot de passe
+          <label className="mb-2 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-neutral-400">
+            <Lock className="h-3.5 w-3.5 text-neutral-500" />
+            <span>Nouveau mot de passe</span>
           </label>
           <div className="relative">
             <Input
@@ -115,13 +131,13 @@ export function ResetForm() {
               type={show ? "text" : "password"}
               required
               minLength={8}
-              placeholder="8 caractères min."
-              className="border-white/10 bg-white/5 pr-11 text-white placeholder:text-white/30"
+              placeholder="••••••••"
+              className="pr-12"
             />
             <button
               type="button"
               onClick={() => setShow((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 transition-colors hover:text-white"
             >
               {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
@@ -129,9 +145,9 @@ export function ResetForm() {
         </div>
 
         <div>
-          <label className="mb-2 flex items-center gap-1.5 text-xs font-medium text-white/70">
-            <Lock className="h-3.5 w-3.5" />
-            Confirmer
+          <label className="mb-2 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-neutral-400">
+            <Lock className="h-3.5 w-3.5 text-neutral-500" />
+            <span>Confirmer le mot de passe</span>
           </label>
           <div className="relative">
             <Input
@@ -140,25 +156,21 @@ export function ResetForm() {
               required
               minLength={8}
               placeholder="••••••••"
-              className="border-white/10 bg-white/5 pr-11 text-white placeholder:text-white/30"
+              className="pr-12"
             />
             <button
               type="button"
               onClick={() => setShowConfirm((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 transition-colors hover:text-white"
             >
-              {showConfirm ? (
-                <EyeOff className="h-4 w-4" />
-              ) : (
-                <Eye className="h-4 w-4" />
-              )}
+              {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
         </div>
 
         {error && (
-          <div className="flex items-start gap-2 rounded-xl bg-red-500/10 p-3 text-xs text-red-400">
-            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+          <div className="flex items-center gap-3 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 font-mono text-xs text-red-400 backdrop-blur-md">
+            <AlertCircle className="h-4 w-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
@@ -166,15 +178,18 @@ export function ResetForm() {
         <button
           type="submit"
           disabled={loading}
-          className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-brand-red text-sm font-semibold uppercase tracking-wider text-white shadow-xl shadow-brand-red/30 transition hover:bg-brand-red/90 disabled:opacity-50"
+          className="group relative flex h-14 w-full items-center justify-center gap-3 overflow-hidden rounded-full bg-brand-red font-mono text-xs font-bold uppercase tracking-widest text-white shadow-xl shadow-brand-red/25 transition-all duration-500 hover:bg-white hover:text-black hover:shadow-brand-red/40 disabled:opacity-50"
         >
           {loading ? (
             <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Modification…
+              <Loader2 className="h-4 w-4 animate-spin text-current" />
+              <span>Modification en cours...</span>
             </>
           ) : (
-            "Modifier le mot de passe"
+            <>
+              <span>Modifier le mot de passe</span>
+              <ArrowUpRight className="h-4 w-4 transition-transform duration-500 group-hover:rotate-45" />
+            </>
           )}
         </button>
       </form>

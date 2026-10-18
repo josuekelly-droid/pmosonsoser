@@ -1,29 +1,37 @@
 export default function Loading() {
   return (
-    <>
-      <section className="bg-brand-black pt-32 md:pt-36">
+    <div className="relative min-h-screen w-full overflow-hidden bg-[#0A0A0B] text-white">
+      {/* Éléments de fond décoratifs Dark Luxury */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(239,68,68,0.15),rgba(255,255,255,0))]" />
+      <div className="absolute right-1/4 top-1/4 h-[500px] w-[500px] rounded-full bg-brand-red/10 blur-[150px] pointer-events-none" />
+
+      {/* Hero skeleton */}
+      <section className="relative pt-32 pb-16 md:pt-40 md:pb-20">
         <div className="mx-auto max-w-7xl px-4 md:px-8">
-          <div className="h-3 w-64 animate-pulse rounded bg-white/10" />
+          <div className="h-3 w-32 animate-pulse rounded-full bg-white/10" />
+          <div className="mt-4 h-12 w-64 animate-pulse rounded-2xl bg-white/10 md:h-16 md:w-96" />
+          <div className="mt-3 h-4 w-full max-w-xl animate-pulse rounded-xl bg-white/5" />
         </div>
       </section>
 
-      <section className="bg-white pb-16 pt-8 md:pb-24 md:pt-12">
+      {/* Grid skeleton */}
+      <section className="relative py-12 md:py-16">
         <div className="mx-auto max-w-7xl px-4 md:px-8">
-          <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16">
-            <div className="aspect-square w-full animate-pulse rounded-3xl bg-brand-gray" />
-            <div className="space-y-5">
-              <div className="flex gap-2">
-                <div className="h-6 w-20 animate-pulse rounded-full bg-brand-gray" />
-                <div className="h-6 w-20 animate-pulse rounded-full bg-brand-gray" />
-              </div>
-              <div className="h-12 w-3/4 animate-pulse rounded bg-brand-gray" />
-              <div className="h-10 w-40 animate-pulse rounded bg-brand-gray" />
-              <div className="h-24 w-full animate-pulse rounded bg-brand-gray" />
-              <div className="h-14 w-full animate-pulse rounded-full bg-brand-gray" />
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[280px_1fr]">
+            <div className="hidden lg:block">
+              <div className="h-[500px] animate-pulse rounded-[2.5rem] border border-white/10 bg-neutral-900/40 backdrop-blur-2xl" />
+            </div>
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6">
+              {Array.from({ length: 9 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="aspect-[3/4] animate-pulse rounded-[2.5rem] border border-white/10 bg-neutral-900/40 backdrop-blur-2xl"
+                />
+              ))}
             </div>
           </div>
         </div>
       </section>
-    </>
+    </div>
   );
 }

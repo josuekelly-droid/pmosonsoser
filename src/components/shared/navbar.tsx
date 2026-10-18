@@ -15,9 +15,10 @@ import {
   LogOut,
   ChevronDown,
   Package,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { SearchModal } from "@/components/shop/search-modal"; // ⬅️ NOUVEL IMPORT
+import { SearchModal } from "@/components/shop/search-modal";
 
 const NAV_LINKS = [
   { href: "/", label: "Accueil" },
@@ -35,7 +36,7 @@ export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false); // ⬅️ NOUVEAU STATE
+  const [searchOpen, setSearchOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   // Effet de scroll
@@ -46,13 +47,13 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Fermer le menu mobile au changement de page
+  // Fermer les menus au changement de page
   useEffect(() => {
     setIsOpen(false);
     setUserMenuOpen(false);
   }, [pathname]);
 
-  // Fermer le menu user au clic extérieur
+  // Fermer le menu utilisateur lors d'un clic à l'extérieur
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
@@ -63,7 +64,7 @@ export function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Raccourci clavier Ctrl+K / Cmd+K pour la recherche
+  // Raccourci clavier Cmd/Ctrl + K
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
@@ -81,18 +82,18 @@ export function Navbar() {
 
   return (
     <>
-      <div className="fixed top-0 left-0 right-0 z-50 px-3 pt-3 md:px-6 md:pt-5">
+      <div className="fixed top-0 left-0 right-0 z-50 px-4 pt-4 md:px-8 md:pt-6">
         <nav
           className={cn(
-            "mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 rounded-full border px-2 transition-all duration-500 md:h-16 md:px-3",
+            "mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 rounded-full border px-3 transition-all duration-700 md:h-18 md:px-4",
             scrolled
-              ? "border-white/10 bg-brand-black/85 shadow-2xl shadow-black/40 backdrop-blur-2xl"
-              : "border-white/5 bg-brand-black/60 backdrop-blur-xl"
+              ? "border-white/15 bg-neutral-950/80 shadow-[0_20px_50px_rgba(0,0,0,0.8)] backdrop-blur-2xl"
+              : "border-white/10 bg-neutral-900/40 backdrop-blur-xl"
           )}
         >
-          {/* Logo */}
-          <Link href="/" className="flex shrink-0 items-center gap-3 pl-1">
-            <div className="relative h-9 w-9 overflow-hidden rounded-full ring-2 ring-brand-red/40 transition hover:ring-brand-red md:h-11 md:w-11">
+          {/* LOGO */}
+          <Link href="/" className="group flex shrink-0 items-center gap-3.5 pl-1">
+            <div className="relative h-10 w-10 overflow-hidden rounded-full border border-white/20 transition-transform duration-500 group-hover:scale-105 md:h-11 md:w-11">
               <Image
                 src="/logo/pm-osons-oser-1.jpg"
                 alt="PM Osons Oser"
@@ -102,12 +103,12 @@ export function Navbar() {
                 priority
               />
             </div>
-            <span className="hidden font-display text-lg leading-none tracking-wide text-white md:block">
-              PM <span className="text-brand-red">OSONS OSER</span>
+            <span className="hidden font-display text-lg font-light tracking-wider text-white md:block">
+              PM <span className="font-bold text-brand-red">OSONS OSER</span>
             </span>
           </Link>
 
-          {/* Desktop Links */}
+          {/* DESKTOP NAVIGATION */}
           <ul className="hidden items-center gap-1 lg:flex">
             {NAV_LINKS.map((link) => {
               const active = pathname === link.href;
@@ -116,13 +117,15 @@ export function Navbar() {
                   <Link
                     href={link.href}
                     className={cn(
-                      "relative flex items-center rounded-full px-4 py-2 text-sm font-medium uppercase tracking-wider transition-colors",
-                      active ? "text-white" : "text-white/60 hover:text-white"
+                      "relative flex items-center rounded-full px-5 py-2.5 font-mono text-xs uppercase tracking-widest transition-all duration-300",
+                      active
+                        ? "text-white font-semibold"
+                        : "text-neutral-400 hover:text-white"
                     )}
                   >
                     <span>{link.label}</span>
                     {active && (
-                      <span className="absolute bottom-0.5 left-1/2 h-0.5 w-6 -translate-x-1/2 rounded-full bg-brand-red" />
+                      <span className="absolute bottom-1 left-1/2 h-0.5 w-5 -translate-x-1/2 rounded-full bg-brand-red shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
                     )}
                   </Link>
                 </li>
@@ -130,73 +133,80 @@ export function Navbar() {
             })}
           </ul>
 
-          {/* Actions */}
-          <div className="flex items-center gap-1 md:gap-2">
-            {/* ⬇️ BOUTON RECHERCHE FONCTIONNEL ⬇️ */}
+          {/* ACTIONS */}
+          <div className="flex items-center gap-2">
+            
+            {/* BOUTON RECHERCHE */}
             <button
               onClick={() => setSearchOpen(true)}
               aria-label="Rechercher"
-              className="flex h-9 w-9 items-center justify-center rounded-full text-white/70 transition hover:bg-white/10 hover:text-white"
+              className="group flex h-10 items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 text-xs text-neutral-400 backdrop-blur-md transition-all duration-300 hover:border-white/20 hover:bg-white/10 hover:text-white"
             >
-              <Search className="h-[18px] w-[18px]" />
+              <Search className="h-4 w-4 text-neutral-300 transition-transform group-hover:scale-110" />
+              <span className="hidden font-mono text-[11px] lg:inline-block">Recherche</span>
+              <kbd className="hidden rounded border border-white/15 bg-black/40 px-1.5 py-0.5 font-mono text-[10px] text-neutral-400 lg:inline-block">
+                ⌘K
+              </kbd>
             </button>
 
+            {/* BOUTON PANIER */}
             <Link
               href="/panier"
               aria-label="Panier"
-              className="relative flex h-9 w-9 items-center justify-center rounded-full text-white/70 transition hover:bg-white/10 hover:text-white"
+              className="relative flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-neutral-300 backdrop-blur-md transition-all duration-300 hover:border-white/20 hover:bg-white/10 hover:text-white"
             >
-              <ShoppingCart className="h-[18px] w-[18px]" />
-              <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-brand-red" />
+              <ShoppingCart className="h-4 w-4" />
+              <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-brand-red animate-pulse" />
             </Link>
 
-            {/* CONDITION : Connecté ou pas */}
+            {/* AUTHENTIFICATION / MENU USER */}
             {isLoggedIn ? (
               <div className="relative" ref={userMenuRef}>
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className="flex h-10 items-center gap-2 rounded-full bg-white/10 pl-1 pr-3 transition hover:bg-white/20"
+                  className="flex h-10 items-center gap-2.5 rounded-full border border-white/15 bg-white/10 pl-1.5 pr-3.5 transition-all duration-300 hover:border-white/30 hover:bg-white/15"
                 >
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-red text-xs font-bold text-white">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-red text-xs font-bold text-white shadow-inner">
                     {session.user?.name?.charAt(0).toUpperCase() || "U"}
                   </div>
-                  <span className="hidden max-w-[80px] truncate text-xs font-medium text-white md:block">
+                  <span className="hidden max-w-[90px] truncate font-mono text-xs font-medium text-white md:block">
                     {session.user?.name?.split(" ")[0]}
                   </span>
-                  <ChevronDown className={cn("h-3.5 w-3.5 text-white/60 transition", userMenuOpen && "rotate-180")} />
+                  <ChevronDown className={cn("h-3.5 w-3.5 text-neutral-400 transition-transform duration-300", userMenuOpen && "rotate-180")} />
                 </button>
 
+                {/* DROPDOWN USER */}
                 {userMenuOpen && (
-                  <div className="absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-2xl border border-white/10 bg-brand-black/95 shadow-2xl backdrop-blur-xl">
+                  <div className="absolute right-0 top-14 z-50 w-64 overflow-hidden rounded-3xl border border-white/15 bg-neutral-950/95 p-2 shadow-2xl backdrop-blur-2xl">
                     <div className="border-b border-white/10 p-4">
-                      <p className="truncate text-sm font-semibold text-white">{session.user?.name}</p>
-                      <p className="truncate text-xs text-white/50">{session.user?.email}</p>
+                      <p className="truncate text-sm font-medium text-white">{session.user?.name}</p>
+                      <p className="truncate font-mono text-xs text-neutral-400">{session.user?.email}</p>
                     </div>
-                    <div className="p-2">
+                    <div className="mt-2 space-y-1">
                       <Link
                         href={dashboardUrl}
                         onClick={() => setUserMenuOpen(false)}
-                        className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-white/80 transition hover:bg-white/10 hover:text-white"
+                        className="flex items-center gap-3 rounded-2xl px-4 py-3 font-mono text-xs text-neutral-300 transition-colors hover:bg-white/10 hover:text-white"
                       >
                         <LayoutDashboard className="h-4 w-4 text-brand-red" />
-                        {isAdmin ? "Tableau de bord Admin" : "Mon compte"}
+                        {isAdmin ? "Tableau de Bord Admin" : "Mon Espace"}
                       </Link>
                       {!isAdmin && (
                         <Link
                           href="/compte/commandes"
                           onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-white/80 transition hover:bg-white/10 hover:text-white"
+                          className="flex items-center gap-3 rounded-2xl px-4 py-3 font-mono text-xs text-neutral-300 transition-colors hover:bg-white/10 hover:text-white"
                         >
                           <Package className="h-4 w-4 text-brand-red" />
-                          Mes commandes
+                          Mes Commandes
                         </Link>
                       )}
                       <button
                         onClick={() => signOut({ callbackUrl: "/" })}
-                        className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-red-400 transition hover:bg-red-500/10"
+                        className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 font-mono text-xs text-red-400 transition-colors hover:bg-red-500/10"
                       >
                         <LogOut className="h-4 w-4" />
-                        Se déconnecter
+                        Déconnexion
                       </button>
                     </div>
                   </div>
@@ -205,18 +215,18 @@ export function Navbar() {
             ) : (
               <Link
                 href="/connexion"
-                className="hidden h-10 items-center gap-2 rounded-full bg-brand-red px-5 text-sm font-semibold text-white shadow-lg shadow-brand-red/30 transition hover:bg-brand-red/90 md:inline-flex"
+                className="hidden h-10 items-center gap-2 rounded-full bg-brand-red px-6 font-mono text-xs font-bold uppercase tracking-widest text-white shadow-xl shadow-brand-red/25 transition-all duration-300 hover:bg-white hover:text-black md:inline-flex"
               >
                 <User className="h-4 w-4" />
                 Connexion
               </Link>
             )}
 
-            {/* Burger Mobile */}
+            {/* BURGER MOBILE */}
             <button
               onClick={() => setIsOpen((v) => !v)}
               aria-label="Menu"
-              className="flex h-9 w-9 items-center justify-center rounded-full text-white transition hover:bg-white/10 lg:hidden"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white transition-colors lg:hidden"
             >
               {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
@@ -224,42 +234,42 @@ export function Navbar() {
         </nav>
       </div>
 
-      {/* Mobile Menu */}
+      {/* MENU MOBILE OVERLAY */}
       {isOpen && (
-        <div className="fixed left-3 right-3 top-20 z-50 rounded-3xl border border-white/10 bg-brand-black/95 p-5 shadow-2xl backdrop-blur-2xl lg:hidden">
-          <ul className="flex flex-col gap-1">
+        <div className="fixed inset-x-4 top-22 z-50 overflow-hidden rounded-[2rem] border border-white/15 bg-neutral-950/95 p-6 shadow-2xl backdrop-blur-2xl lg:hidden">
+          <ul className="flex flex-col gap-2">
             {NAV_LINKS.map((link) => (
               <li key={link.href}>
                 <Link
                   href={link.href}
                   className={cn(
-                    "block rounded-xl px-4 py-3 text-base font-medium transition-colors",
+                    "block rounded-2xl px-5 py-3.5 font-display text-lg tracking-wide transition-colors",
                     pathname === link.href
                       ? "bg-brand-red text-white"
-                      : "text-white/80 hover:bg-white/5 hover:text-white"
+                      : "text-neutral-300 hover:bg-white/5 hover:text-white"
                   )}
                 >
                   {link.label}
                 </Link>
               </li>
             ))}
-            
-            <li className="pt-2">
+
+            <li className="pt-4 border-t border-white/10">
               {isLoggedIn ? (
                 <Link
                   href={dashboardUrl}
-                  className="flex items-center justify-center gap-2 rounded-xl bg-brand-red px-4 py-3 text-base font-semibold text-white"
+                  className="flex items-center justify-center gap-3 rounded-2xl bg-brand-red px-5 py-4 font-mono text-xs font-bold uppercase tracking-widest text-white"
                 >
                   <LayoutDashboard className="h-4 w-4" />
-                  Mon compte
+                  Espace Personnel
                 </Link>
               ) : (
                 <Link
                   href="/connexion"
-                  className="flex items-center justify-center gap-2 rounded-xl bg-brand-red px-4 py-3 text-base font-semibold text-white"
+                  className="flex items-center justify-center gap-3 rounded-2xl bg-brand-red px-5 py-4 font-mono text-xs font-bold uppercase tracking-widest text-white"
                 >
                   <User className="h-4 w-4" />
-                  Connexion / Inscription
+                  Espace Connexion
                 </Link>
               )}
             </li>
@@ -267,7 +277,7 @@ export function Navbar() {
         </div>
       )}
 
-      {/* ⬇️ LA MODALE DE RECHERCHE ⬇️ */}
+      {/* MODALE DE RECHERCHE */}
       <SearchModal isOpen={searchOpen} onCloseAction={() => setSearchOpen(false)} />
     </>
   );

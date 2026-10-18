@@ -7,6 +7,7 @@ import {
   Navigation,
   CheckCircle2,
   AlertCircle,
+  Sparkles,
 } from "lucide-react";
 import { cn, formatPrice } from "@/lib/utils";
 import { DELIVERY_ORIGIN, type DeliveryPoint } from "@/lib/delivery";
@@ -34,7 +35,7 @@ export function MapPicker({ subtotal, onDeliveryChangeAction }: Props) {
 
       const L = (await import("leaflet")).default;
 
-      // CSS Leaflet injecté dynamiquement
+      // Inject Leaflet CSS
       if (!document.getElementById("leaflet-css")) {
         const link = document.createElement("link");
         link.id = "leaflet-css";
@@ -49,25 +50,28 @@ export function MapPicker({ subtotal, onDeliveryChangeAction }: Props) {
         center: [DELIVERY_ORIGIN.lat, DELIVERY_ORIGIN.lng],
         zoom: 13,
         scrollWheelZoom: true,
+        zoomControl: false, // On désactive pour un design plus épuré
       });
 
+      // Tuiles OSM avec filtre dark appliqué via CSS
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: "© OpenStreetMap",
         maxZoom: 19,
+        className: "map-tiles-dark",
       }).addTo(map);
 
       // Marqueur boutique (origine)
       L.circleMarker([DELIVERY_ORIGIN.lat, DELIVERY_ORIGIN.lng], {
         radius: 8,
-        color: "#E30613",
-        fillColor: "#E30613",
+        color: "#EF4444",
+        fillColor: "#EF4444",
         fillOpacity: 1,
         weight: 3,
       })
         .addTo(map)
-        .bindPopup(`<b>${DELIVERY_ORIGIN.label}</b>`);
+        .bindPopup(`<b style="font-family: sans-serif; font-size: 12px;">${DELIVERY_ORIGIN.label}</b>`);
 
-      // Icône personnalisée pour le marqueur client
+      // Icône personnalisée client
       L.Marker.prototype.options.icon = L.icon({
         iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
         iconRetinaUrl:
@@ -78,7 +82,7 @@ export function MapPicker({ subtotal, onDeliveryChangeAction }: Props) {
         iconAnchor: [12, 41],
       });
 
-      // Gestion du clic
+      // Clic carte
       map.on("click", async (e: any) => {
         const { lat, lng } = e.latlng;
         if (markerRef.current) markerRef.current.remove();
@@ -101,7 +105,7 @@ export function MapPicker({ subtotal, onDeliveryChangeAction }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* ------- Calcul distance via API interne ------- */
+  /* ------- Calcul distance via API ------- */
   async function computeDistance(lat: number, lng: number) {
     setLoading(true);
     setError(null);
@@ -112,7 +116,7 @@ export function MapPicker({ subtotal, onDeliveryChangeAction }: Props) {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || "Erreur de calcul");
+        throw new Error(data.error || "Erreur de calcul de distance.");
       }
 
       const deliveryResult: DeliveryPoint = {
@@ -128,14 +132,12 @@ export function MapPicker({ subtotal, onDeliveryChangeAction }: Props) {
       if (markerRef.current) {
         markerRef.current
           .bindPopup(
-            `<b>Livraison</b><br/>${data.distanceKm} km<br/><b>${formatPrice(
-              data.fee
-            )}</b>`
+            `<div style="font-family: sans-serif; font-size: 11px;"><b>Livraison</b><br/>${data.distanceKm} km · <b>${formatPrice(data.fee)}</b></div>`
           )
           .openPopup();
       }
     } catch (err: any) {
-      setError(err.message || "Impossible de calculer la distance");
+      setError(err.message || "Impossible de calculer la distance.");
       setResult(null);
       onDeliveryChangeAction(null);
     } finally {
@@ -143,10 +145,10 @@ export function MapPicker({ subtotal, onDeliveryChangeAction }: Props) {
     }
   }
 
-  /* ------- Géolocalisation navigateur ------- */
+  /* ------- Géolocalisation GPS ------- */
   async function useMyLocation() {
     if (!navigator.geolocation) {
-      setError("La géolocalisation n'est pas supportée par votre navigateur");
+      setError("La géolocalisation n'est pas supportée par votre navigateur.");
       return;
     }
     setLoading(true);
@@ -169,8 +171,8 @@ export function MapPicker({ subtotal, onDeliveryChangeAction }: Props) {
         setLoading(false);
         setError(
           err.code === 1
-            ? "Autorisation refusée. Autorisez la localisation ou cliquez sur la carte."
-            : "Impossible d'obtenir votre position"
+            ? "Autorisation refusée. Cliquez directement sur la carte pour vous positionner."
+            : "Impossible d'obtenir votre position actuelle."
         );
       },
       { enableHighAccuracy: true, timeout: 10000 }
@@ -178,12 +180,18 @@ export function MapPicker({ subtotal, onDeliveryChangeAction }: Props) {
   }
 
   return (
-    <div className="space-y-3">
-      {/* Carte */}
-      <div className="relative">
+    <div className="space-y-4">
+      {/* Conteneur de la Carte */}
+      <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-neutral-900/60 p-2 backdrop-blur-xl">
+        <style jsx global>{`
+          .map-tiles-dark {
+            filter: brightness(0.6) invert(1) contrast(1.2) hue-rotate(200deg) saturate(0.3);
+          }
+        `}</style>
+
         <div
           ref={mapRef}
-          className="h-72 w-full overflow-hidden rounded-2xl border border-brand-black/10 bg-brand-gray md:h-80"
+          className="h-72 w-full overflow-hidden rounded-[1.5rem] bg-neutral-950 md:h-80"
           style={{ zIndex: 0 }}
         />
 
@@ -192,67 +200,70 @@ export function MapPicker({ subtotal, onDeliveryChangeAction }: Props) {
           type="button"
           onClick={useMyLocation}
           disabled={loading}
-          className="absolute right-3 top-3 z-[400] inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-semibold text-brand-black shadow-lg transition hover:bg-brand-red hover:text-white disabled:opacity-50"
+          className="group absolute right-5 top-5 z-[400] inline-flex items-center gap-2 rounded-full border border-white/15 bg-neutral-950/80 px-4 py-2 font-mono text-xs uppercase tracking-widest text-white shadow-2xl backdrop-blur-md transition-all duration-300 hover:border-brand-red hover:bg-brand-red disabled:opacity-50"
         >
           {loading ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            <Loader2 className="h-3.5 w-3.5 animate-spin text-current" />
           ) : (
-            <Navigation className="h-3.5 w-3.5" />
+            <Navigation className="h-3.5 w-3.5 transition-transform duration-300 group-hover:rotate-45" />
           )}
-          Ma position
+          <span>Ma position</span>
         </button>
 
-        {/* Overlay instruction initiale */}
+        {/* Instruction overlay */}
         {!result && !loading && !error && (
-          <div className="pointer-events-none absolute bottom-3 left-1/2 z-[400] -translate-x-1/2 rounded-full bg-brand-black/85 px-4 py-2 text-xs text-white backdrop-blur-sm">
-            📍 Cliquez sur la carte pour indiquer votre position
+          <div className="pointer-events-none absolute bottom-5 left-1/2 z-[400] -translate-x-1/2 rounded-full border border-white/10 bg-black/80 px-5 py-2 font-mono text-[11px] uppercase tracking-widest text-neutral-300 backdrop-blur-md">
+            Cliquez sur la carte pour définir votre point de livraison
           </div>
         )}
       </div>
 
-      {/* Feedback erreur */}
+      {/* Alerte Erreur */}
       {error && (
-        <div className="flex items-start gap-2 rounded-xl bg-red-50 p-3 text-xs text-red-700">
-          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+        <div className="flex items-center gap-3 rounded-2xl border border-red-500/20 bg-red-500/10 p-4 font-mono text-xs text-red-400">
+          <AlertCircle className="h-4 w-4 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
-      {/* Résultat */}
+      {/* Résultat / Position Confirmée */}
       {result && (
-        <div className="rounded-2xl border border-brand-red/20 bg-brand-red/5 p-4 transition">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-red text-white">
-              <CheckCircle2 className="h-5 w-5" />
+        <div className="relative overflow-hidden rounded-[2rem] border border-brand-red/30 bg-neutral-900/60 p-6 backdrop-blur-xl">
+          <div className="flex items-start gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-brand-red/30 bg-brand-red/10 text-brand-red">
+              <CheckCircle2 className="h-6 w-6" />
             </div>
+
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-brand-black">
-                Position confirmée
-              </p>
-              <p className="mt-0.5 flex items-center gap-1.5 text-xs text-brand-black/60">
-                <MapPin className="h-3 w-3 shrink-0" />
+              <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-brand-red">
+                [ Localisation Confirmée ]
+              </span>
+              <p className="mt-1 flex items-center gap-2 font-sans text-sm text-neutral-300">
+                <MapPin className="h-4 w-4 shrink-0 text-neutral-400" />
                 <span className="truncate">{result.address}</span>
               </p>
-              <div className="mt-3 flex items-center justify-between border-t border-brand-red/10 pt-3">
+
+              <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-4 font-mono">
                 <div>
-                  <p className="text-[10px] uppercase tracking-widest text-brand-black/50">
-                    Distance
+                  <p className="text-[10px] uppercase tracking-widest text-neutral-500">
+                    Distance Estimée
                   </p>
-                  <p className="font-display text-lg text-brand-black">
+                  <p className="font-display text-xl font-light text-white">
                     {result.distanceKm.toFixed(1)} km
                   </p>
                 </div>
+
                 <div className="text-right">
-                  <p className="text-[10px] uppercase tracking-widest text-brand-black/50">
-                    Frais
+                  <p className="text-[10px] uppercase tracking-widest text-neutral-500">
+                    Frais de Livraison
                   </p>
                   <p
                     className={cn(
-                      "font-display text-lg",
-                      result.fee === 0 ? "text-green-700" : "text-brand-red"
+                      "font-display text-xl font-light",
+                      result.fee === 0 ? "text-emerald-400" : "text-brand-red"
                     )}
                   >
-                    {result.fee === 0 ? "Offerte" : formatPrice(result.fee)}
+                    {result.fee === 0 ? "Offerts" : formatPrice(result.fee)}
                   </p>
                 </div>
               </div>

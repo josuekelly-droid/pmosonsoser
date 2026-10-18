@@ -131,7 +131,7 @@ export function Hero() {
           
           <div className="relative aspect-square overflow-hidden rounded-[2.5rem] border border-white/10 bg-brand-black shadow-2xl backdrop-blur-sm">
             <Image
-              src="/categories/ap150ts.jpg"
+              src="/categories/ap150ts-hero2x.webp"
               alt="Motos PM Osons Oser"
               fill
               sizes="(max-width: 768px) 100vw, 500px"

@@ -47,9 +47,15 @@ function InstagramIcon({ className }: { className?: string }) {
 export async function Footer() {
   const year = new Date().getFullYear();
 
-  const settings = await prisma.settings.findUnique({
-    where: { id: "global" },
-  });
+  // 🛡️ SÉCURITÉ BUILD VERCEL : On isole la requête DB dans un try/catch
+  let settings = null;
+  try {
+    settings = await prisma.settings.findUnique({
+      where: { id: "global" },
+    });
+  } catch (error) {
+    console.warn("⚠️ [Footer] Base de données non disponible. Utilisation des valeurs par défaut.");
+  }
 
   const phone = settings?.phone || "+229 XX XX XX XX";
   const email = settings?.email || "contact@pmosonsoser.com";
@@ -63,9 +69,7 @@ export async function Footer() {
 
       {/* Section Newsletter */}
       <div className="relative border-b border-white/10">
-        {/* py-16 ajoute beaucoup d'espace en haut et en bas de la section */}
         <div className="mx-auto max-w-7xl px-4 py-16 md:px-8 md:py-20">
-          {/* gap-10 sur mobile pour bien séparer le texte du formulaire */}
           <div className="grid items-start gap-10 md:grid-cols-2 md:items-center md:gap-8">
             <div>
               <h3 className="font-display text-3xl tracking-wide text-white md:text-4xl">
@@ -202,7 +206,14 @@ export async function Footer() {
           </p>
           <p className="text-xs text-white/50">
             Conçu & développé par{" "}
-            <span className="font-medium text-white">Kelly Josué AKPLOGAN</span>
+            <a
+              href="https://kja-studio-labs.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-white transition-colors hover:text-brand-red hover:underline"
+            >
+              Kelly Josué AKPLOGAN (KJA Studio Labs)
+            </a>
           </p>
         </div>
       </div>

@@ -61,7 +61,7 @@ const lineReveal: Variants = {
 };
 
 /* -------------------------------------------------------------------------- */
-/*  Pile d'images                                                             */
+/*  Pile d'images Interactive                                                 */
 /* -------------------------------------------------------------------------- */
 
 function BikeStack({
@@ -154,9 +154,8 @@ export function Hero() {
     <section
       ref={sectionRef}
       onPointerMove={onPointerMove}
-      className="relative isolate flex min-h-screen w-full flex-col justify-between overflow-hidden bg-brand-black text-white pt-28 md:pt-36 selection:bg-brand-red selection:text-white"
+      className="relative isolate flex min-h-screen w-full flex-col justify-between overflow-hidden bg-[#0A0A0B] text-white pt-28 md:pt-36 selection:bg-brand-red selection:text-white"
     >
-      
       {/* Grille architecturale sombre */}
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:5rem_5rem] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_0%,#000_70%,transparent_100%)]" />
 
@@ -185,12 +184,10 @@ export function Hero() {
         style={{ backgroundImage: GRAIN }}
       />
 
-      
+      {/* CONTENU PRINCIPAL */}
       <div className="relative z-10 mx-auto grid w-full max-w-[90rem] flex-1 grid-cols-1 items-center gap-12 px-6 py-8 md:px-10 lg:grid-cols-[0.95fr_1.05fr] lg:gap-8 lg:py-12">
-        
         {/* COLONNE TEXTE ÉDITORIALE */}
         <div className="min-w-0 text-center lg:text-left">
-          
           {/* Badge Supérieur */}
           <motion.div
             variants={fadeUp}
@@ -237,7 +234,7 @@ export function Hero() {
             initial="hidden"
             animate="visible"
             custom={4}
-            className="mx-auto mt-7 max-w-xl text-base leading-relaxed text-neutral-400 md:text-lg lg:mx-0"
+            className="mx-auto mt-7 max-w-xl font-sans text-base leading-relaxed text-neutral-400 md:text-lg lg:mx-0"
           >
             L'excellence motocycle au Bénin. Sélection exclusive de motos, tricycles d'ingénierie, pièces d'origine certifiées et lubrifiants haute performance.
           </motion.p>
@@ -252,7 +249,7 @@ export function Hero() {
           >
             <Link
               href="/motos"
-              className="group relative inline-flex h-14 w-full items-center justify-between gap-8 overflow-hidden rounded-full bg-brand-red pl-8 pr-3 text-xs font-bold uppercase tracking-widest text-white shadow-2xl shadow-brand-red/30 transition-all duration-500 hover:bg-white hover:text-black hover:shadow-brand-red/50 sm:w-auto"
+              className="group relative inline-flex h-14 w-full items-center justify-between gap-8 overflow-hidden rounded-full bg-brand-red pl-8 pr-3 font-mono text-xs font-bold uppercase tracking-widest text-white shadow-2xl shadow-brand-red/30 transition-all duration-500 hover:bg-white hover:text-black hover:shadow-brand-red/50 sm:w-auto"
             >
               <span className="relative z-10">Explorer le catalogue</span>
               <span className="relative z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black text-white transition-transform duration-500 group-hover:rotate-45 group-hover:bg-brand-red">
@@ -262,7 +259,7 @@ export function Hero() {
 
             <Link
               href="/pro"
-              className="group inline-flex h-14 w-full items-center justify-center gap-3 rounded-full border border-white/15 bg-white/5 px-8 text-xs font-bold uppercase tracking-widest text-white backdrop-blur-md transition-all duration-500 hover:border-white hover:bg-white/10 sm:w-auto"
+              className="group inline-flex h-14 w-full items-center justify-center gap-3 rounded-full border border-white/15 bg-white/5 px-8 font-mono text-xs font-bold uppercase tracking-widest text-white backdrop-blur-md transition-all duration-500 hover:border-white hover:bg-white/10 sm:w-auto"
             >
               <Sparkles className="h-4 w-4 text-brand-red" />
               Espace Partner B2B
@@ -410,7 +407,7 @@ export function Hero() {
         </motion.div>
       </div>
 
-      
+      {/* BANDEAU MARQUEES / PARTENAIRES */}
       <div className="relative z-10 border-t border-white/10 bg-black/60 backdrop-blur-xl">
         <div className="mx-auto flex max-w-[90rem] items-center gap-8 px-6 py-5 md:gap-12 md:px-10">
           <p className="hidden shrink-0 font-mono text-xs uppercase tracking-[0.3em] text-neutral-500 md:block">

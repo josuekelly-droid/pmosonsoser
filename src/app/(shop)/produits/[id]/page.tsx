@@ -258,7 +258,7 @@ export default async function ProduitPage({ params }: Props) {
               <ul className="mt-5 space-y-3.5 text-sm text-brand-black/70">
                 <li className="flex items-start gap-2.5"><span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-brand-red" />Garantie constructeur selon le produit</li>
                 <li className="flex items-start gap-2.5"><span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-brand-red" />Service après-vente disponible en boutique</li>
-                <li className="flex items-start gap-2.5"><span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-brand-red" />Support client : +229 XX XX XX XX</li>
+                <li className="flex items-start gap-2.5"><span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-brand-red" />Support client : +229 01 96 98 71 09</li>
                 <li className="flex items-start gap-2.5"><span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-brand-red" />Facture professionnelle fournie</li>
               </ul>
             </div>

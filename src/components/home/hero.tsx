@@ -61,7 +61,7 @@ const lineReveal: Variants = {
 };
 
 /* -------------------------------------------------------------------------- */
-/*  Pile d'images Interactive                                                 */
+/*  Pile d'images Stabilisée                                                  */
 /* -------------------------------------------------------------------------- */
 
 function BikeStack({
@@ -81,12 +81,11 @@ function BikeStack({
             initial={false}
             animate={{
               opacity: isActive ? 1 : 0,
-              x: isActive ? 0 : i < active ? -60 : 60,
-              scale: isActive ? 1 : 0.95,
-              rotate: isActive ? 0 : i < active ? -1.5 : 1.5,
+              x: isActive ? 0 : i < active ? -40 : 40,
+              scale: isActive ? 1 : 0.96,
             }}
-            transition={{ duration: 0.9, ease: EASE }}
-            className="absolute inset-0"
+            transition={{ duration: 0.6, ease: EASE }}
+            className="absolute inset-0 h-full w-full pointer-events-none"
           >
             <Image
               src={c.src}
@@ -95,7 +94,7 @@ function BikeStack({
               fill
               sizes="(max-width: 1024px) 100vw, 800px"
               priority={!decorative && i === DEFAULT_INDEX}
-              className="select-none object-contain drop-shadow-[0_25px_35px_rgba(0,0,0,0.85)]"
+              className="select-none object-contain drop-shadow-[0_20px_30px_rgba(0,0,0,0.85)]"
               draggable={false}
             />
           </motion.div>
@@ -239,13 +238,13 @@ export function Hero() {
             L'excellence motocycle au Bénin. Sélection exclusive de motos, tricycles d'ingénierie, pièces d'origine certifiées et lubrifiants haute performance.
           </motion.p>
 
-          {/* Boutons CTA Style Awwwards */}
+          {/* Boutons CTA - PARFAITEMENT CENTRÉS SUR TABLETTE & MOBILE */}
           <motion.div
             variants={fadeUp}
             initial="hidden"
             animate="visible"
             custom={5}
-            className="mt-10 flex flex-col items-center gap-5 sm:flex-row lg:justify-start"
+            className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row md:justify-center lg:justify-start"
           >
             <Link
               href="/motos"
@@ -298,11 +297,11 @@ export function Hero() {
           </motion.div>
         </div>
 
-        {/* COLONNE VISUELLE (SHOWCASE MOTO) */}
+        {/* COLONNE VISUELLE (SHOWCASE MOTO SANS JEUX MOBILE) */}
         <motion.div
-          initial={{ opacity: 0, x: 70, scale: 0.95 }}
+          initial={{ opacity: 0, x: 50, scale: 0.98 }}
           animate={{ opacity: 1, x: 0, scale: 1 }}
-          transition={{ duration: 1.2, delay: 0.2, ease: EASE }}
+          transition={{ duration: 1, delay: 0.2, ease: EASE }}
           className="relative mx-auto w-full min-w-0 max-w-[46rem] lg:ml-auto lg:max-w-none"
         >
           {/* Halos lumineux réactifs */}
@@ -312,7 +311,7 @@ export function Hero() {
           <motion.div style={reduce ? undefined : { y: bikeScrollY }}>
             <motion.div
               style={reduce ? undefined : { x: bikeX, y: bikeY }}
-              className="relative aspect-[1200/840] w-full"
+              className="relative aspect-[16/11] sm:aspect-[1200/840] w-full overflow-hidden rounded-2xl"
             >
               <BikeStack active={active} />
 
@@ -323,7 +322,7 @@ export function Hero() {
               {/* Reflet miroir inversé au sol */}
               <div
                 aria-hidden
-                className="pointer-events-none absolute left-0 right-0 top-full h-[40%] overflow-hidden opacity-40 [mask-image:linear-gradient(to_bottom,rgba(0,0,0,0.8),transparent)]"
+                className="pointer-events-none absolute left-0 right-0 top-full h-[40%] overflow-hidden opacity-30 [mask-image:linear-gradient(to_bottom,rgba(0,0,0,0.8),transparent)]"
               >
                 <div className="absolute inset-x-0 top-0 h-[260%] [transform:scaleY(-1)]">
                   <BikeStack active={active} decorative />
@@ -331,16 +330,16 @@ export function Hero() {
               </div>
 
               {/* Tag Modèle High-End */}
-              <div className="absolute right-2 top-2 z-20 flex items-center gap-2.5 rounded-full border border-white/10 bg-black/60 px-4 py-2 text-[11px] font-mono uppercase tracking-widest text-neutral-300 backdrop-blur-xl">
+              <div className="absolute right-2 top-2 z-20 flex items-center gap-2 rounded-full border border-white/10 bg-black/60 px-3.5 py-1.5 text-[10px] sm:text-[11px] font-mono uppercase tracking-widest text-neutral-300 backdrop-blur-xl">
                 <span className="h-2 w-2 rounded-full bg-brand-red" />
                 APSONIC AP150TS
               </div>
             </motion.div>
           </motion.div>
 
-          {/* SÉLECTEUR DE COLORIS TYPE HUD TECH */}
-          <div className="relative z-20 mt-8 flex flex-col items-center gap-5 lg:mt-10">
-            <div className="flex items-center gap-6 rounded-full border border-white/10 bg-neutral-900/60 px-6 py-3 backdrop-blur-xl">
+          {/* SÉLECTEUR DE COLORIS HUD TECH */}
+          <div className="relative z-20 mt-6 flex flex-col items-center gap-4 lg:mt-10">
+            <div className="flex items-center gap-5 rounded-full border border-white/10 bg-neutral-900/80 px-5 py-2.5 backdrop-blur-xl">
               <div role="group" aria-label="Choisir le coloris" className="flex items-center gap-3">
                 {COLORWAYS.map((c, i) => {
                   const isActive = i === active;
@@ -376,10 +375,10 @@ export function Hero() {
                 <AnimatePresence mode="wait" initial={false}>
                   <motion.span
                     key={active}
-                    initial={{ opacity: 0, y: 6 }}
+                    initial={{ opacity: 0, y: 4 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -6 }}
-                    transition={{ duration: 0.2 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    transition={{ duration: 0.15 }}
                   >
                     {COLORWAYS[active].name}
                   </motion.span>
@@ -394,12 +393,12 @@ export function Hero() {
               initial="hidden"
               animate="visible"
               custom={9}
-              className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/40 px-5 py-3 backdrop-blur-md"
+              className="flex items-center gap-2.5 rounded-2xl border border-white/10 bg-black/40 px-4 py-2.5 backdrop-blur-md"
             >
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400">
                 <CheckCircle2 className="h-4 w-4" />
               </div>
-              <p className="font-mono text-xs text-neutral-300">
+              <p className="font-mono text-[11px] text-neutral-300">
                 Véhicule certifié d'origine · Garantie 1 an constructeur
               </p>
             </motion.div>

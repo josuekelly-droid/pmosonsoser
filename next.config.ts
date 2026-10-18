@@ -1,19 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  experimental: {
-    agentFeedback: true,
-  },
-  cacheComponents: true,
-  partialPrefetching: true,
   turbopack: {
-    rules: {
-      "*.css": {
-        loaders: ["@tailwindcss/turbopack"],
-        as: "*.css",
-      },
-    },
+    root: __dirname,
+  },
+  images: {
+    // Désactive l'optimisation d'image de Next.js pour toutes les images.
+    // Les images seront chargées directement depuis leur source, ce qui
+    // permet d'utiliser n'importe quelle URL externe.
+    unoptimized: true,
   },
 };
 

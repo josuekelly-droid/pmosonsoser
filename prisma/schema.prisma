@@ -1,0 +1,235 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                    String           @id @default(cuid())
+  name                  String?
+  email                 String           @unique
+  password              String
+  phone                 String?
+  role                  Role             @default(CLIENT)
+  typeCompte            TypeCompte       @default(B2C)
+  statutValidation      StatutValidation @default(EN_ATTENTE)
+  emailVerified         DateTime?
+  image                 String?
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+
+  orders                Order[]
+  subscription          Subscription?
+  reviews               Review[]
+  verificationCodes     VerificationCode[]
+  passwordResetTokens   PasswordResetToken[]
+  notifications         Notification[] 
+}
+
+model VerificationCode {
+  id         String   @id @default(cuid())
+  userId     String
+  code       String   // Code à 6 chiffres
+  type       CodeType @default(EMAIL_VERIFICATION)
+  expiresAt  DateTime
+  usedAt     DateTime?
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+}
+
+enum CodeType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
+model PasswordResetToken {
+  id         String   @id @default(cuid())
+  userId     String
+  token      String   @unique
+  expiresAt  DateTime
+  usedAt     DateTime?
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+}
+
+enum Role {
+  CLIENT
+  ADMIN
+}
+
+enum TypeCompte {
+  B2C
+  B2B
+  PREMIUM
+}
+
+enum StatutValidation {
+  EN_ATTENTE
+  VALIDE
+  REJETE
+}
+
+model Category {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  slug     String    @unique
+  products Product[]
+}
+
+model Brand {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  logo     String?
+  products Product[]
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  priceB2C    Float
+  priceB2B    Float?
+  stock       Int      @default(0)
+  images      String[]
+  categoryId  String
+  brandId     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category   Category    @relation(fields: [categoryId], references: [id])
+  brand      Brand       @relation(fields: [brandId], references: [id])
+  orderItems OrderItem[]
+}
+
+model Order {
+  id               String          @id @default(cuid())
+  orderNumber      String          @unique
+  idempotencyKey   String?         @unique
+  userId           String?
+  total            Float
+  statut           StatutCommande  @default(EN_ATTENTE)
+  methodePaiement  MethodePaiement
+  preuvePaiement   String?
+  codeMTCN         String?
+  adresseLivraison String
+  telephone        String
+  deliveryLat    Float?
+  deliveryLng    Float?
+  deliveryDistance Float?
+  customerName     String
+  customerEmail    String
+  notes            String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  user  User?       @relation(fields: [userId], references: [id])
+  items OrderItem[]
+}
+
+enum StatutCommande {
+  EN_ATTENTE
+  PAYE
+  EXPEDIE
+  LIVRE
+  ANNULE
+}
+
+enum MethodePaiement {
+  FEDAPAY
+  WESTERN_UNION
+  VIREMENT
+}
+
+model OrderItem {
+  id        String @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Float
+
+  order   Order   @relation(fields: [orderId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+}
+
+model Subscription {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  startDate DateTime
+  endDate   DateTime
+  isActive  Boolean  @default(true)
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  name       String
+  role       String?
+  city       String?
+  rating     Int      @default(5)
+  text       String
+  isApproved Boolean  @default(true)
+  isFeatured Boolean  @default(false)
+  userId     String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([isApproved, createdAt])
+}
+
+model Settings {
+  id                    String   @id @default("global")
+  phone                 String?
+  email                 String?
+  address               String?
+  facebook              String?
+  instagram             String?
+  whatsapp              String?
+  baseFee               Int      @default(500)
+  pricePerKm            Int      @default(150)
+  freeDeliveryThreshold Int      @default(5000000)
+  maxRadiusKm           Int      @default(550)
+  bankName              String?
+  bankIban              String?
+  bankHolder            String?
+  wuFirstName           String?
+  wuLastName            String?
+  wuCity                String?
+  wuCountry             String?
+  updatedAt             DateTime @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String?  // null = Notification Admin, non-null = Notification Client
+  title     String
+  message   String
+  type      String   // "ORDER_NEW", "ORDER_STATUS", "B2B_REQUEST", "ACCOUNT_APPROVED"
+  link      String?  // ex: "/admin/commandes/xxx"
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead, createdAt])
+}
+
+model NewsletterSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}

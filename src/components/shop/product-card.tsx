@@ -58,29 +58,33 @@ export function ProductCard({
         {/* OVERLAY DE FONDU */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 transition-opacity duration-500 group-hover:opacity-40" />
 
-        {/* BADGE MARQUE (HAUT GAUCHE) */}
-        <span className="absolute left-3 top-3 rounded-full border border-white/10 bg-neutral-950/70 px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest text-neutral-300 backdrop-blur-md">
-          {brandName}
-        </span>
+        {/* BADGE MARQUE (HAUT GAUCHE - SÉCURISÉ CONTRE LES CHEVAUCHEMENTS) */}
+        <div className="absolute left-3 top-3 z-10 max-w-[65%]">
+          <span className="inline-block truncate rounded-full border border-white/10 bg-neutral-950/70 px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest text-neutral-300 backdrop-blur-md">
+            {brandName}
+          </span>
+        </div>
 
         {/* BADGE PRIX PRO B2B (HAUT DROITE) */}
         {hasB2BPrice && (
-          <span className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-amber-400 backdrop-blur-md shadow-[0_0_12px_rgba(245,158,11,0.2)]">
-            <Sparkles className="h-3 w-3" />
-            Prix Pro
-          </span>
+          <div className="absolute right-3 top-3 z-10">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-amber-400 backdrop-blur-md shadow-[0_0_12px_rgba(245,158,11,0.2)]">
+              <Sparkles className="h-3 w-3 shrink-0" />
+              <span>Prix Pro</span>
+            </span>
+          </div>
         )}
 
         {/* BADGE RUPTURE (BAS DROITE) */}
         {!inStock && (
-          <span className="absolute right-3 bottom-3 rounded-full border border-red-500/30 bg-red-500/20 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-red-400 backdrop-blur-md">
+          <span className="absolute right-3 bottom-3 z-10 rounded-full border border-red-500/30 bg-red-500/20 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-red-400 backdrop-blur-md">
             Rupture
           </span>
         )}
 
         {/* BOUTON Révélation au survol (BAS DROITE si en stock) */}
         {inStock && (
-          <div className="absolute right-3 bottom-3 flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-md transition-all duration-500 group-hover:scale-110 group-hover:border-white group-hover:bg-white group-hover:text-black">
+          <div className="absolute right-3 bottom-3 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-md transition-all duration-500 group-hover:scale-110 group-hover:border-white group-hover:bg-white group-hover:text-black">
             <ArrowUpRight className="h-4 w-4 transition-transform duration-500 group-hover:rotate-45" />
           </div>
         )}
@@ -97,7 +101,7 @@ export function ProductCard({
         </h3>
 
         {/* AFFICHAGE TARIF */}
-        <div className="mt-auto pt-4 border-t border-white/5">
+        <div className="mt-auto border-t border-white/5 pt-4">
           {hasB2BPrice ? (
             <div className="flex flex-col">
               <span className="font-mono text-xs text-neutral-500 line-through">

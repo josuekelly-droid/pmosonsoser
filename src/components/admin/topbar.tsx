@@ -156,7 +156,7 @@ export function AdminTopbar({
 
   return (
     <>
-      <header className="sticky top-0 z-20 flex h-20 items-center justify-between gap-4 border-b border-white/10 bg-[#0A0A0B]/80 pl-16 pr-4 backdrop-blur-2xl md:pl-8 md:pr-8">
+      <header className="sticky top-0 z-20 flex h-20 items-center justify-between gap-3 border-b border-white/10 bg-[#0A0A0B]/80 pl-16 pr-4 backdrop-blur-2xl sm:gap-4 md:pl-8 md:pr-8">
         {/* BREADCRUMB HUD */}
         <nav className="hidden min-w-0 flex-1 items-center gap-2 text-xs md:flex font-mono">
           {crumbs.map((c, i) => {
@@ -181,11 +181,11 @@ export function AdminTopbar({
         </nav>
 
         {/* ACTIONS & OUTILS HUD */}
-        <div className="flex items-center gap-3">
+        <div className="ml-auto flex items-center gap-2.5 sm:gap-3">
           {/* Recherche Déclencheur */}
           <button
             onClick={() => { setSearchOpen(true); setTimeout(() => searchInputRef.current?.focus(), 100); }}
-            className="flex h-11 items-center gap-3 rounded-full border border-white/10 bg-neutral-900/40 px-4 font-mono text-xs text-neutral-400 backdrop-blur-md transition-all hover:border-brand-red/50 hover:text-white md:w-64"
+            className="flex h-11 items-center gap-2.5 rounded-full border border-white/10 bg-neutral-900/40 px-3.5 font-mono text-xs text-neutral-400 backdrop-blur-md transition-all hover:border-brand-red/50 hover:text-white sm:px-4 md:w-64"
           >
             <Search className="h-4 w-4 shrink-0 text-neutral-400" />
             <span className="hidden md:inline">Rechercher…</span>
@@ -197,7 +197,7 @@ export function AdminTopbar({
             <button
               onClick={() => setNotifOpen(!notifOpen)}
               aria-label="Voir les notifications"
-              className="relative flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-neutral-900/40 text-neutral-300 backdrop-blur-md transition-all hover:border-brand-red/50 hover:text-white"
+              className="relative flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-neutral-900/40 text-neutral-300 backdrop-blur-md transition-all hover:border-brand-red/50 hover:text-white shrink-0"
             >
               <Bell className="h-4 w-4" />
               {unreadCount > 0 && (
@@ -209,7 +209,7 @@ export function AdminTopbar({
 
             {/* Menu Déroulant Notifications Glassmorphism */}
             {notifOpen && (
-              <div className="absolute right-0 top-14 z-50 w-80 overflow-hidden rounded-[2rem] border border-white/10 bg-neutral-900/90 shadow-2xl backdrop-blur-2xl">
+              <div className="absolute right-0 top-14 z-50 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-[2rem] border border-white/10 bg-neutral-900/95 shadow-2xl backdrop-blur-2xl">
                 <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
                   <h3 className="font-mono text-xs uppercase tracking-widest text-white">Notifications</h3>
                   {unreadCount > 0 && (

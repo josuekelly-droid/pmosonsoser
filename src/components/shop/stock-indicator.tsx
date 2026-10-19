@@ -19,7 +19,7 @@ export function StockIndicator({ stock, variant = "full" }: Props) {
   const config = {
     in: {
       label: "En Stock",
-      sublabel: `${stock} unités disponibles en réserve`,
+      sublabel: `${stock} unités disponibles`,
       icon: CheckCircle2,
       color: "text-emerald-400",
       bg: "bg-emerald-500/10",
@@ -99,7 +99,7 @@ export function StockIndicator({ stock, variant = "full" }: Props) {
 
           <div>
             <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-500">
-              [ Disponibilité ]
+              {/* [ Disponibilité ] */}
             </span>
             <p className={cn("font-display text-base font-light leading-tight", config.color)}>
               {config.label}

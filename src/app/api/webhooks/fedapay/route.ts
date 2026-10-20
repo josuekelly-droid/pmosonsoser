@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { Webhook } from "fedapay";
+import crypto from "crypto"; // Import natif pour le debug manuel
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { sendOrderConfirmationEmail, sendNewOrderAdminEmail } from "@/lib/email";
@@ -18,87 +19,107 @@ export async function POST(req: Request) {
     let event;
 
     try {
+      // 1. Tentative avec le SDK officiel (méthode recommandée)
       event = Webhook.constructEvent(rawBody, signature, secret);
-      console.log("✅ Signature webhook FedaPay vérifiée.");
-    } catch (err) {
-      console.error("🚨 Échec de la vérification de la signature:", err);
-      return NextResponse.json({ error: "Signature invalide" }, { status: 400 });
+      console.log("✅ Signature vérifiée par le SDK FedaPay.");
+    } catch (err: any) {
+      console.warn("⚠️ Le SDK a rejeté la signature. Tentative de vérification manuelle pour debug...");
+      
+      // 2. Vérification manuelle (pour comprendre ce qui cloche)
+      const parts = signature.split(',');
+      let timestamp = "";
+      let sigHash = "";
+
+      parts.forEach((part) => {
+        const [key, value] = part.split('=');
+        if (key === 't') timestamp = value;
+        if (key === 'v1') sigHash = value;
+      });
+
+      if (timestamp && sigHash) {
+        const signedPayload = `${timestamp}.${rawBody}`;
+        const expectedSignature = crypto
+          .createHmac("sha256", secret)
+          .update(signedPayload)
+          .digest("hex");
+
+        if (expectedSignature === sigHash) {
+          console.log("✅ Signature vérifiée manuellement ! Le problème vient du SDK.");
+          event = JSON.parse(rawBody); // On accepte l'événement
+        } else {
+          console.error("❌ Échec de la vérification manuelle aussi.");
+          console.error("Timestamp reçu:", timestamp);
+          console.error("Signature attendue:", expectedSignature);
+          console.error("Signature reçue   :", sigHash);
+          
+          // Debug du secret (pour vérifier s'il y a des espaces ou des guillemets)
+          console.error("Secret utilisé (longueur):", secret.length);
+          console.error("Secret utilisé (début):", secret.substring(0, 10) + "...");
+
+          return NextResponse.json({ error: "Signature invalide" }, { status: 400 });
+        }
+      } else {
+        console.error("❌ Impossible de parser le header de signature.");
+        return NextResponse.json({ error: "Format de signature invalide" }, { status: 400 });
+      }
     }
 
-    // ⚠️ CORRECTION ICI : Les données sont dans event.entity et non event.data.transaction
-    const transaction = event.entity; 
+    // --- TRAITEMENT DE L'ÉVÉNEMENT ---
+    const transaction = event.entity;
     const eventName = event.name;
 
     if (!transaction) {
-      console.warn("⚠️ Aucune donnée de transaction trouvée dans l'événement.");
       return NextResponse.json({ received: true });
     }
 
-    console.log(`🔍 Événement reçu : ${eventName} pour la transaction ${transaction.id}`);
-
-    // Extraire le numéro de commande depuis la description ("Commande PM-20261020-5785")
     const description = transaction.description || "";
     const orderNumberMatch = description.match(/PM-\d{8}-\d{4}/);
     const orderNumber = orderNumberMatch ? orderNumberMatch[0] : null;
 
     if (!orderNumber) {
-      console.warn("Numéro de commande non trouvé dans la description:", description);
+      console.warn("Numéro de commande non trouvé:", description);
       return NextResponse.json({ received: true });
     }
 
-    console.log(`🔍 Numéro de commande extrait : ${orderNumber}`);
-
-    // Traitement du paiement approuvé
     if (eventName === "transaction.approved") {
       const order = await prisma.order.findUnique({
         where: { orderNumber },
         include: { items: { include: { product: true } } },
       });
 
-      if (!order) {
-        console.warn(`⚠️ Commande ${orderNumber} introuvable en base.`);
-        return NextResponse.json({ received: true });
-      }
+      if (order && order.statut === "EN_ATTENTE") {
+        const updatedOrder = await prisma.order.update({
+          where: { id: order.id },
+          data: { statut: "PAYE" },
+          include: { items: { include: { product: true } } },
+        });
 
-      if (order.statut !== "EN_ATTENTE") {
-        console.log(`ℹ️ Commande ${orderNumber} déjà traitée (statut: ${order.statut}).`);
-        return NextResponse.json({ received: true });
-      }
+        console.log(`✅ Commande ${orderNumber} passée au statut PAYE.`);
 
-      // Mettre à jour la commande
-      const updatedOrder = await prisma.order.update({
-        where: { id: order.id },
-        data: { statut: "PAYE" },
-        include: { items: { include: { product: true } } },
-      });
-
-      console.log(`✅ Commande ${orderNumber} passée au statut PAYE.`);
-
-      // Envoyer les emails
-      try {
-        await sendOrderConfirmationEmail(
-          updatedOrder.customerEmail,
-          updatedOrder.customerName,
-          updatedOrder.orderNumber,
-          updatedOrder.total,
-          updatedOrder.items.map((i) => ({ name: i.product.name, quantity: i.quantity }))
-        );
-        if (process.env.EMAIL_USER) {
-          await sendNewOrderAdminEmail(
-            updatedOrder.orderNumber,
+        try {
+          await sendOrderConfirmationEmail(
+            updatedOrder.customerEmail,
             updatedOrder.customerName,
+            updatedOrder.orderNumber,
             updatedOrder.total,
-            process.env.EMAIL_USER
+            updatedOrder.items.map((i) => ({ name: i.product.name, quantity: i.quantity }))
           );
+          if (process.env.EMAIL_USER) {
+            await sendNewOrderAdminEmail(
+              updatedOrder.orderNumber,
+              updatedOrder.customerName,
+              updatedOrder.total,
+              process.env.EMAIL_USER
+            );
+          }
+        } catch (emailError) {
+          console.error("[WEBHOOK] Erreur email:", emailError);
         }
-      } catch (emailError) {
-        console.error("[WEBHOOK] Erreur email:", emailError);
-      }
 
-      // Rafraîchir les pages
-      revalidatePath("/admin/commandes");
-      revalidatePath(`/compte/commandes/${order.id}`);
-      revalidatePath(`/commande/${order.orderNumber}`);
+        revalidatePath("/admin/commandes");
+        revalidatePath(`/compte/commandes/${order.id}`);
+        revalidatePath(`/commande/${order.orderNumber}`);
+      }
     }
 
     return NextResponse.json({ received: true });

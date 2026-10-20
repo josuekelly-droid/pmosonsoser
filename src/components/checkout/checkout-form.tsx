@@ -112,6 +112,7 @@ export function CheckoutForm() {
     };
 
     try {
+      // 1. Créer la commande en base
       const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -121,14 +122,37 @@ export function CheckoutForm() {
 
       if (!res.ok) {
         setError(data.error || "Erreur lors de la commande");
+        setLoading(false);
         return;
       }
 
+      // 2. Si FedaPay → Initier le paiement et rediriger
+      if (method === "FEDAPAY") {
+        const paymentRes = await fetch("/api/payment/fedapay", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ orderId: data.orderId }),
+        });
+
+        const paymentData = await paymentRes.json();
+
+        if (!paymentRes.ok) {
+          setError(paymentData.error || "Erreur d'initialisation du paiement FedaPay");
+          setLoading(false);
+          return;
+        }
+
+        // On vide le panier et on redirige vers l'interface FedaPay
+        clear();
+        window.location.href = paymentData.paymentUrl;
+        return;
+      }
+
+      // 3. Si Western Union ou Virement → Redirection classique
       clear();
       router.push(`/commande/${data.orderNumber}`);
     } catch {
       setError("Connexion impossible. Vérifiez votre réseau.");
-    } finally {
       setLoading(false);
     }
   }

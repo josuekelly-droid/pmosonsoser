@@ -32,18 +32,19 @@ export async function POST(req: Request) {
     /* ---------- 2. Idempotence (anti double-clic) ---------- */
     const existing = await prisma.order.findUnique({
       where: { idempotencyKey: data.idempotencyKey },
-      select: { orderNumber: true, total: true },
+      select: { id: true, orderNumber: true, total: true },
     });
 
     if (existing) {
       return NextResponse.json(
-        { ok: true, orderNumber: existing.orderNumber, total: existing.total, reused: true },
+        { ok: true, orderNumber: existing.orderNumber, orderId: existing.id, total: existing.total, reused: true },
         { status: 200 }
       );
     }
 
     /* ---------- 3. Transaction sécurisée ---------- */
-    const order = await prisma.$transaction(async (tx) => {
+    // On retourne un objet avec la commande ET les totaux pour les utiliser plus bas
+    const result = await prisma.$transaction(async (tx) => {
       
       // 3a. Vérifier le statut B2B du client (si connecté)
       let isB2BValidated = false;
@@ -53,7 +54,6 @@ export async function POST(req: Request) {
           select: { typeCompte: true, statutValidation: true }
         });
         
-        // 🛡️ FIX : Parenthèses pour forcer l'évaluation (B2B OU PREMIUM) ET VALIDE
         if (
           (dbUser?.typeCompte === "B2B" || dbUser?.typeCompte === "PREMIUM") &&
           dbUser?.statutValidation === "VALIDE"
@@ -73,19 +73,15 @@ export async function POST(req: Request) {
       }
 
       let subtotal = 0;
-      const orderItemsToCreate = []; // On prépare les items avec le bon prix
+      const orderItemsToCreate = [];
 
       // 3c. Vérifier, calculer et décrémenter le stock
       for (const item of data.items) {
         const product = products.find((p) => p.id === item.id)!;
 
-        // 🛡️ FIX : Déterminer le prix unitaire une seule fois
         const unitPrice = (isB2BValidated && product.priceB2B) ? product.priceB2B : product.priceB2C;
-        
-        // 🛡️ FIX : Utiliser unitPrice pour le sous-total
         subtotal += unitPrice * item.quantity;
 
-        // Décrémentation conditionnelle (atomique)
         const updated = await tx.product.updateMany({
           where: { 
             id: item.id, 
@@ -98,7 +94,6 @@ export async function POST(req: Request) {
           throw new Error(`STOCK_INSUFFISANT:${product.name}`);
         }
 
-        // 🛡️ FIX : Ajouter le bon prix dans les items de la commande
         orderItemsToCreate.push({
           productId: item.id,
           quantity: item.quantity,
@@ -115,7 +110,7 @@ export async function POST(req: Request) {
         data: {
           orderNumber: generateOrderNumber(),
           idempotencyKey: data.idempotencyKey,
-          userId: session?.user?.id || null, // 🛡️ FIX : Lier au client si connecté
+          userId: session?.user?.id || null,
           total,
           statut: "EN_ATTENTE",
           methodePaiement: data.methodePaiement,
@@ -128,7 +123,7 @@ export async function POST(req: Request) {
           deliveryDistance: data.deliveryDistance,
           notes: data.notes || null,
           items: {
-            create: orderItemsToCreate, // On insère les items avec le bon prix
+            create: orderItemsToCreate,
           },
         },
         include: {
@@ -146,24 +141,24 @@ export async function POST(req: Request) {
         },
       });
 
-      return newOrder;
+      return { order: newOrder, subtotal, deliveryFee };
     });
 
     /* ---------- 4. Envoi des emails (hors transaction) ---------- */
     try {
       await sendOrderConfirmationEmail(
-        order.customerEmail,
-        order.customerName,
-        order.orderNumber,
-        order.total,
-        order.items.map(i => ({ name: i.product.name, quantity: i.quantity }))
+        result.order.customerEmail,
+        result.order.customerName,
+        result.order.orderNumber,
+        result.order.total,
+        result.order.items.map(i => ({ name: i.product.name, quantity: i.quantity }))
       );
 
       if (process.env.EMAIL_USER) {
         await sendNewOrderAdminEmail(
-          order.orderNumber,
-          order.customerName,
-          order.total,
+          result.order.orderNumber,
+          result.order.customerName,
+          result.order.total,
           process.env.EMAIL_USER
         );
       }
@@ -173,7 +168,15 @@ export async function POST(req: Request) {
 
     /* ---------- 5. Réponse succès ---------- */
     return NextResponse.json(
-      { ok: true, orderNumber: order.orderNumber, total: order.total },
+      { 
+        ok: true, 
+        orderNumber: result.order.orderNumber, 
+        orderId: result.order.id, // ⬅️ Essentiel pour FedaPay
+        total: result.order.total, 
+        deliveryFee: result.deliveryFee, 
+        subtotal: result.subtotal, 
+        itemCount: result.order.items.length 
+      },
       { status: 201 }
     );
 

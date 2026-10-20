@@ -212,7 +212,7 @@ export default async function CommandePage({ params }: Props) {
             </div>
           )}
 
-          {/* INSTRUCTIONS FEDAPAY */}
+          {/* INSTRUCTIONS FEDAPAY (En attente) */}
           {isPending && order.methodePaiement === "FEDAPAY" && (
             <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-6 backdrop-blur-2xl md:p-8">
               <h2 className="font-display text-2xl font-light tracking-wide text-white mb-3">
@@ -224,6 +224,21 @@ export default async function CommandePage({ params }: Props) {
               <div className="mt-6">
                 <PaymentBadges />
               </div>
+            </div>
+          )}
+
+          {/* ⬇️ SUCCÈS FEDAPAY (Style Dark Luxury) ⬇️ */}
+          {order.methodePaiement === "FEDAPAY" && order.statut === "PAYE" && (
+            <div className="relative overflow-hidden rounded-[2.5rem] border border-emerald-500/30 bg-emerald-500/10 p-6 text-center backdrop-blur-2xl md:p-8">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.2)]">
+                <CheckCircle2 className="h-8 w-8" />
+              </div>
+              <h2 className="mt-4 font-display text-2xl font-light tracking-wide text-white">
+                Paiement <span className="italic font-serif text-emerald-400">confirmé</span> !
+              </h2>
+              <p className="mt-2 font-mono text-xs text-neutral-400">
+                Votre paiement Mobile Money a bien été reçu. Nous préparons votre commande et vous recevrez un email de confirmation.
+              </p>
             </div>
           )}
 

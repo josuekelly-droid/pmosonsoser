@@ -15,8 +15,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Signature ou secret manquant" }, { status: 400 });
     }
 
-    // 🛡️ GESTION DES DEUX FORMATS DE SIGNATURE (avec ou sans timestamp)
+    // 1. Vérification de la signature (Sécurité prioritaire)
     let expectedSignature = "";
+    let isValid = false;
 
     if (signature.includes("t=") && signature.includes("v1=")) {
       // Format timestampé (t=...,v1=...)
@@ -29,19 +30,13 @@ export async function POST(req: Request) {
         if (key === "v1") sigHash = value;
       });
 
-      if (!timestamp || !sigHash) {
-        return NextResponse.json({ error: "Format de signature invalide" }, { status: 400 });
-      }
-
-      const signedPayload = `${timestamp}.${rawBody}`;
-      expectedSignature = crypto
-        .createHmac("sha256", secret)
-        .update(signedPayload)
-        .digest("hex");
-
-      if (expectedSignature !== sigHash) {
-        console.warn("⚠️ Signature invalide (format timestampé)");
-        return NextResponse.json({ error: "Signature invalide" }, { status: 401 });
+      if (timestamp && sigHash) {
+        const signedPayload = `${timestamp}.${rawBody}`;
+        expectedSignature = crypto
+          .createHmac("sha256", secret)
+          .update(signedPayload)
+          .digest("hex");
+        isValid = expectedSignature === sigHash;
       }
     } else {
       // Format simple (juste un hash hexadécimal)
@@ -49,20 +44,21 @@ export async function POST(req: Request) {
         .createHmac("sha256", secret)
         .update(rawBody)
         .digest("hex");
+      isValid = expectedSignature === signature;
+    }
 
-      if (expectedSignature !== signature) {
-        console.warn("⚠️ Signature invalide (format simple)");
-        return NextResponse.json({ error: "Signature invalide" }, { status: 401 });
-      }
+    if (!isValid) {
+      console.warn("⚠️ Signature invalide reçue.");
+      return NextResponse.json({ error: "Signature invalide" }, { status: 401 });
     }
 
     console.log("✅ Signature webhook FedaPay vérifiée.");
 
-    // 3. Traiter l'événement
+    // 2. Traitement de l'événement
     const event = JSON.parse(rawBody);
     const eventName = event.name;
     
-    // 🛡️ On ignore poliment les événements qui ne sont pas "approved"
+    // On ignore poliment les événements qui ne sont pas "approved" (ex: transaction.created)
     if (eventName !== "transaction.approved") {
       console.log(`ℹ️ Événement ignoré : ${eventName}`);
       return NextResponse.json({ received: true });
@@ -83,6 +79,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ received: true });
     }
 
+    // 3. Mise à jour de la commande
     const order = await prisma.order.findUnique({
       where: { orderNumber },
       include: { items: { include: { product: true } } },

@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { Webhook } from "fedapay";
-import crypto from "crypto"; // Import natif pour le debug manuel
+import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { sendOrderConfirmationEmail, sendNewOrderAdminEmail } from "@/lib/email";
@@ -16,56 +15,45 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Signature ou secret manquant" }, { status: 400 });
     }
 
-    let event;
+    // 1. Extraire le timestamp et la signature du header
+    const parts = signature.split(",");
+    let timestamp = "";
+    let sigHash = "";
 
-    try {
-      // 1. Tentative avec le SDK officiel (méthode recommandée)
-      event = Webhook.constructEvent(rawBody, signature, secret);
-      console.log("✅ Signature vérifiée par le SDK FedaPay.");
-    } catch (err: any) {
-      console.warn("⚠️ Le SDK a rejeté la signature. Tentative de vérification manuelle pour debug...");
-      
-      // 2. Vérification manuelle (pour comprendre ce qui cloche)
-      const parts = signature.split(',');
-      let timestamp = "";
-      let sigHash = "";
+    parts.forEach((part) => {
+      const [key, value] = part.split("=");
+      if (key === "t") timestamp = value;
+      if (key === "v1") sigHash = value;
+    });
 
-      parts.forEach((part) => {
-        const [key, value] = part.split('=');
-        if (key === 't') timestamp = value;
-        if (key === 'v1') sigHash = value;
-      });
-
-      if (timestamp && sigHash) {
-        const signedPayload = `${timestamp}.${rawBody}`;
-        const expectedSignature = crypto
-          .createHmac("sha256", secret)
-          .update(signedPayload)
-          .digest("hex");
-
-        if (expectedSignature === sigHash) {
-          console.log("✅ Signature vérifiée manuellement ! Le problème vient du SDK.");
-          event = JSON.parse(rawBody); // On accepte l'événement
-        } else {
-          console.error("❌ Échec de la vérification manuelle aussi.");
-          console.error("Timestamp reçu:", timestamp);
-          console.error("Signature attendue:", expectedSignature);
-          console.error("Signature reçue   :", sigHash);
-          
-          // Debug du secret (pour vérifier s'il y a des espaces ou des guillemets)
-          console.error("Secret utilisé (longueur):", secret.length);
-          console.error("Secret utilisé (début):", secret.substring(0, 10) + "...");
-
-          return NextResponse.json({ error: "Signature invalide" }, { status: 400 });
-        }
-      } else {
-        console.error("❌ Impossible de parser le header de signature.");
-        return NextResponse.json({ error: "Format de signature invalide" }, { status: 400 });
-      }
+    if (!timestamp || !sigHash) {
+      console.warn("⚠️ Format de signature invalide");
+      return NextResponse.json({ error: "Format de signature invalide" }, { status: 400 });
     }
 
-    // --- TRAITEMENT DE L'ÉVÉNEMENT ---
-    const transaction = event.entity;
+    // 2. Vérifier la signature (HMAC-SHA256)
+    const signedPayload = `${timestamp}.${rawBody}`;
+    const expectedSignature = crypto
+      .createHmac("sha256", secret)
+      .update(signedPayload)
+      .digest("hex");
+
+    // Comparaison sécurisée pour éviter les attaques temporelles
+    const isValid = crypto.timingSafeEqual(
+      Buffer.from(expectedSignature),
+      Buffer.from(sigHash)
+    );
+
+    if (!isValid) {
+      console.error("🚨 Signature invalide");
+      return NextResponse.json({ error: "Signature invalide" }, { status: 401 });
+    }
+
+    console.log("✅ Signature webhook FedaPay vérifiée.");
+
+    // 3. Traiter l'événement
+    const event = JSON.parse(rawBody);
+    const transaction = event.entity; // ⚠️ Les données sont dans event.entity
     const eventName = event.name;
 
     if (!transaction) {

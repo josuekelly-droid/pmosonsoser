@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 
 // ⚠️ REMPLACE PAR LE NUMÉRO DE TA COMMANDE EN ATTENTE
-const ORDER_NUMBER = "PM-20261020-7767"; 
+const ORDER_NUMBER = "PM-20261020-5871"; 
 
 // ⚠️ REMPLACE PAR TON SECRET WEBHOOK (commençant par wh_live_...)
 const WEBHOOK_SECRET = "wh_live_sOZXkBLVUbeLNimPm3GHfuDz"; 
@@ -14,8 +14,8 @@ const payload = {
   object: "transaction",
   entity: {
     klass: "v1/transaction",
-    id: 113799333,
-    reference: "trx_test_12345",
+    id: 113799331,
+    reference: "trx_test_12341",
     amount: 1500,
     description: `Commande ${ORDER_NUMBER}`,
     status: "approved",

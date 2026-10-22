@@ -18,6 +18,10 @@ export function ImageUploader({ images, onChangeAction }: Props) {
     const url = urlInput.trim();
     if (!url || !/^https?:\/\//.test(url)) return;
     if (images.length >= 10) return;
+    if (images.includes(url)) {
+      setUrlInput("");
+      return;
+    }
     onChangeAction([...images, url]);
     setUrlInput("");
   }
@@ -104,14 +108,16 @@ export function ImageUploader({ images, onChangeAction }: Props) {
                 unoptimized
               />
               {i === 0 && (
-                <span className="absolute left-2 top-2 rounded-full bg-brand-red px-2 py-0.5 text-[10px] font-bold text-white shadow-lg">
+                <span className="absolute left-2 top-2 z-10 rounded-full bg-brand-red px-2 py-0.5 text-[10px] font-bold text-white shadow-lg">
                   Principale
                 </span>
               )}
+              {/* Bouton de suppression visible directement sur mobile, et au survol sur PC */}
               <button
                 type="button"
                 onClick={() => removeImage(i)}
-                className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/70 text-white opacity-0 backdrop-blur-sm transition hover:bg-red-600 group-hover:opacity-100"
+                className="absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-black/80 text-white opacity-100 backdrop-blur-sm transition hover:bg-red-600 md:opacity-0 md:group-hover:opacity-100"
+                aria-label="Supprimer l'image"
               >
                 <X className="h-3.5 w-3.5" />
               </button>

@@ -6,13 +6,10 @@ import Link from "next/link";
 import {
   Loader2,
   AlertCircle,
-  Plus,
-  X,
-  Image as ImageIcon,
   ArrowUpRight,
   Save,
 } from "lucide-react";
-import Image from "next/image";
+import { ImageUploader } from "@/components/admin/image-uploader";
 
 type Category = { id: string; name: string };
 type Brand = { id: string; name: string };
@@ -44,27 +41,6 @@ export function ProductForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [images, setImages] = useState<string[]>(initial?.images || []);
-  const [imageInput, setImageInput] = useState("");
-
-  function addImage() {
-    const url = imageInput.trim();
-    if (!url) return;
-    if (!/^https?:\/\//.test(url)) {
-      setError("L'URL de l'image doit commencer par http:// ou https://");
-      return;
-    }
-    if (images.length >= 10) {
-      setError("Maximum 10 images par produit.");
-      return;
-    }
-    setImages([...images, url]);
-    setImageInput("");
-    setError(null);
-  }
-
-  function removeImage(index: number) {
-    setImages(images.filter((_, i) => i !== index));
-  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -256,74 +232,13 @@ export function ProductForm({
           Images du produit
         </h2>
         <p className="mt-1 font-mono text-xs text-neutral-400">
-          Collez les URLs des images (maximum 10). La première image servira de visuel principal.
+          Ajoutez une URL ou uploadez directement vos photos (maximum 10). La première image servira de visuel principal.
         </p>
 
-        {/* Ajout */}
-        <div className="mt-6 flex gap-3">
-          <input
-            type="url"
-            value={imageInput}
-            onChange={(e) => setImageInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                addImage();
-              }
-            }}
-            placeholder="https://exemple.com/image.jpg"
-            className="input flex-1"
-          />
-          <button
-            type="button"
-            onClick={addImage}
-            className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-6 font-mono text-xs uppercase tracking-widest text-white backdrop-blur-md transition-all hover:bg-white/10"
-          >
-            <Plus className="h-4 w-4" />
-            <span>Ajouter</span>
-          </button>
+        <div className="mt-6">
+          {/* ⬇️ LE NOUVEAU COMPOSANT EST ICI ⬇️ */}
+          <ImageUploader images={images} onChangeAction={setImages} />
         </div>
-
-        {/* Aperçu */}
-        {images.length === 0 ? (
-          <div className="mt-6 flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-black/20 py-12 text-center backdrop-blur-md">
-            <ImageIcon className="h-10 w-10 text-neutral-600" />
-            <p className="mt-3 font-mono text-xs text-neutral-400">
-              Aucune image pour le moment. Ajoutez au moins une URL valide.
-            </p>
-          </div>
-        ) : (
-          <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
-            {images.map((url, i) => (
-              <div
-                key={url + i}
-                className="group relative aspect-square overflow-hidden rounded-2xl border border-white/10 bg-black/40"
-              >
-                <Image
-                  src={url}
-                  alt={`Aperçu ${i + 1}`}
-                  fill
-                  sizes="200px"
-                  className="object-cover"
-                  unoptimized
-                />
-                {i === 0 && (
-                  <span className="absolute left-2 top-2 rounded-lg border border-brand-red/30 bg-brand-red px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest text-white shadow-md">
-                    Principale
-                  </span>
-                )}
-                <button
-                  type="button"
-                  onClick={() => removeImage(i)}
-                  aria-label="Supprimer l'image"
-                  className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-xl border border-red-500/30 bg-black/70 text-red-400 opacity-0 backdrop-blur-md transition-all hover:bg-red-600 hover:text-white group-hover:opacity-100"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
       </section>
 
       {/* Erreur */}

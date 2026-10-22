@@ -18,6 +18,7 @@ import {
   Home,
   Mail,
   ArrowUpRight,
+  Tag,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,7 @@ import { cn } from "@/lib/utils";
 const NAV_ITEMS = [
   { href: "/admin", label: "Vue d'ensemble", icon: LayoutDashboard },
   { href: "/admin/produits", label: "Produits", icon: Package },
+  { href: "/admin/marques", label: "Marques", icon: Tag },
   { href: "/admin/commandes", label: "Commandes", icon: ShoppingCart },
   { href: "/admin/utilisateurs", label: "Clients", icon: Users },
   { href: "/admin/avis", label: "Avis", icon: MessageSquare },

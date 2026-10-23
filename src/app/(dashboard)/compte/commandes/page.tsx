@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/utils";
 import Link from "next/link";
-import { Package, ArrowUpRight, ShoppingBag } from "lucide-react";
+import { Package, ArrowUpRight } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -93,12 +93,28 @@ export default async function CommandesPage() {
               </div>
 
               {/* Liste résumée des articles */}
-              <ul className="space-y-2 font-mono text-xs text-neutral-400">
+              <ul className="space-y-2.5 font-mono text-xs text-neutral-400">
                 {o.items.map((i) => (
-                  <li key={i.id} className="flex justify-between items-center">
-                    <span className="truncate pr-4">
-                      <strong className="text-white font-sans">{i.quantity}x</strong> {i.product.name}
-                    </span>
+                  <li key={i.id} className="flex justify-between items-start gap-4">
+                    <div className="min-w-0 flex-1">
+                      <span className="truncate block">
+                        <strong className="text-white font-sans">{i.quantity}x</strong>{" "}
+                        {i.product.name}
+                      </span>
+
+                      {/* 🎨 COULEUR SÉLECTIONNÉE */}
+                      {i.colorName && (
+                        <div className="mt-1 flex items-center gap-1.5">
+                          <span
+                            className="h-3 w-3 rounded-full border border-white/20 shadow-inner"
+                            style={{ backgroundColor: i.colorHex || "#888" }}
+                          />
+                          <span className="font-mono text-[10px] uppercase tracking-widest text-neutral-500">
+                            {i.colorName}
+                          </span>
+                        </div>
+                      )}
+                    </div>
                     <span className="shrink-0 text-white font-medium">
                       {formatPrice(i.price * i.quantity)}
                     </span>

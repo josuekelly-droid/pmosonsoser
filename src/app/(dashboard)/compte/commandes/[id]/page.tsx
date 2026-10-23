@@ -140,6 +140,19 @@ export default async function CommandeDetailPage({
                     <p className="font-mono text-xs text-neutral-400">
                       {item.product.brand.name} · <span className="text-white">Qté : {item.quantity}</span>
                     </p>
+
+                    {/* 🎨 COULEUR SÉLECTIONNÉE */}
+                    {item.colorName && (
+                      <div className="mt-1.5 flex items-center gap-1.5">
+                        <span
+                          className="h-3 w-3 rounded-full border border-white/20 shadow-inner"
+                          style={{ backgroundColor: item.colorHex || "#888" }}
+                        />
+                        <span className="font-mono text-[10px] uppercase tracking-widest text-neutral-400">
+                          {item.colorName}
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="text-right shrink-0">

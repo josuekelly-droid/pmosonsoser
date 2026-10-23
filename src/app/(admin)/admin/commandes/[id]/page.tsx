@@ -160,6 +160,19 @@ export default async function AdminCommandeDetailPage({
                     <p className="mt-1 font-mono text-xs text-neutral-400">
                       {item.product.brand.name} · Quantité : {item.quantity}
                     </p>
+
+                    {/* 🎨 COULEUR SÉLECTIONNÉE */}
+                    {item.colorName && (
+                      <div className="mt-2 inline-flex items-center gap-2 rounded-lg border border-white/10 bg-black/40 px-2.5 py-1">
+                        <span
+                          className="h-3 w-3 rounded-full border border-white/20 shadow-inner"
+                          style={{ backgroundColor: item.colorHex || "#888" }}
+                        />
+                        <span className="font-mono text-[10px] uppercase tracking-widest text-neutral-300">
+                          {item.colorName}
+                        </span>
+                      </div>
+                    )}
                   </div>
                   <p className="shrink-0 font-display text-lg font-light text-white">
                     {formatPrice(item.price * item.quantity)}

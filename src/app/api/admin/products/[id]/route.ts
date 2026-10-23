@@ -76,8 +76,11 @@ export async function PATCH(req: Request, { params }: Params) {
         images: data.images,
         categoryId: data.categoryId,
         brandId: data.brandId,
+        colors: {
+      set: data.colorIds.map((id) => ({ id })), 
+    },
       },
-      include: { brand: true, category: true },
+      include: { brand: true, category: true, colors: true },
     });
 
     /* ---- Revalidation ---- */

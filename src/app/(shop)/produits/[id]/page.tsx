@@ -10,6 +10,7 @@ import {
   Lock,
   Info,
   ArrowUpRight,
+  Palette, // ⬅️ NOUVEL IMPORT
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { constructMetadata, siteConfig } from "@/lib/seo";
@@ -57,9 +58,10 @@ export default async function ProduitPage({ params }: Props) {
   const { id } = await params;
   const isB2B = await getIsB2BValidated();
 
+  // ⬇️ AJOUT DE `colors: true` DANS L'INCLUDE
   const product = await prisma.product.findUnique({
     where: { id },
-    include: { brand: true, category: true },
+    include: { brand: true, category: true, colors: true }, 
   });
 
   if (!product) notFound();
@@ -201,6 +203,32 @@ export default async function ProduitPage({ params }: Props) {
                     {product.description || `Découvrez ${product.name} de la marque ${product.brand.name}, disponible immédiatement chez PM Osons Oser. Produit d'origine certifiée, garanti et livré avec tous les documents officiels.`}
                   </p>
                 </div>
+
+                {/* ⬇️ COULEURS DISPONIBLES (Adapté Dark Theme) ⬇️ */}
+                {product.colors && product.colors.length > 0 && (
+                  <div className="mt-8">
+                    <h2 className="flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-white">
+                      <Palette className="h-4 w-4 text-brand-red" />
+                      Couleurs disponibles
+                    </h2>
+                    <div className="mt-3 flex flex-wrap gap-2.5">
+                      {product.colors.map((color) => (
+                        <div
+                          key={color.id}
+                          className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-black/40 px-3 py-2 backdrop-blur-md"
+                        >
+                          <span
+                            className="h-5 w-5 rounded-full border border-white/20 shadow-inner"
+                            style={{ backgroundColor: color.hex }}
+                          />
+                          <span className="font-mono text-xs text-neutral-200">
+                            {color.name}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Ajouter au panier */}
                 <div className="mt-9">

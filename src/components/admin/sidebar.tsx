@@ -20,6 +20,7 @@ import {
   ArrowUpRight,
   Tag,
   Layers,
+  Palette,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
@@ -29,6 +30,7 @@ const NAV_ITEMS = [
   { href: "/admin/produits", label: "Produits", icon: Package },
   { href: "/admin/marques", label: "Marques", icon: Tag },
   { href: "/admin/categories", label: "Catégories", icon: Layers },
+  { href: "/admin/couleurs", label: "Couleurs", icon: Palette },
   { href: "/admin/commandes", label: "Commandes", icon: ShoppingCart },
   { href: "/admin/utilisateurs", label: "Clients", icon: Users },
   { href: "/admin/avis", label: "Avis", icon: MessageSquare },

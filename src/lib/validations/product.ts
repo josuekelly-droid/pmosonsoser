@@ -9,6 +9,7 @@ export const productSchema = z.object({
   images: z.array(z.string().url("URL d'image invalide")).max(10).default([]),
   categoryId: z.string().min(1, "Catégorie requise"),
   brandId: z.string().min(1, "Marque requise"),
+  colorIds: z.array(z.string()).default([]),
 });
 
 export type ProductInput = z.infer<typeof productSchema>;

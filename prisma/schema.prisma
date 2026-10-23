@@ -92,6 +92,15 @@ model Brand {
   products Product[]
 }
 
+model Color {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  hex       String    // Format "#RRGGBB"
+  products  Product[] @relation("ProductColors")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
 model Product {
   id          String   @id @default(cuid())
   name        String
@@ -102,6 +111,7 @@ model Product {
   images      String[]
   categoryId  String
   brandId     String
+  colors      Color[]  @relation("ProductColors")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

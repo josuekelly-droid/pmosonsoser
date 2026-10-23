@@ -10,9 +10,11 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function NouveauProduitPage() {
-  const [categories, brands] = await Promise.all([
+  // ⬇️ AJOUT DE `colors` DANS LA DÉSTRUCTURATION
+  const [categories, brands, colors] = await Promise.all([
     prisma.category.findMany({ orderBy: { name: "asc" } }),
     prisma.brand.findMany({ orderBy: { name: "asc" } }),
+    prisma.color.findMany({ orderBy: { name: "asc" } }),
   ]);
 
   return (
@@ -30,8 +32,13 @@ export default async function NouveauProduitPage() {
         </p>
       </div>
 
-      {/* FORMULAIRE DE CRÉATION PRODUIT */}
-      <ProductForm mode="create" categories={categories} brands={brands} />
+      {/* FORMULAIRE DE CRÉATION PRODUIT (un seul, avec colors) */}
+      <ProductForm 
+        mode="create" 
+        categories={categories} 
+        brands={brands} 
+        colors={colors} 
+      />
     </div>
   );
 }

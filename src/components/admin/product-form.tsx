@@ -10,9 +10,11 @@ import {
   Save,
 } from "lucide-react";
 import { ImageUploader } from "@/components/admin/image-uploader";
+import { ColorPicker } from "@/components/admin/color-picker";
 
 type Category = { id: string; name: string };
 type Brand = { id: string; name: string };
+type Color = { id: string; name: string; hex: string };
 
 type ProductData = {
   id?: string;
@@ -24,23 +26,31 @@ type ProductData = {
   images: string[];
   categoryId: string;
   brandId: string;
+  colorIds?: string[];
 };
 
 export function ProductForm({
   mode,
   categories,
   brands,
+  colors, // ⬅️ AJOUTÉ ici dans la déstructuration
   initial,
 }: {
   mode: "create" | "edit";
   categories: Category[];
   brands: Brand[];
+  colors: Color[];
   initial?: ProductData;
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [images, setImages] = useState<string[]>(initial?.images || []);
+  
+  // ⬇️ DÉPLACÉ ICI : Le state doit être au niveau racine du composant
+  const [selectedColorIds, setSelectedColorIds] = useState<string[]>(
+    initial?.colorIds || []
+  );
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -59,6 +69,7 @@ export function ProductForm({
       images,
       categoryId: formData.get("categoryId"),
       brandId: formData.get("brandId"),
+      colorIds: selectedColorIds, // Utilise le state du composant
     };
 
     try {
@@ -154,7 +165,7 @@ export function ProductForm({
                 ))}
               </select>
             </Field>
-            
+
             <Field label="Marque *">
               <select
                 name="brandId"
@@ -223,6 +234,27 @@ export function ProductForm({
         </div>
       </section>
 
+      {/* Couleurs disponibles */}
+      <section className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-8 backdrop-blur-2xl md:p-10">
+        <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-brand-red">
+          [ Variations ]
+        </span>
+        <h2 className="mt-1 font-display text-2xl font-light tracking-wide text-white">
+          Couleurs disponibles
+        </h2>
+        <p className="mt-1 font-mono text-xs text-neutral-400">
+          Sélectionnez les coloris dans lesquels ce produit est disponible.
+        </p>
+
+        <div className="mt-6">
+          <ColorPicker
+            colors={colors}
+            selectedIds={selectedColorIds}
+            onChangeAction={setSelectedColorIds}
+          />
+        </div>
+      </section>
+
       {/* Images */}
       <section className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-8 backdrop-blur-2xl md:p-10">
         <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-brand-red">
@@ -236,7 +268,6 @@ export function ProductForm({
         </p>
 
         <div className="mt-6">
-          {/* ⬇️ LE NOUVEAU COMPOSANT EST ICI ⬇️ */}
           <ImageUploader images={images} onChangeAction={setImages} />
         </div>
       </section>
@@ -257,7 +288,7 @@ export function ProductForm({
         >
           <span>Annuler</span>
         </Link>
-        
+
         <button
           type="submit"
           disabled={loading}

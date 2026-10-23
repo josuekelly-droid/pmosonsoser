@@ -85,8 +85,11 @@ export async function POST(req: Request) {
         images: data.images,
         categoryId: data.categoryId,
         brandId: data.brandId,
+        colors: {
+      connect: data.colorIds.map((id) => ({ id })), 
+    },
       },
-      include: { brand: true, category: true },
+      include: { brand: true, category: true, colors: true },
     });
 
     /* ---- Revalidation (SEO + affichage temps réel) ---- */

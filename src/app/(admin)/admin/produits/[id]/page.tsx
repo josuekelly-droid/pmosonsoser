@@ -17,13 +17,15 @@ export default async function EditProduitPage({
 }) {
   const { id } = await params;
 
-  const [product, categories, brands] = await Promise.all([
+  // ⬇️ AJOUT DE `colors` DANS LA DÉSTRUCTURATION ET DANS LE Promise.all
+  const [product, categories, brands, colors] = await Promise.all([
     prisma.product.findUnique({
       where: { id },
-      include: { brand: true, category: true },
+      include: { brand: true, category: true, colors: true },
     }),
     prisma.category.findMany({ orderBy: { name: "asc" } }),
     prisma.brand.findMany({ orderBy: { name: "asc" } }),
+    prisma.color.findMany({ orderBy: { name: "asc" } }),
   ]);
 
   if (!product) notFound();
@@ -43,11 +45,12 @@ export default async function EditProduitPage({
         </p>
       </div>
 
-      {/* FORMULAIRE DE MODIFICATION PRODUIT */}
+      {/* FORMULAIRE DE MODIFICATION PRODUIT (avec colors) */}
       <ProductForm
         mode="edit"
         categories={categories}
         brands={brands}
+        colors={colors} // ⬅️ AJOUTÉ ICI
         initial={{
           id: product.id,
           name: product.name,
@@ -58,6 +61,7 @@ export default async function EditProduitPage({
           images: product.images,
           categoryId: product.categoryId,
           brandId: product.brandId,
+          colorIds: product.colors.map((c) => c.id),
         }}
       />
     </div>

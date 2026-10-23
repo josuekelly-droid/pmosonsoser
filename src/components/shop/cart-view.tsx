@@ -11,7 +11,7 @@ import {
   ArrowLeft,
   ShieldCheck,
   Truck,
-  Sparkles,
+  Palette,
 } from "lucide-react";
 import { useCart } from "@/store/cart";
 import { formatPrice } from "@/lib/utils";
@@ -83,7 +83,7 @@ export function CartView() {
           >
             {/* Image */}
             <Link
-              href={`/produits/${item.id}`}
+              href={`/produits/${item.productId}`} // ⬅️ CORRIGÉ : productId au lieu de id
               className="relative aspect-square w-full shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-black/40 sm:h-28 sm:w-28"
             >
               {item.image ? (
@@ -107,12 +107,26 @@ export function CartView() {
             <div className="flex min-w-0 flex-1 flex-col justify-between">
               <div>
                 <Link
-                  href={`/produits/${item.id}`}
+                  href={`/produits/${item.productId}`} // ⬅️ CORRIGÉ
                   className="line-clamp-2 font-display text-lg font-light text-white transition-colors duration-300 hover:text-brand-red"
                 >
                   {item.name}
                 </Link>
-                <p className="mt-1 font-mono text-xs text-neutral-400">
+
+                {/* 🎨 COULEUR SÉLECTIONNÉE */}
+                {item.colorName && (
+                  <div className="mt-2 flex items-center gap-2">
+                    <span
+                      className="h-3.5 w-3.5 rounded-full border border-white/20 shadow-inner"
+                      style={{ backgroundColor: item.colorHex || "#888" }}
+                    />
+                    <span className="font-mono text-[11px] uppercase tracking-widest text-neutral-400">
+                      {item.colorName}
+                    </span>
+                  </div>
+                )}
+
+                <p className="mt-2 font-mono text-xs text-neutral-400">
                   {formatPrice(item.price)} / unité
                 </p>
               </div>

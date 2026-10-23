@@ -227,7 +227,7 @@ export default async function CommandePage({ params }: Props) {
             </div>
           )}
 
-          {/* ⬇️ SUCCÈS FEDAPAY (Style Dark Luxury) ⬇️ */}
+          {/* SUCCÈS FEDAPAY (Style Dark Luxury) */}
           {order.methodePaiement === "FEDAPAY" && order.statut === "PAYE" && (
             <div className="relative overflow-hidden rounded-[2.5rem] border border-emerald-500/30 bg-emerald-500/10 p-6 text-center backdrop-blur-2xl md:p-8">
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.2)]">
@@ -261,6 +261,19 @@ export default async function CommandePage({ params }: Props) {
                     <p className="font-mono text-xs text-neutral-400">
                       {i.product.brand.name} · <span className="text-white font-semibold">x{i.quantity}</span>
                     </p>
+                    
+                    {/* 🎨 COULEUR SÉLECTIONNÉE */}
+                    {i.colorName && (
+                      <div className="mt-1.5 flex items-center gap-1.5">
+                        <span
+                          className="h-3 w-3 rounded-full border border-white/20 shadow-inner"
+                          style={{ backgroundColor: i.colorHex || "#888" }}
+                        />
+                        <span className="font-mono text-[10px] uppercase tracking-widest text-neutral-400">
+                          {i.colorName}
+                        </span>
+                      </div>
+                    )}
                   </div>
                   <span className="shrink-0 font-display text-lg font-light text-white">
                     {formatPrice(i.price * i.quantity)}

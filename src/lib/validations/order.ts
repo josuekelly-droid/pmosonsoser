@@ -3,6 +3,9 @@ import { z } from "zod";
 export const orderItemSchema = z.object({
   id: z.string().min(1, "ID produit requis"),
   quantity: z.coerce.number().int().min(1, "Quantité min 1").max(99, "Quantité max 99"),
+  // 🎨 Couleurs (optionnelles, pour les produits qui en ont)
+  colorName: z.string().max(40).optional().or(z.literal("")),
+  colorHex: z.string().max(10).optional().or(z.literal("")),
   // 🚨 AUCUN CHAMP "price" ICI. Le serveur utilise la BDD.
 });
 

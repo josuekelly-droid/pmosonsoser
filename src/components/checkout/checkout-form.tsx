@@ -107,7 +107,13 @@ export function CheckoutForm() {
       deliveryDistance: delivery.distanceKm,
       notes: formData.get("notes") || "",
       methodePaiement: method,
-      items: items.map((i) => ({ id: i.id, quantity: i.quantity })),
+      // 🎨 On utilise productId et on inclut les couleurs
+      items: items.map((i) => ({
+        id: i.productId,
+        quantity: i.quantity,
+        colorName: i.colorName || "",
+        colorHex: i.colorHex || "",
+      })),
       idempotencyKey,
     };
 
@@ -142,7 +148,6 @@ export function CheckoutForm() {
           return;
         }
 
-        // On vide le panier et on redirige vers l'interface FedaPay
         clear();
         window.location.href = paymentData.paymentUrl;
         return;
@@ -369,7 +374,21 @@ export function CheckoutForm() {
                   <p className="truncate font-sans text-sm font-medium text-white">
                     {i.name}
                   </p>
-                  <p className="text-neutral-500">Quantité : {i.quantity}</p>
+                  
+                  {/* 🎨 COULEUR DANS LE RÉCAP */}
+                  {i.colorName && (
+                    <div className="mt-1.5 flex items-center gap-1.5">
+                      <span
+                        className="h-3 w-3 rounded-full border border-white/20 shadow-inner"
+                        style={{ backgroundColor: i.colorHex || "#888" }}
+                      />
+                      <span className="font-mono text-[10px] uppercase tracking-widest text-neutral-400">
+                        {i.colorName}
+                      </span>
+                    </div>
+                  )}
+
+                  <p className="mt-1 text-neutral-500">Quantité : {i.quantity}</p>
                 </div>
                 <span className="shrink-0 text-white font-medium">
                   {formatPrice(i.price * i.quantity)}

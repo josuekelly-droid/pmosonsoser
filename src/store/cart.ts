@@ -2,44 +2,60 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export type CartItem = {
-  id: string;
+  id: string;        // cartKey = `${productId}-${colorId || "default"}`
+  productId: string; // pour l'API
   name: string;
   price: number;
   image?: string;
   quantity: number;
   stock: number;
+  colorId?: string;
+  colorName?: string;
+  colorHex?: string;
 };
 
 type CartState = {
   items: CartItem[];
-  add: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
+  add: (
+    item: Omit<CartItem, "id" | "quantity">,
+    quantity?: number
+  ) => void;
   remove: (id: string) => void;
   updateQty: (id: string, quantity: number) => void;
   clear: () => void;
-  totalItems: () => number;
-  totalPrice: () => number;
 };
+
+function makeCartKey(productId: string, colorId?: string) {
+  return `${productId}::${colorId || "default"}`;
+}
 
 export const useCart = create<CartState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       items: [],
 
       add: (item, quantity = 1) =>
         set((state) => {
-          const existing = state.items.find((i) => i.id === item.id);
+          const cartKey = makeCartKey(item.productId, item.colorId);
+          const existing = state.items.find((i) => i.id === cartKey);
+
           if (existing) {
             const newQty = Math.min(existing.quantity + quantity, item.stock);
             return {
               items: state.items.map((i) =>
-                i.id === item.id ? { ...i, quantity: newQty } : i
+                i.id === cartKey ? { ...i, quantity: newQty } : i
               ),
             };
           }
+
           return {
             items: [
               ...state.items,
-              { ...item, quantity: Math.min(quantity, item.stock) },
+              {
+                ...item,
+                id: cartKey,
+                quantity: Math.min(quantity, item.stock),
+              },
             ],
           };
         }),
@@ -57,13 +73,7 @@ export const useCart = create<CartState>()(
         })),
 
       clear: () => set({ items: [] }),
-
-      totalItems: () =>
-        get().items.reduce((sum, i) => sum + i.quantity, 0),
-
-      totalPrice: () =>
-        get().items.reduce((sum, i) => sum + i.price * i.quantity, 0),
     }),
-    { name: "pm-osons-cart" }
+    { name: "pm-osons-cart-v2" } // invalider l'ancien cache
   )
 );

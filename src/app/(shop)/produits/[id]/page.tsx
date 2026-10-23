@@ -10,7 +10,7 @@ import {
   Lock,
   Info,
   ArrowUpRight,
-  Palette, // ⬅️ NOUVEL IMPORT
+  Palette,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { constructMetadata, siteConfig } from "@/lib/seo";
@@ -21,6 +21,7 @@ import { AddToCart } from "@/components/shop/add-to-cart";
 import { ProductCard } from "@/components/shop/product-card";
 import { StockIndicator } from "@/components/shop/stock-indicator";
 import { PaymentBadges } from "@/components/shop/payment-badges";
+import { ProductPurchaseBlock } from "@/components/shop/product-purchase-block";
 
 export const revalidate = 60;
 
@@ -204,44 +205,18 @@ export default async function ProduitPage({ params }: Props) {
                   </p>
                 </div>
 
-                {/* ⬇️ COULEURS DISPONIBLES (Adapté Dark Theme) ⬇️ */}
-                {product.colors && product.colors.length > 0 && (
-                  <div className="mt-8">
-                    <h2 className="flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-white">
-                      <Palette className="h-4 w-4 text-brand-red" />
-                      Couleurs disponibles
-                    </h2>
-                    <div className="mt-3 flex flex-wrap gap-2.5">
-                      {product.colors.map((color) => (
-                        <div
-                          key={color.id}
-                          className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-black/40 px-3 py-2 backdrop-blur-md"
-                        >
-                          <span
-                            className="h-5 w-5 rounded-full border border-white/20 shadow-inner"
-                            style={{ backgroundColor: color.hex }}
-                          />
-                          <span className="font-mono text-xs text-neutral-200">
-                            {color.name}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Ajouter au panier */}
-                <div className="mt-9">
-                  <AddToCart
-                    product={{
-                      id: product.id,
-                      name: product.name,
-                      priceB2C: displayPrice,
-                      images: product.images,
-                      stock: product.stock,
-                    }}
-                  />
-                </div>
+                <div className="mt-8">
+  <ProductPurchaseBlock
+    product={{
+      id: product.id,
+      name: product.name,
+      priceB2C: displayPrice,
+      images: product.images,
+      stock: product.stock,
+    }}
+    colors={product.colors}
+  />
+</div>
 
                 {/* Moyens de paiement */}
                 <div className="mt-10 border-t border-white/10 pt-8">

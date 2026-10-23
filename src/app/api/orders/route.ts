@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { orderSchema } from "@/lib/validations/order";
 import { calculateDeliveryFee } from "@/lib/delivery";
 import { sendOrderConfirmationEmail, sendNewOrderAdminEmail } from "@/lib/email";
@@ -43,7 +44,6 @@ export async function POST(req: Request) {
     }
 
     /* ---------- 3. Transaction sécurisée ---------- */
-    // On retourne un objet avec la commande ET les totaux pour les utiliser plus bas
     const result = await prisma.$transaction(async (tx) => {
       
       // 3a. Vérifier le statut B2B du client (si connecté)
@@ -73,7 +73,8 @@ export async function POST(req: Request) {
       }
 
       let subtotal = 0;
-      const orderItemsToCreate = [];
+      // 🛡️ Typage strict pour Prisma
+      const orderItemsToCreate: Prisma.OrderItemUncheckedCreateWithoutOrderInput[] = [];
 
       // 3c. Vérifier, calculer et décrémenter le stock
       for (const item of data.items) {
@@ -97,7 +98,9 @@ export async function POST(req: Request) {
         orderItemsToCreate.push({
           productId: item.id,
           quantity: item.quantity,
-          price: unitPrice, 
+          price: unitPrice,
+          colorName: item.colorName || null, 
+          colorHex: item.colorHex || null,
         });
       }
 
@@ -146,12 +149,18 @@ export async function POST(req: Request) {
 
     /* ---------- 4. Envoi des emails (hors transaction) ---------- */
     try {
+      // 🎨 On inclut la couleur dans le nom de l'article pour l'email
+      const emailItems = result.order.items.map((i) => ({
+        name: i.colorName ? `${i.product.name} (${i.colorName})` : i.product.name,
+        quantity: i.quantity,
+      }));
+
       await sendOrderConfirmationEmail(
         result.order.customerEmail,
         result.order.customerName,
         result.order.orderNumber,
         result.order.total,
-        result.order.items.map(i => ({ name: i.product.name, quantity: i.quantity }))
+        emailItems
       );
 
       if (process.env.EMAIL_USER) {
@@ -171,7 +180,7 @@ export async function POST(req: Request) {
       { 
         ok: true, 
         orderNumber: result.order.orderNumber, 
-        orderId: result.order.id, // ⬅️ Essentiel pour FedaPay
+        orderId: result.order.id,
         total: result.order.total, 
         deliveryFee: result.deliveryFee, 
         subtotal: result.subtotal, 

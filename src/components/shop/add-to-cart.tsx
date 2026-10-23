@@ -11,6 +11,7 @@ import {
   Share2,
   ArrowUpRight,
   AlertTriangle,
+  Palette,
 } from "lucide-react";
 import { useCart } from "@/store/cart";
 import { cn } from "@/lib/utils";
@@ -23,9 +24,11 @@ type Props = {
     images: string[];
     stock: number;
   };
+  selectedColor?: { id: string; name: string; hex: string } | null;
+  requiresColor?: boolean; // true si le produit a des couleurs
 };
 
-export function AddToCart({ product }: Props) {
+export function AddToCart({ product, selectedColor, requiresColor }: Props) {
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -40,13 +43,20 @@ export function AddToCart({ product }: Props) {
 
   function handleAdd() {
     if (outOfStock) return;
+    // ⬇️ Blocage si une couleur est requise et non sélectionnée
+    if (requiresColor && !selectedColor) return;
+
     add(
       {
-        id: product.id,
+        productId: product.id, // ⬅️ productId (le store génère la cartKey)
         name: product.name,
         price: product.priceB2C,
         image: product.images?.[0],
         stock: product.stock,
+        // 🎨 Couleur ajoutée
+        colorId: selectedColor?.id,
+        colorName: selectedColor?.name,
+        colorHex: selectedColor?.hex,
       },
       qty
     );
@@ -97,6 +107,8 @@ export function AddToCart({ product }: Props) {
     );
   }
 
+  const missingColor = requiresColor && !selectedColor;
+
   return (
     <div className="space-y-5">
       {/* ACTIONS SECONDAIRES (FAVORIS + PARTAGE) */}
@@ -129,6 +141,14 @@ export function AddToCart({ product }: Props) {
           <span>Partager</span>
         </button>
       </div>
+
+      {/* AVERTISSEMENT COULEUR MANQUANTE */}
+      {missingColor && (
+        <div className="flex items-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 font-mono text-xs text-amber-400">
+          <Palette className="h-4 w-4 shrink-0" />
+          <span>Veuillez sélectionner une couleur avant d'ajouter au panier.</span>
+        </div>
+      )}
 
       {/* SÉLECTEUR DE QUANTITÉ HUD */}
       <div className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-neutral-900/60 p-2.5 backdrop-blur-xl">
@@ -166,8 +186,9 @@ export function AddToCart({ product }: Props) {
       <button
         type="button"
         onClick={handleAdd}
+        disabled={missingColor}
         className={cn(
-          "group relative inline-flex h-14 w-full items-center justify-center gap-3 overflow-hidden rounded-full font-mono text-xs font-bold uppercase tracking-widest text-white shadow-xl transition-all duration-500",
+          "group relative inline-flex h-14 w-full items-center justify-center gap-3 overflow-hidden rounded-full font-mono text-xs font-bold uppercase tracking-widest text-white shadow-xl transition-all duration-500 disabled:cursor-not-allowed disabled:opacity-50",
           added
             ? "bg-emerald-600 shadow-emerald-600/30"
             : "bg-brand-red shadow-brand-red/25 hover:bg-white hover:text-black hover:shadow-brand-red/40"
@@ -190,7 +211,8 @@ export function AddToCart({ product }: Props) {
       <button
         type="button"
         onClick={handleAdd}
-        className="group relative inline-flex h-12 w-full items-center justify-center gap-3 overflow-hidden rounded-full border border-white/20 bg-white/5 font-mono text-xs font-semibold uppercase tracking-widest text-white backdrop-blur-md transition-all duration-500 hover:border-white hover:bg-white hover:text-black"
+        disabled={missingColor}
+        className="group relative inline-flex h-12 w-full items-center justify-center gap-3 overflow-hidden rounded-full border border-white/20 bg-white/5 font-mono text-xs font-semibold uppercase tracking-widest text-white backdrop-blur-md transition-all duration-500 hover:border-white hover:bg-white hover:text-black disabled:opacity-50"
       >
         <Zap className="h-4 w-4 text-brand-red transition-colors duration-500 group-hover:text-black" />
         <span>Commander Immédiatement</span>

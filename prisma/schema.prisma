@@ -165,6 +165,8 @@ model OrderItem {
   productId String
   quantity  Int
   price     Float
+  colorName String?
+  colorHex  String?
 
   order   Order   @relation(fields: [orderId], references: [id])
   product Product @relation(fields: [productId], references: [id])

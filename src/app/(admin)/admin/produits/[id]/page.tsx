@@ -17,7 +17,7 @@ export default async function EditProduitPage({
 }) {
   const { id } = await params;
 
-  // ⬇️ AJOUT DE `colors` DANS LA DÉSTRUCTURATION ET DANS LE Promise.all
+  
   const [product, categories, brands, colors] = await Promise.all([
     prisma.product.findUnique({
       where: { id },
@@ -50,7 +50,7 @@ export default async function EditProduitPage({
         mode="edit"
         categories={categories}
         brands={brands}
-        colors={colors} // ⬅️ AJOUTÉ ICI
+        colors={colors} 
         initial={{
           id: product.id,
           name: product.name,

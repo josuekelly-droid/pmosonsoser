@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
@@ -48,6 +48,18 @@ export function AdminSidebar({
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  // Verrouiller le scroll du body lorsque le menu mobile est ouvert
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [mobileOpen]);
+
   function isActive(href: string) {
     if (href === "/admin") return pathname === "/admin";
     return pathname.startsWith(href);
@@ -55,7 +67,8 @@ export function AdminSidebar({
 
   const sidebarContent = (
     <div className="flex h-full flex-col justify-between">
-      <div>
+      {/* SECTION HAUTE : LOGO + NAVIGATION (Scrollable pour petits écrans) */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden pr-1 [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.1)_transparent]">
         {/* LOGO BRANDING DARK LUXURY */}
         <div className="flex items-center gap-3.5 px-6 py-8">
           <div className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-brand-red/30 bg-brand-red/10 shadow-[0_0_20px_rgba(239,68,68,0.2)] backdrop-blur-2xl">
@@ -67,8 +80,8 @@ export function AdminSidebar({
               className="object-cover"
             />
           </div>
-          <div className="flex flex-col">
-            <span className="font-display text-lg tracking-wide text-white">
+          <div className="flex flex-col min-w-0">
+            <span className="truncate font-display text-lg tracking-wide text-white">
               PM <span className="text-brand-red font-serif italic">OSONS</span>
             </span>
             <span className="font-mono text-[9px] font-bold uppercase tracking-[0.25em] text-neutral-400">
@@ -79,7 +92,7 @@ export function AdminSidebar({
 
         {/* NAVIGATION HUD */}
         <nav className="px-4 py-2">
-          <ul className="space-y-2">
+          <ul className="space-y-1.5">
             {NAV_ITEMS.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
@@ -104,14 +117,14 @@ export function AdminSidebar({
                       />
                     )}
 
-                    <div className="relative z-10 flex items-center gap-3.5">
+                    <div className="relative z-10 flex items-center gap-3.5 min-w-0">
                       <Icon
                         className={cn(
-                          "h-4 w-4 transition-colors duration-300",
+                          "h-4 w-4 shrink-0 transition-colors duration-300",
                           active ? "text-brand-red" : "text-neutral-500 group-hover:text-white"
                         )}
                       />
-                      <span>{item.label}</span>
+                      <span className="truncate">{item.label}</span>
                     </div>
 
                     {/* Ligne lumineuse rouge néon sur le flanc gauche */}
@@ -124,24 +137,24 @@ export function AdminSidebar({
             })}
           </ul>
 
-          <div className="mt-6 pt-6 border-t border-white/10">
+          <div className="mt-6 pt-6 border-t border-white/10 mb-4">
             <Link
               href="/"
               target="_blank"
               className="group flex items-center justify-between rounded-2xl border border-white/5 bg-white/5 px-4 py-3 font-mono text-xs uppercase tracking-wider text-neutral-400 backdrop-blur-md transition-all hover:border-white/20 hover:text-white"
             >
-              <div className="flex items-center gap-3">
-                <Home className="h-4 w-4 text-neutral-500 transition-colors group-hover:text-white" />
-                <span>Boutique publique</span>
+              <div className="flex items-center gap-3 min-w-0">
+                <Home className="h-4 w-4 shrink-0 text-neutral-500 transition-colors group-hover:text-white" />
+                <span className="truncate">Boutique publique</span>
               </div>
-              <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:rotate-45" />
+              <ArrowUpRight className="h-3.5 w-3.5 shrink-0 transition-transform group-hover:rotate-45" />
             </Link>
           </div>
         </nav>
       </div>
 
-      {/* PROFIL ADMINISTRATEUR */}
-      <div className="p-4">
+      {/* PROFIL ADMINISTRATEUR (Fixe en bas) */}
+      <div className="p-4 shrink-0 border-t border-white/5 bg-neutral-900/40 backdrop-blur-md">
         <div className="rounded-3xl border border-white/10 bg-black/40 p-4 backdrop-blur-2xl">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-brand-red/30 bg-brand-red/20 font-display text-sm font-light text-white shadow-[0_0_15px_rgba(239,68,68,0.2)]">
@@ -169,11 +182,11 @@ export function AdminSidebar({
 
   return (
     <>
-      {/* Bouton Toggle Mobile */}
+      {/* Bouton Toggle Mobile Flottant (Parfaitement positionné et sécurisé z-index) */}
       <button
         onClick={() => setMobileOpen(true)}
         aria-label="Ouvrir le menu administration"
-        className="fixed left-4 top-4 z-40 flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-neutral-900/80 text-white shadow-2xl backdrop-blur-2xl lg:hidden"
+        className="fixed left-4 top-4 z-40 flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-neutral-900/90 text-white shadow-2xl backdrop-blur-2xl transition-transform active:scale-95 lg:hidden"
       >
         <Menu className="h-5 w-5" />
       </button>
@@ -183,28 +196,30 @@ export function AdminSidebar({
         {sidebarContent}
       </aside>
 
-      {/* Sidebar Mobile Tiroir */}
+      {/* Sidebar Mobile Tiroir (Drawer) */}
       <AnimatePresence>
         {mobileOpen && (
           <>
+            {/* Backdrop Sombre */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setMobileOpen(false)}
-              className="fixed inset-0 z-40 bg-black/80 backdrop-blur-md lg:hidden"
+              className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md lg:hidden"
             />
+            {/* Contenu du tiroir */}
             <motion.aside
               initial={{ x: -320 }}
               animate={{ x: 0 }}
               exit={{ x: -320 }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="fixed inset-y-4 left-4 z-50 w-[270px] overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/90 shadow-2xl backdrop-blur-2xl lg:hidden"
+              className="fixed inset-y-4 left-4 z-50 flex w-[270px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-950/95 shadow-2xl backdrop-blur-2xl lg:hidden"
             >
               <button
                 onClick={() => setMobileOpen(false)}
                 aria-label="Fermer le menu administration"
-                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-neutral-400 hover:text-white"
+                className="absolute right-4 top-4 z-20 flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-neutral-400 hover:text-white transition-colors"
               >
                 <X className="h-4 w-4" />
               </button>

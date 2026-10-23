@@ -20,7 +20,6 @@ export async function POST(req: Request) {
     let isValid = false;
 
     if (signature.includes("t=") && signature.includes("v1=")) {
-      // Format timestampé (t=...,v1=...)
       const parts = signature.split(",");
       let timestamp = "";
       let sigHash = "";
@@ -39,7 +38,6 @@ export async function POST(req: Request) {
         isValid = expectedSignature === sigHash;
       }
     } else {
-      // Format simple (juste un hash hexadécimal)
       expectedSignature = crypto
         .createHmac("sha256", secret)
         .update(rawBody)
@@ -58,7 +56,7 @@ export async function POST(req: Request) {
     const event = JSON.parse(rawBody);
     const eventName = event.name;
     
-    // On ignore poliment les événements qui ne sont pas "approved" (ex: transaction.created)
+    // On ignore les événements qui ne sont pas "approved"
     if (eventName !== "transaction.approved") {
       console.log(`ℹ️ Événement ignoré : ${eventName}`);
       return NextResponse.json({ received: true });
@@ -82,33 +80,55 @@ export async function POST(req: Request) {
     // 3. Mise à jour de la commande
     const order = await prisma.order.findUnique({
       where: { orderNumber },
-      include: { items: { include: { product: true } } },
+      // 🛡️ AJOUT DE brand: true
+      include: { items: { include: { product: { include: { brand: true } } } } },
     });
 
     if (order && order.statut === "EN_ATTENTE") {
       const updatedOrder = await prisma.order.update({
         where: { id: order.id },
         data: { statut: "PAYE" },
-        include: { items: { include: { product: true } } },
+        // 🛡️ AJOUT DE brand: true
+        include: { items: { include: { product: { include: { brand: true } } } } },
       });
 
       console.log(`✅ Commande ${orderNumber} passée au statut PAYE.`);
 
+      // 🎨 Calcul des totaux pour l'email détaillé
+      const subtotal = updatedOrder.items.reduce((s, i) => s + i.price * i.quantity, 0);
+      const deliveryFee = updatedOrder.total - subtotal;
+
       try {
-        await sendOrderConfirmationEmail(
-          updatedOrder.customerEmail,
-          updatedOrder.customerName,
-          updatedOrder.orderNumber,
-          updatedOrder.total,
-          updatedOrder.items.map((i) => ({ name: i.product.name, quantity: i.quantity }))
-        );
+        // Construction de l'objet complet pour le nouvel email détaillé
+        const emailOrder = {
+          orderNumber: updatedOrder.orderNumber,
+          customerName: updatedOrder.customerName,
+          customerEmail: updatedOrder.customerEmail,
+          telephone: updatedOrder.telephone,
+          adresseLivraison: updatedOrder.adresseLivraison,
+          notes: updatedOrder.notes,
+          methodePaiement: updatedOrder.methodePaiement,
+          total: updatedOrder.total,
+          deliveryFee,
+          subtotal,
+          createdAt: updatedOrder.createdAt,
+          items: updatedOrder.items.map((i) => ({
+            productName: i.product.name,
+            brandName: i.product.brand?.name,
+            quantity: i.quantity,
+            price: i.price,
+            image: i.product.images?.[0],
+            colorName: i.colorName,
+            colorHex: i.colorHex,
+          })),
+        };
+
+        // Envoi au client
+        await sendOrderConfirmationEmail(emailOrder);
+
+        // Envoi à l'admin
         if (process.env.EMAIL_USER) {
-          await sendNewOrderAdminEmail(
-            updatedOrder.orderNumber,
-            updatedOrder.customerName,
-            updatedOrder.total,
-            process.env.EMAIL_USER
-          );
+          await sendNewOrderAdminEmail(emailOrder, process.env.EMAIL_USER);
         }
       } catch (emailError) {
         console.error("[WEBHOOK] Erreur email:", emailError);

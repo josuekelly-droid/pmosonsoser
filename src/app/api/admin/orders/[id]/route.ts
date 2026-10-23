@@ -28,9 +28,10 @@ export async function PATCH(req: Request, { params }: Params) {
 
     const { statut, codeMTCN, preuvePaiement, noteInterne } = parsed.data;
 
+    // 🛡️ AJOUT : brand: true pour l'email
     const order = await prisma.order.findUnique({
       where: { id },
-      include: { items: true },
+      include: { items: { include: { product: { include: { brand: true } } } } },
     });
 
     if (!order) {
@@ -57,6 +58,7 @@ export async function PATCH(req: Request, { params }: Params) {
       }
 
       // 2. Mise à jour de la commande
+      // 🛡️ AJOUT : include brand: true + items pour l'email
       const updatedOrder = await tx.order.update({
         where: { id },
         data: {
@@ -65,13 +67,13 @@ export async function PATCH(req: Request, { params }: Params) {
           ...(preuvePaiement !== undefined && { preuvePaiement: preuvePaiement || null }),
           ...(noteInterne !== undefined && { notes: noteInterne || null }),
         },
+        include: { items: { include: { product: { include: { brand: true } } } } },
       });
 
       return updatedOrder;
     });
 
-    // --- NOTIFICATIONS & EMAILS (Hors transaction pour ne pas la casser) ---
-    // On utilise des try/catch séparés pour que si une notification plante, la commande est quand même mise à jour.
+    // --- NOTIFICATIONS & EMAILS (Hors transaction) ---
     try {
       // Notif Admin
       await prisma.notification.create({
@@ -97,20 +99,42 @@ export async function PATCH(req: Request, { params }: Params) {
       }
     } catch (notifError) {
       console.error("[NOTIFICATION ERROR]", notifError);
-      // On ne bloque pas la réponse si la notification échoue
     }
 
     try {
-      // Emails
+      // 🎨 Construction de l'objet complet pour l'email détaillé
+      const subtotal = updated.items.reduce((s, i) => s + i.price * i.quantity, 0);
+      const deliveryFee = updated.total - subtotal;
+
+      const emailOrder = {
+        orderNumber: updated.orderNumber,
+        customerName: updated.customerName,
+        customerEmail: updated.customerEmail,
+        telephone: updated.telephone,
+        adresseLivraison: updated.adresseLivraison,
+        notes: updated.notes,
+        methodePaiement: updated.methodePaiement,
+        total: updated.total,
+        deliveryFee,
+        subtotal,
+        createdAt: updated.createdAt,
+        items: updated.items.map((i) => ({
+          productName: i.product.name,
+          brandName: i.product.brand?.name,
+          quantity: i.quantity,
+          price: i.price,
+          image: i.product.images?.[0],
+          colorName: i.colorName,
+          colorHex: i.colorHex,
+        })),
+      };
+
+      // Envoi au client (nouvelle signature : emailOrder + statut)
       if (updated.customerEmail) {
-        await sendOrderStatusUpdateEmail(
-          updated.customerEmail,
-          updated.customerName,
-          updated.orderNumber,
-          statut
-        );
+        await sendOrderStatusUpdateEmail(emailOrder, statut);
       }
 
+      // Envoi à l'admin (signature inchangée)
       if (process.env.EMAIL_USER) {
         await sendOrderStatusAdminEmail(
           updated.orderNumber,
@@ -121,7 +145,6 @@ export async function PATCH(req: Request, { params }: Params) {
       }
     } catch (emailError) {
       console.error("[EMAIL ERROR]", emailError);
-      // On ne bloque pas la réponse si l'email échoue
     }
 
     revalidatePath("/admin/commandes");

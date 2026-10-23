@@ -73,7 +73,6 @@ export async function POST(req: Request) {
       }
 
       let subtotal = 0;
-      // 🛡️ Typage strict pour Prisma
       const orderItemsToCreate: Prisma.OrderItemUncheckedCreateWithoutOrderInput[] = [];
 
       // 3c. Vérifier, calculer et décrémenter le stock
@@ -130,7 +129,8 @@ export async function POST(req: Request) {
           },
         },
         include: {
-          items: { include: { product: true } },
+          // 🛡️ AJOUT DE brand: true POUR L'EMAIL
+          items: { include: { product: { include: { brand: true } } } },
         },
       });
 
@@ -149,27 +149,36 @@ export async function POST(req: Request) {
 
     /* ---------- 4. Envoi des emails (hors transaction) ---------- */
     try {
-      // 🎨 On inclut la couleur dans le nom de l'article pour l'email
-      const emailItems = result.order.items.map((i) => ({
-        name: i.colorName ? `${i.product.name} (${i.colorName})` : i.product.name,
-        quantity: i.quantity,
-      }));
+      // 🎨 Construction de l'objet complet pour le nouvel email détaillé
+      const emailOrder = {
+        orderNumber: result.order.orderNumber,
+        customerName: result.order.customerName,
+        customerEmail: result.order.customerEmail,
+        telephone: result.order.telephone,
+        adresseLivraison: result.order.adresseLivraison,
+        notes: result.order.notes,
+        methodePaiement: result.order.methodePaiement,
+        total: result.order.total,
+        deliveryFee: result.deliveryFee,
+        subtotal: result.subtotal,
+        createdAt: result.order.createdAt,
+        items: result.order.items.map((i) => ({
+          productName: i.product.name,
+          brandName: i.product.brand?.name,
+          quantity: i.quantity,
+          price: i.price,
+          image: i.product.images?.[0],
+          colorName: i.colorName,
+          colorHex: i.colorHex,
+        })),
+      };
 
-      await sendOrderConfirmationEmail(
-        result.order.customerEmail,
-        result.order.customerName,
-        result.order.orderNumber,
-        result.order.total,
-        emailItems
-      );
+      // Envoi au client
+      await sendOrderConfirmationEmail(emailOrder);
 
+      // Envoi à l'admin
       if (process.env.EMAIL_USER) {
-        await sendNewOrderAdminEmail(
-          result.order.orderNumber,
-          result.order.customerName,
-          result.order.total,
-          process.env.EMAIL_USER
-        );
+        await sendNewOrderAdminEmail(emailOrder, process.env.EMAIL_USER);
       }
     } catch (emailError) {
       console.error("[orders] Erreur lors de l'envoi des emails:", emailError);

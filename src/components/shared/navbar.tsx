@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SearchModal } from "@/components/shop/search-modal";
-import { CartBadge } from "@/components/shop/cart-badge"; // ⬅️ IMPORT DU BADGE
+import { CartBadge } from "@/components/shop/cart-badge";
 
 const NAV_LINKS = [
   { href: "/", label: "Accueil" },
@@ -26,6 +26,7 @@ const NAV_LINKS = [
   { href: "/tricycles", label: "Tricycles" },
   { href: "/pieces-detachees", label: "Pièces" },
   { href: "/lubrifiants", label: "Lubrifiants" },
+  { href: "/machines-agricoles", label: "Machines" },
 ];
 
 export function Navbar() {

@@ -57,8 +57,8 @@ const CATEGORIES = [
     id: "05",
     slug: "machines-agricoles",
     title: "Machines Agricoles",
-    subtitle: "Agriculture moderne & Rentabilité",
-    image: "/categories/lubrifiants.jpg",
+    subtitle: "Gamme de Machines Agricoles pour Booster votre Productivité",
+    image: "/categories/machines-agricoles.jpg",
   },
 ];
 

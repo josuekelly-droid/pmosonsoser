@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Package, ArrowUpRight } from "lucide-react";
+import { Suspense } from "react"; // ⬅️ IMPORT AJOUTÉ
+import { Package, ArrowUpRight, Loader2 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/utils";
 import { constructMetadata } from "@/lib/seo";
@@ -55,6 +56,14 @@ export const CATALOG_CONFIGS: Record<string, CatalogConfig> = {
     seoDescription: "Huiles moteur et lubrifiants moto de marques reconnues au Bénin. Livraison rapide, prix compétitifs.",
     heroSubtitle: "Huiles · Graisses · Entretien",
   },
+  "machines-agricoles": {
+    slug: "machines-agricoles",
+    title: "Machines Agricoles",
+    description: "Découvrez notre gamme de machines agricoles pour booster votre productivité : motoculteurs, pompes, tronçonneuses et plus.",
+    seoTitle: "Machines Agricoles — Motoculteurs, Pompes, Tronçonneuses",
+    seoDescription: "Achetez vos machines agricoles au Bénin. Motoculteurs, pompes à eau, tronçonneuses. Livraison rapide et garantie.",
+    heroSubtitle: "Motoculteurs · Pompes · Tronçonneuses",
+  },
 };
 
 function getString(v: string | string[] | undefined): string | undefined {
@@ -81,6 +90,15 @@ export async function generateCatalogMetadata(
     title: `${config.seoTitle}${titleSuffix}${pageSuffix}`,
     description: config.seoDescription,
   });
+}
+
+// 🛡️ Fallback léger pour les Suspense
+function FilterSkeleton() {
+  return (
+    <div className="flex items-center justify-center rounded-2xl border border-white/10 bg-neutral-900/40 py-12">
+      <Loader2 className="h-6 w-6 animate-spin text-brand-red" />
+    </div>
+  );
 }
 
 export async function CatalogPage({
@@ -190,7 +208,6 @@ export async function CatalogPage({
         <div className="pointer-events-none absolute -top-40 right-0 h-[500px] w-[600px] rounded-full bg-brand-red/15 blur-[150px]" />
         
         <div className="relative mx-auto max-w-7xl px-6 lg:px-12">
-          {/* Fil d'Ariane */}
           <nav aria-label="Fil d'Ariane" className="font-mono text-xs uppercase tracking-widest text-neutral-500">
             <Link href="/" className="transition-colors hover:text-white">Accueil</Link>
             <span className="mx-2.5 text-neutral-700">/</span>
@@ -217,20 +234,25 @@ export async function CatalogPage({
         <div className="mx-auto max-w-7xl px-6 lg:px-12">
           <div className="grid grid-cols-1 gap-8 md:grid-cols-[240px_1fr] md:gap-10 lg:grid-cols-[300px_1fr]">
             
-            {/* SIDEBAR DESKTOP */}
+            {/* 🛡️ SIDEBAR DESKTOP - Enveloppé dans Suspense */}
             <div className="hidden md:block">
-              <CatalogSidebar
-                brands={allBrandsInCategory.map((b) => ({ id: b.id, name: b.name, slug: slugify(b.name) }))}
-                totalCount={totalCount}
-              />
+              <Suspense fallback={<FilterSkeleton />}>
+                <CatalogSidebar
+                  brands={allBrandsInCategory.map((b) => ({ id: b.id, name: b.name, slug: slugify(b.name) }))}
+                  totalCount={totalCount}
+                />
+              </Suspense>
             </div>
 
             {/* COLONNE PRODUITS */}
             <div className="min-w-0">
-              <CatalogToolbar
-                brands={allBrandsInCategory.map((b) => ({ id: b.id, name: b.name, slug: slugify(b.name) }))}
-                totalCount={totalCount}
-              />
+              {/* 🛡️ TOOLBAR - Enveloppé dans Suspense */}
+              <Suspense fallback={<FilterSkeleton />}>
+                <CatalogToolbar
+                  brands={allBrandsInCategory.map((b) => ({ id: b.id, name: b.name, slug: slugify(b.name) }))}
+                  totalCount={totalCount}
+                />
+              </Suspense>
 
               {products.length === 0 ? (
                 <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-16 text-center backdrop-blur-xl">

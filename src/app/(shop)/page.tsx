@@ -53,6 +53,13 @@ const CATEGORIES = [
     subtitle: "Protection Ultime & Performance Moteur",
     image: "/categories/lubrifiants.jpg",
   },
+  {
+    id: "05",
+    slug: "machines-agricoles",
+    title: "Machines Agricoles",
+    subtitle: "Agriculture moderne & Rentabilité",
+    image: "/categories/lubrifiants.jpg",
+  },
 ];
 
 const AVANTAGES = [

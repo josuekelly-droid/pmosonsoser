@@ -10,14 +10,12 @@ import {
   Lock,
   Info,
   ArrowUpRight,
-  Palette,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { constructMetadata, siteConfig } from "@/lib/seo";
 import { formatPrice, slugify } from "@/lib/utils";
 import { getIsB2BValidated } from "@/lib/pricing";
 import { ProductGallery } from "@/components/shop/product-gallery";
-import { AddToCart } from "@/components/shop/add-to-cart";
 import { ProductCard } from "@/components/shop/product-card";
 import { StockIndicator } from "@/components/shop/stock-indicator";
 import { PaymentBadges } from "@/components/shop/payment-badges";
@@ -35,9 +33,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   });
 
   if (!product) {
-    return constructMetadata({ title: "Produit introuvable", noIndex: true });
+    return constructMetadata({
+      title: "Produit introuvable",
+      noIndex: true,
+    });
   }
 
+  // 🎯 SEO enrichi avec keywords spécifiques au produit
   return constructMetadata({
     pathname: `/produits/${product.id}`,
     title: `${product.name} — ${product.brand.name}`,
@@ -45,6 +47,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ? product.description.slice(0, 155)
       : `Achetez ${product.name} (${product.brand.name}) au meilleur prix chez PM Osons Oser. Livraison rapide au Bénin, paiement Mobile Money.`,
     image: product.images?.[0],
+    type: "product",
+    priceAmount: product.priceB2C,
+    priceCurrency: "XOF",
+    keywords: [
+      product.name,
+      product.brand.name,
+      product.category.name,
+      `${product.name} Bénin`,
+      `${product.name} prix`,
+      `${product.name} Cotonou`,
+      `acheter ${product.name}`,
+      `${product.brand.name} Bénin`,
+      `${product.brand.name} prix`,
+      `${product.category.name} Bénin`,
+    ],
   });
 }
 
@@ -59,10 +76,9 @@ export default async function ProduitPage({ params }: Props) {
   const { id } = await params;
   const isB2B = await getIsB2BValidated();
 
-  // ⬇️ AJOUT DE `colors: true` DANS L'INCLUDE
   const product = await prisma.product.findUnique({
     where: { id },
-    include: { brand: true, category: true, colors: true }, 
+    include: { brand: true, category: true, colors: true },
   });
 
   if (!product) notFound();
@@ -83,19 +99,26 @@ export default async function ProduitPage({ params }: Props) {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
-    description: product.description || `${product.name} — ${product.brand.name} disponible chez PM Osons Oser.`,
+    description:
+      product.description ||
+      `${product.name} — ${product.brand.name} disponible chez PM Osons Oser.`,
     sku: product.id,
     brand: { "@type": "Brand", name: product.brand.name },
     category: product.category.name,
     image: product.images?.length
-      ? product.images.map((img) => (img.startsWith("http") ? img : `${siteConfig.url}${img}`))
+      ? product.images.map((img) =>
+          img.startsWith("http") ? img : `${siteConfig.url}${img}`
+        )
       : [`${siteConfig.url}/logo/pm-osons-oser-1.jpg`],
     offers: {
       "@type": "Offer",
       url: `${siteConfig.url}/produits/${product.id}`,
       priceCurrency: "XOF",
       price: displayPrice,
-      availability: product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      availability:
+        product.stock > 0
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
       itemCondition: "https://schema.org/NewCondition",
       seller: { "@type": "Organization", name: siteConfig.name },
     },
@@ -106,52 +129,88 @@ export default async function ProduitPage({ params }: Props) {
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Accueil", item: siteConfig.url },
-      { "@type": "ListItem", position: 2, name: product.category.name, item: `${siteConfig.url}/${product.category.slug}` },
-      { "@type": "ListItem", position: 3, name: product.name, item: `${siteConfig.url}/produits/${product.id}` },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: product.category.name,
+        item: `${siteConfig.url}/${product.category.slug}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: product.name,
+        item: `${siteConfig.url}/produits/${product.id}`,
+      },
     ],
   };
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-[#0A0A0B] text-white">
-      {/* Éléments de fond décoratifs Dark Luxury */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(239,68,68,0.15),rgba(255,255,255,0))]" />
-      <div className="absolute right-0 top-1/4 h-[600px] w-[600px] rounded-full bg-brand-red/10 blur-[180px] pointer-events-none" />
+      <div className="pointer-events-none absolute right-0 top-1/4 h-[600px] w-[600px] rounded-full bg-brand-red/10 blur-[180px]" />
 
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
 
-      {/* BREADCRUMB + HERO MINI */}
+      {/* BREADCRUMB */}
       <section className="relative pt-28 pb-10 md:pt-36 md:pb-14">
         <div className="mx-auto max-w-7xl px-4 md:px-8">
-          <nav aria-label="Fil d'Ariane" className="flex flex-wrap items-center gap-2 font-mono text-xs uppercase tracking-widest text-neutral-400">
-            <Link href="/" className="transition-colors hover:text-white">Accueil</Link>
+          <nav
+            aria-label="Fil d'Ariane"
+            className="flex flex-wrap items-center gap-2 font-mono text-xs uppercase tracking-widest text-neutral-400"
+          >
+            <Link href="/" className="transition-colors hover:text-white">
+              Accueil
+            </Link>
             <ChevronRight className="h-3 w-3 text-brand-red" />
-            <Link href={`/${product.category.slug}`} className="transition-colors hover:text-white">{product.category.name}</Link>
+            <Link
+              href={`/${product.category.slug}`}
+              className="transition-colors hover:text-white"
+            >
+              {product.category.name}
+            </Link>
             <ChevronRight className="h-3 w-3 text-brand-red" />
             <span className="truncate text-white">{product.name}</span>
           </nav>
         </div>
       </section>
 
-      {/* FICHE PRODUIT GLASSMORPHISM */}
+      {/* FICHE PRODUIT */}
       <section className="relative pb-24 md:pb-32">
         <div className="mx-auto max-w-7xl px-4 md:px-8">
           <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-6 backdrop-blur-2xl md:p-10 lg:p-14">
             <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16">
-              
               {/* Galerie */}
               <div className="lg:sticky lg:top-32 lg:self-start">
-                <ProductGallery images={product.images} alt={product.name} brandName={product.brand.name} />
+                <ProductGallery
+                  images={product.images}
+                  alt={product.name}
+                  brandName={product.brand.name}
+                />
               </div>
 
               {/* Détails */}
               <div className="flex flex-col">
                 {/* Badges */}
                 <div className="flex flex-wrap items-center gap-2">
-                  <Link href={`/${product.category.slug}`} className="rounded-xl border border-white/10 bg-black/40 px-3.5 py-1.5 font-mono text-[10px] uppercase tracking-widest text-neutral-300 backdrop-blur-md transition-colors hover:border-brand-red/50 hover:text-white">
+                  <Link
+                    href={`/${product.category.slug}`}
+                    className="rounded-xl border border-white/10 bg-black/40 px-3.5 py-1.5 font-mono text-[10px] uppercase tracking-widest text-neutral-300 backdrop-blur-md transition-colors hover:border-brand-red/50 hover:text-white"
+                  >
                     {product.category.name}
                   </Link>
-                  <Link href={`/${product.category.slug}?marque=${slugify(product.brand.name)}`} className="rounded-xl border border-white/10 bg-black/40 px-3.5 py-1.5 font-mono text-[10px] uppercase tracking-widest text-neutral-300 backdrop-blur-md transition-colors hover:border-brand-red/50 hover:text-white">
+                  <Link
+                    href={`/${product.category.slug}?marque=${slugify(
+                      product.brand.name
+                    )}`}
+                    className="rounded-xl border border-white/10 bg-black/40 px-3.5 py-1.5 font-mono text-[10px] uppercase tracking-widest text-neutral-300 backdrop-blur-md transition-colors hover:border-brand-red/50 hover:text-white"
+                  >
                     {product.brand.name}
                   </Link>
                 </div>
@@ -176,20 +235,21 @@ export default async function ProduitPage({ params }: Props) {
                       <span className="font-mono text-xs text-neutral-500 line-through">
                         {formatPrice(product.priceB2C)}
                       </span>
-                      <span className="font-mono text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-2.5 py-0.5 rounded-lg mt-1">
+                      <span className="mt-1 rounded-lg border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-0.5 font-mono text-xs font-semibold text-emerald-400">
                         Économisez {formatPrice(savings)}
                       </span>
                     </div>
                   ) : (
-                    product.priceB2B && product.priceB2B > 0 && (
-                       <span className="font-mono text-xs text-neutral-400 mb-1">
-                         Prix pro : {formatPrice(product.priceB2B)}
-                       </span>
+                    product.priceB2B &&
+                    product.priceB2B > 0 && (
+                      <span className="mb-1 font-mono text-xs text-neutral-400">
+                        Prix pro : {formatPrice(product.priceB2B)}
+                      </span>
                     )
                   )}
                 </div>
 
-                {/* Stock temps réel */}
+                {/* Stock */}
                 <div className="mt-7">
                   <StockIndicator stock={product.stock} />
                 </div>
@@ -200,25 +260,27 @@ export default async function ProduitPage({ params }: Props) {
                     <Info className="h-4 w-4 text-brand-red" />
                     Description technique
                   </h2>
-                  <p className="mt-3 font-mono text-xs md:text-sm leading-relaxed text-neutral-300">
-                    {product.description || `Découvrez ${product.name} de la marque ${product.brand.name}, disponible immédiatement chez PM Osons Oser. Produit d'origine certifiée, garanti et livré avec tous les documents officiels.`}
+                  <p className="mt-3 font-mono text-xs leading-relaxed text-neutral-300 md:text-sm">
+                    {product.description ||
+                      `Découvrez ${product.name} de la marque ${product.brand.name}, disponible immédiatement chez PM Osons Oser. Produit d'origine certifiée, garanti et livré avec tous les documents officiels.`}
                   </p>
                 </div>
 
+                {/* Sélecteur couleur + Ajout panier */}
                 <div className="mt-8">
-  <ProductPurchaseBlock
-    product={{
-      id: product.id,
-      name: product.name,
-      priceB2C: displayPrice,
-      images: product.images,
-      stock: product.stock,
-    }}
-    colors={product.colors}
-  />
-</div>
+                  <ProductPurchaseBlock
+                    product={{
+                      id: product.id,
+                      name: product.name,
+                      priceB2C: displayPrice,
+                      images: product.images,
+                      stock: product.stock,
+                    }}
+                    colors={product.colors}
+                  />
+                </div>
 
-                {/* Moyens de paiement */}
+                {/* Paiement */}
                 <div className="mt-10 border-t border-white/10 pt-8">
                   <div className="mb-4 flex items-center gap-2">
                     <Lock className="h-3.5 w-3.5 text-neutral-400" />
@@ -229,7 +291,6 @@ export default async function ProduitPage({ params }: Props) {
                   <PaymentBadges />
                 </div>
               </div>
-
             </div>
           </div>
 
@@ -238,38 +299,73 @@ export default async function ProduitPage({ params }: Props) {
             {AVANTAGES.map((a) => {
               const Icon = a.icon;
               return (
-                <div key={a.title} className="flex items-start gap-3.5 rounded-2xl border border-white/10 bg-neutral-900/40 p-4 backdrop-blur-2xl">
+                <div
+                  key={a.title}
+                  className="flex items-start gap-3.5 rounded-2xl border border-white/10 bg-neutral-900/40 p-4 backdrop-blur-2xl"
+                >
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-brand-red/30 bg-brand-red/10 text-brand-red">
                     <Icon className="h-5 w-5" />
                   </div>
                   <div className="min-w-0">
-                    <p className="font-sans text-sm font-medium text-white">{a.title}</p>
-                    <p className="mt-0.5 font-mono text-[11px] text-neutral-400">{a.desc}</p>
+                    <p className="font-sans text-sm font-medium text-white">
+                      {a.title}
+                    </p>
+                    <p className="mt-0.5 font-mono text-[11px] text-neutral-400">
+                      {a.desc}
+                    </p>
                   </div>
                 </div>
               );
             })}
           </div>
 
-          {/* DÉTAILS TECHNIQUES & LIVRAISON */}
+          {/* DÉTAILS */}
           <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-2">
             <div className="rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-8 backdrop-blur-2xl">
-              <h3 className="font-display text-xl font-light text-white mb-4">Livraison & Retours</h3>
+              <h3 className="mb-4 font-display text-xl font-light text-white">
+                Livraison & Retours
+              </h3>
               <ul className="space-y-3 font-mono text-xs text-neutral-300">
-                <li className="flex items-start gap-2.5"><span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-red" />Expédition sous 24-48h à Cotonou et environs</li>
-                <li className="flex items-start gap-2.5"><span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-red" />Livraison nationale sous 3-5 jours ouvrés</li>
-                <li className="flex items-start gap-2.5"><span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-red" />Retour sous 7 jours ouvrés (produit non altéré)</li>
-                <li className="flex items-start gap-2.5"><span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-red" />Frais de transport calculés selon la distance</li>
+                <li className="flex items-start gap-2.5">
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-red" />
+                  Expédition sous 24-48h à Cotonou et environs
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-red" />
+                  Livraison nationale sous 3-5 jours ouvrés
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-red" />
+                  Retour sous 7 jours ouvrés (produit non altéré)
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-red" />
+                  Frais de transport calculés selon la distance
+                </li>
               </ul>
             </div>
-            
+
             <div className="rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-8 backdrop-blur-2xl">
-              <h3 className="font-display text-xl font-light text-white mb-4">Garantie & Support</h3>
+              <h3 className="mb-4 font-display text-xl font-light text-white">
+                Garantie & Support
+              </h3>
               <ul className="space-y-3 font-mono text-xs text-neutral-300">
-                <li className="flex items-start gap-2.5"><span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-red" />Garantie constructeur officielle incluse</li>
-                <li className="flex items-start gap-2.5"><span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-red" />Service après-vente assuré en agence</li>
-                <li className="flex items-start gap-2.5"><span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-red" />Assistance dédiée par téléphone et WhatsApp</li>
-                <li className="flex items-start gap-2.5"><span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-red" />Facture normalisée et pièces d'origine</li>
+                <li className="flex items-start gap-2.5">
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-red" />
+                  Garantie constructeur officielle incluse
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-red" />
+                  Service après-vente assuré en agence
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-red" />
+                  Assistance dédiée par téléphone et WhatsApp
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-red" />
+                  Facture normalisée et pièces d'origine
+                </li>
               </ul>
             </div>
           </div>
@@ -278,14 +374,21 @@ export default async function ProduitPage({ params }: Props) {
 
       {/* PRODUITS SIMILAIRES */}
       {related.length > 0 && (
-        <section className="relative py-20 border-t border-white/10 bg-black/40">
+        <section className="relative border-t border-white/10 bg-black/40 py-20">
           <div className="mx-auto max-w-7xl px-4 md:px-8">
-            <div className="flex items-end justify-between gap-4 mb-10">
+            <div className="mb-10 flex items-end justify-between gap-4">
               <div>
-                <span className="font-mono text-xs uppercase tracking-[0.3em] text-brand-red">[ Suggestions ]</span>
-                <h2 className="mt-1 font-display text-3xl font-light tracking-wide text-white md:text-4xl">Produits similaires</h2>
+                <span className="font-mono text-xs uppercase tracking-[0.3em] text-brand-red">
+                  [ Suggestions ]
+                </span>
+                <h2 className="mt-1 font-display text-3xl font-light tracking-wide text-white md:text-4xl">
+                  Produits similaires
+                </h2>
               </div>
-              <Link href={`/${product.category.slug}`} className="hidden shrink-0 font-mono text-xs uppercase tracking-widest text-brand-red transition hover:text-white md:inline-flex items-center gap-1">
+              <Link
+                href={`/${product.category.slug}`}
+                className="hidden shrink-0 items-center gap-1 font-mono text-xs uppercase tracking-widest text-brand-red transition hover:text-white md:inline-flex"
+              >
                 <span>Voir tout</span> <ArrowUpRight className="h-3.5 w-3.5" />
               </Link>
             </div>

@@ -100,6 +100,7 @@ export const settingsSchema = z.object({
   pricePerKm: numberField(0, 100_000_000),
   freeDeliveryThreshold: numberField(0, 1_000_000_000),
   maxRadiusKm: numberField(1, 1000),
+  maxDeliveryFee: numberField(0, 1_000_000),
   // Paiement
   bankName: optionalString(100),
   bankIban: optionalString(60),

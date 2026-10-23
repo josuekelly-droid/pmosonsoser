@@ -27,6 +27,7 @@ type Settings = {
   wuLastName: string | null;
   wuCity: string | null;
   wuCountry: string | null;
+  maxDeliveryFee: number;
 };
 
 type FieldErrors = Record<string, string[]>;
@@ -165,6 +166,13 @@ export function SettingsForm({ initial }: { initial: Settings }) {
             defaultValue={String(initial.maxRadiusKm)}
             errors={fieldErrors.maxRadiusKm}
           />
+        <Field
+          label="Frais de livraison maximum (FCFA)"
+          name="maxDeliveryFee"
+          type="number"
+          defaultValue={String(initial.maxDeliveryFee)}
+          errors={fieldErrors.maxDeliveryFee}
+        />
         </div>
       </Section>
 

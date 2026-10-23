@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { useCart } from "@/store/cart";
 import { formatPrice, cn } from "@/lib/utils";
-import { DELIVERY_PRICING, type DeliveryPoint } from "@/lib/delivery";
+import { DELIVERY_PRICING_DEFAULTS, type DeliveryPoint } from "@/lib/delivery";
 import { PaymentBadges } from "@/components/shop/payment-badges";
 import { MapPicker } from "@/components/shop/map-picker";
 import { Input } from "@/components/ui/input";
@@ -76,7 +76,8 @@ export function CheckoutForm() {
 
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
-  const isFreeDelivery = subtotal >= DELIVERY_PRICING.freeDeliveryThreshold;
+  // ⬇️ CORRECTION : DELIVERY_PRICING_DEFAULTS
+  const isFreeDelivery = subtotal >= DELIVERY_PRICING_DEFAULTS.freeDeliveryThreshold;
   const deliveryFee = isFreeDelivery ? 0 : (delivery?.fee ?? 0);
   const total = subtotal + deliveryFee;
 
@@ -107,7 +108,6 @@ export function CheckoutForm() {
       deliveryDistance: delivery.distanceKm,
       notes: formData.get("notes") || "",
       methodePaiement: method,
-      // 🎨 On utilise productId et on inclut les couleurs
       items: items.map((i) => ({
         id: i.productId,
         quantity: i.quantity,
@@ -118,7 +118,6 @@ export function CheckoutForm() {
     };
 
     try {
-      // 1. Créer la commande en base
       const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -132,7 +131,6 @@ export function CheckoutForm() {
         return;
       }
 
-      // 2. Si FedaPay → Initier le paiement et rediriger
       if (method === "FEDAPAY") {
         const paymentRes = await fetch("/api/payment/fedapay", {
           method: "POST",
@@ -153,7 +151,6 @@ export function CheckoutForm() {
         return;
       }
 
-      // 3. Si Western Union ou Virement → Redirection classique
       clear();
       router.push(`/commande/${data.orderNumber}`);
     } catch {
@@ -262,7 +259,7 @@ export function CheckoutForm() {
                 maxLength={500}
                 rows={3}
                 placeholder="Remarques, repères de livraison, horaires préférentiels…"
-                className="w-full rounded-2xl border border-white/10 bg-white/[0.03] p-4 font-sans text-sm text-white placeholder:text-neutral-600 outline-none transition-all duration-300 hover:border-white/20 focus:border-brand-red focus:bg-white/[0.06] focus:ring-1 focus:ring-brand-red/50 resize-none"
+                className="w-full resize-none rounded-2xl border border-white/10 bg-white/[0.03] p-4 font-sans text-sm text-white placeholder:text-neutral-600 outline-none transition-all duration-300 hover:border-white/20 focus:border-brand-red focus:bg-white/[0.06] focus:ring-1 focus:ring-brand-red/50"
               />
             </Field>
           </div>
@@ -273,7 +270,7 @@ export function CheckoutForm() {
               <span>
                 Livraison offerte dès{" "}
                 <strong className="text-amber-300">
-                  {formatPrice(DELIVERY_PRICING.freeDeliveryThreshold)}
+                  {formatPrice(DELIVERY_PRICING_DEFAULTS.freeDeliveryThreshold)}
                 </strong>{" "}
                 d'achat.
               </span>
@@ -357,14 +354,14 @@ export function CheckoutForm() {
       {/* COLONNE RÉCAPITULATIF COMMANDE */}
       <aside className="lg:sticky lg:top-32 lg:self-start">
         <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-6 backdrop-blur-2xl md:p-8">
-          <span className="font-mono text-xs uppercase tracking-[0.25em] text-brand-red block">
+          <span className="block font-mono text-xs uppercase tracking-[0.25em] text-brand-red">
             [ Synthèse ]
           </span>
           <h2 className="mt-1 font-display text-2xl font-light text-white">
             Votre Commande
           </h2>
 
-          <ul className="mt-6 max-h-64 space-y-3 overflow-y-auto pr-1 scrollbar-none">
+          <ul className="scrollbar-none mt-6 max-h-64 space-y-3 overflow-y-auto pr-1">
             {items.map((i) => (
               <li
                 key={i.id}
@@ -374,7 +371,7 @@ export function CheckoutForm() {
                   <p className="truncate font-sans text-sm font-medium text-white">
                     {i.name}
                   </p>
-                  
+
                   {/* 🎨 COULEUR DANS LE RÉCAP */}
                   {i.colorName && (
                     <div className="mt-1.5 flex items-center gap-1.5">
@@ -390,7 +387,7 @@ export function CheckoutForm() {
 
                   <p className="mt-1 text-neutral-500">Quantité : {i.quantity}</p>
                 </div>
-                <span className="shrink-0 text-white font-medium">
+                <span className="shrink-0 font-medium text-white">
                   {formatPrice(i.price * i.quantity)}
                 </span>
               </li>
@@ -400,7 +397,7 @@ export function CheckoutForm() {
           <dl className="mt-6 space-y-3 border-t border-white/10 pt-5 font-mono text-xs">
             <div className="flex justify-between text-neutral-400">
               <dt>Sous-total</dt>
-              <dd className="text-white font-medium">{formatPrice(subtotal)}</dd>
+              <dd className="font-medium text-white">{formatPrice(subtotal)}</dd>
             </div>
             <div className="flex justify-between text-neutral-400">
               <dt>Livraison</dt>

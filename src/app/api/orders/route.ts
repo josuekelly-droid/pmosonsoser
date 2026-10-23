@@ -45,15 +45,14 @@ export async function POST(req: Request) {
 
     /* ---------- 3. Transaction sécurisée ---------- */
     const result = await prisma.$transaction(async (tx) => {
-      
       // 3a. Vérifier le statut B2B du client (si connecté)
       let isB2BValidated = false;
       if (session?.user?.id) {
         const dbUser = await tx.user.findUnique({
           where: { id: session.user.id },
-          select: { typeCompte: true, statutValidation: true }
+          select: { typeCompte: true, statutValidation: true },
         });
-        
+
         if (
           (dbUser?.typeCompte === "B2B" || dbUser?.typeCompte === "PREMIUM") &&
           dbUser?.statutValidation === "VALIDE"
@@ -61,7 +60,7 @@ export async function POST(req: Request) {
           isB2BValidated = true;
         }
       }
-      
+
       // 3b. Récupérer les vrais produits DANS la transaction
       const productIds = data.items.map((i) => i.id);
       const products = await tx.product.findMany({
@@ -79,14 +78,12 @@ export async function POST(req: Request) {
       for (const item of data.items) {
         const product = products.find((p) => p.id === item.id)!;
 
-        const unitPrice = (isB2BValidated && product.priceB2B) ? product.priceB2B : product.priceB2C;
+        const unitPrice =
+          isB2BValidated && product.priceB2B ? product.priceB2B : product.priceB2C;
         subtotal += unitPrice * item.quantity;
 
         const updated = await tx.product.updateMany({
-          where: { 
-            id: item.id, 
-            stock: { gte: item.quantity }
-          },
+          where: { id: item.id, stock: { gte: item.quantity } },
           data: { stock: { decrement: item.quantity } },
         });
 
@@ -98,14 +95,23 @@ export async function POST(req: Request) {
           productId: item.id,
           quantity: item.quantity,
           price: unitPrice,
-          colorName: item.colorName || null, 
+          colorName: item.colorName || null,
           colorHex: item.colorHex || null,
         });
       }
 
-      // 3d. Calcul des frais de livraison
-      const deliveryFee = calculateDeliveryFee(data.deliveryDistance, subtotal);
-      const total = subtotal + deliveryFee;
+      // 3d. Récupérer les settings de livraison + calcul des frais
+      const settings = await tx.settings.findUnique({ where: { id: "global" } });
+      const pricing = {
+        baseFee: settings?.baseFee ?? 500,
+        pricePerKm: settings?.pricePerKm ?? 150,
+        freeDeliveryThreshold: settings?.freeDeliveryThreshold ?? 5000_000,
+        maxRadiusKm: settings?.maxRadiusKm ?? 850,
+        maxFee: settings?.maxDeliveryFee ?? 40_000,
+      };
+
+      const deliveryFee = calculateDeliveryFee(data.deliveryDistance, subtotal, pricing);
+      const total = subtotal + deliveryFee; // ✅ LIGNE AJOUTÉE (c'était le bug)
 
       // 3e. Création de la commande
       const newOrder = await tx.order.create({
@@ -129,7 +135,6 @@ export async function POST(req: Request) {
           },
         },
         include: {
-          // 🛡️ AJOUT DE brand: true POUR L'EMAIL
           items: { include: { product: { include: { brand: true } } } },
         },
       });
@@ -149,7 +154,6 @@ export async function POST(req: Request) {
 
     /* ---------- 4. Envoi des emails (hors transaction) ---------- */
     try {
-      // 🎨 Construction de l'objet complet pour le nouvel email détaillé
       const emailOrder = {
         orderNumber: result.order.orderNumber,
         customerName: result.order.customerName,
@@ -173,10 +177,8 @@ export async function POST(req: Request) {
         })),
       };
 
-      // Envoi au client
       await sendOrderConfirmationEmail(emailOrder);
 
-      // Envoi à l'admin
       if (process.env.EMAIL_USER) {
         await sendNewOrderAdminEmail(emailOrder, process.env.EMAIL_USER);
       }
@@ -186,18 +188,17 @@ export async function POST(req: Request) {
 
     /* ---------- 5. Réponse succès ---------- */
     return NextResponse.json(
-      { 
-        ok: true, 
-        orderNumber: result.order.orderNumber, 
+      {
+        ok: true,
+        orderNumber: result.order.orderNumber,
         orderId: result.order.id,
-        total: result.order.total, 
-        deliveryFee: result.deliveryFee, 
-        subtotal: result.subtotal, 
-        itemCount: result.order.items.length 
+        total: result.order.total,
+        deliveryFee: result.deliveryFee,
+        subtotal: result.subtotal,
+        itemCount: result.order.items.length,
       },
       { status: 201 }
     );
-
   } catch (error: any) {
     console.error("[/api/orders POST]", error);
 

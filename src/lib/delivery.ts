@@ -1,6 +1,8 @@
 /**
  * Configuration de la livraison PM Osons Oser
  * Calcul basé sur la distance réelle (km) via OpenRouteService
+ * Rayon max : 850 km (tout le Bénin)
+ * Plafond frais : 40 000 FCFA
  */
 
 export const DELIVERY_ORIGIN = {
@@ -9,16 +11,20 @@ export const DELIVERY_ORIGIN = {
   label: "PM Osons Oser — Cotonou",
 } as const;
 
-export const DELIVERY_PRICING = {
-  baseFee: 500, // Frais de base (FCFA)
-  pricePerKm: 150, // Prix par km (FCFA)
-  freeDeliveryThreshold: 5000_000, // Livraison offerte dès (FCFA)
-  maxRadiusKm: 500, // Rayon max de livraison
-  minDistanceKm: 0.5, // Distance minimale facturée
+/**
+ * Valeurs par défaut (si la table Settings est inaccessible)
+ */
+export const DELIVERY_PRICING_DEFAULTS = {
+  baseFee: 500,
+  pricePerKm: 150,
+  freeDeliveryThreshold: 5000_000,  
+  maxRadiusKm: 850,                // 850 km (Bénin entier)
+  maxFee: 40_000,                  
+  minDistanceKm: 0.5,
 } as const;
 
 /**
- * Point de livraison complet (retourné par MapPicker et utilisé au checkout)
+ * Point de livraison complet
  */
 export type DeliveryPoint = {
   coords: { lat: number; lng: number };
@@ -28,28 +34,50 @@ export type DeliveryPoint = {
 };
 
 /**
- * Calcule les frais de livraison en fonction de la distance et du sous-total
+ * Paramètres de tarification
+ */
+export type DeliveryPricing = {
+  baseFee: number;
+  pricePerKm: number;
+  freeDeliveryThreshold: number;
+  maxRadiusKm: number;
+  maxFee: number;
+  minDistanceKm?: number;
+};
+
+/**
+ * Calcule les frais de livraison
+ * - Distance × prix au km + frais de base
+ * - Plafonné à `maxFee`
+ * - Gratuit si le sous-total dépasse `freeDeliveryThreshold`
  */
 export function calculateDeliveryFee(
   distanceKm: number,
-  subtotal: number
+  subtotal: number,
+  pricing: DeliveryPricing = DELIVERY_PRICING_DEFAULTS
 ): number {
-  if (subtotal >= DELIVERY_PRICING.freeDeliveryThreshold) return 0;
+  // Livraison offerte si le sous-total dépasse le seuil
+  if (subtotal >= pricing.freeDeliveryThreshold) return 0;
 
+  const minDistance = pricing.minDistanceKm ?? 0.5;
+
+  // Clamp la distance dans [minDistance, maxRadiusKm]
   const safeDistance = Math.max(
-    DELIVERY_PRICING.minDistanceKm,
-    Math.min(distanceKm, DELIVERY_PRICING.maxRadiusKm)
+    minDistance,
+    Math.min(distanceKm, pricing.maxRadiusKm)
   );
 
-  const fee =
-    DELIVERY_PRICING.baseFee + safeDistance * DELIVERY_PRICING.pricePerKm;
+  // Calcul brut
+  const rawFee = pricing.baseFee + safeDistance * pricing.pricePerKm;
 
-  return Math.round(fee);
+  // Application du plafond
+  const finalFee = Math.min(rawFee, pricing.maxFee);
+
+  return Math.round(finalFee);
 }
 
 /**
- * Distance en ligne droite (fallback si l'API ORS échoue)
- * Formule de Haversine
+ * Distance en ligne droite (Haversine)
  */
 export function haversineDistance(
   lat1: number,
@@ -57,7 +85,7 @@ export function haversineDistance(
   lat2: number,
   lng2: number
 ): number {
-  const R = 6371; // Rayon Terre en km
+  const R = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLng = ((lng2 - lng1) * Math.PI) / 180;
   const a =

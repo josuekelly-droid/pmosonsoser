@@ -55,6 +55,7 @@ export async function PATCH(req: Request) {
         wuLastName: data.wuLastName || null,
         wuCity: data.wuCity || null,
         wuCountry: data.wuCountry || null,
+        maxDeliveryFee: data.maxDeliveryFee,
       },
       update: {
         phone: data.phone || null,
@@ -74,6 +75,7 @@ export async function PATCH(req: Request) {
         wuLastName: data.wuLastName || null,
         wuCity: data.wuCity || null,
         wuCountry: data.wuCountry || null,
+        maxDeliveryFee: data.maxDeliveryFee,
       },
     });
 

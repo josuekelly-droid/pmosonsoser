@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Settings" ADD COLUMN     "maxDeliveryFee" INTEGER NOT NULL DEFAULT 40000,
+ALTER COLUMN "maxRadiusKm" SET DEFAULT 850;

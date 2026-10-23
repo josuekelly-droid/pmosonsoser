@@ -211,7 +211,8 @@ model Settings {
   baseFee               Int      @default(500)
   pricePerKm            Int      @default(150)
   freeDeliveryThreshold Int      @default(5000000)
-  maxRadiusKm           Int      @default(550)
+  maxRadiusKm           Int      @default(850)
+  maxDeliveryFee        Int      @default(40000)
   bankName              String?
   bankIban              String?
   bankHolder            String?

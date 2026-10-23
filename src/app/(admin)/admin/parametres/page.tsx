@@ -50,6 +50,7 @@ export default async function AdminParametresPage() {
           wuLastName: settings.wuLastName,
           wuCity: settings.wuCity,
           wuCountry: settings.wuCountry,
+          maxDeliveryFee: settings.maxDeliveryFee,
         }}
       />
     </div>

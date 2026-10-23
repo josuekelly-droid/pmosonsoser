@@ -19,7 +19,7 @@ import { ArrowUpRight, ShieldCheck, Truck, Award, CheckCircle2, Sparkles } from 
 /*  Données                                                                  */
 /* -------------------------------------------------------------------------- */
 
-const BRANDS = ["Apsonic", "Honda", "TVS", "Haojue", "Dayang"];
+const BRANDS = ["Apsonic", "Honda", "TVS", "Haojue", "Dayang", "Fenghao"];
 
 const STATS = [
   { value: "60+", label: "Modèles d'Élite", icon: Award },

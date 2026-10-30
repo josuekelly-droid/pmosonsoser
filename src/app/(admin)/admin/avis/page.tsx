@@ -16,7 +16,7 @@ export default async function AdminAvisPage() {
   });
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 md:space-y-8">
       {/* HEADER DE PAGE DARK LUXURY */}
       <div>
         <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-brand-red">
@@ -31,7 +31,9 @@ export default async function AdminAvisPage() {
       </div>
 
       {/* TABLEAU ET FILTRES REVISE */}
-      <ReviewsTable initialReviews={reviews} />
+      <div className="min-w-0 overflow-x-hidden">
+        <ReviewsTable initialReviews={reviews} />
+      </div>
     </div>
   );
 }

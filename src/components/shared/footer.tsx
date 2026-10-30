@@ -11,6 +11,8 @@ const LINKS = {
     { href: "/tricycles", label: "Tricycles" },
     { href: "/pieces-detachees", label: "Pièces Détachées" },
     { href: "/lubrifiants", label: "Lubrifiants" },
+    { href: "/machines-agricoles", label: "Machines Agricoles" },
+
   ],
   entreprise: [
     { href: "/a-propos", label: "À propos" },

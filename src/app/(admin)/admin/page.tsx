@@ -9,6 +9,7 @@ import {
   ArrowRight,
   AlertTriangle,
   Calendar,
+  LucideIcon,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/utils";
@@ -37,18 +38,10 @@ function getMonthRange(offset = 0) {
   return { start, end };
 }
 
-function getMonthLabel(date: Date) {
-  return MONTH_NAMES_FR[date.getMonth()];
-}
-
-/* ========================================================
-   Page
-   ======================================================== */
 export default async function AdminDashboardPage() {
   const currentMonth = getMonthRange(0);
   const previousMonth = getMonthRange(-1);
 
-  // 1. Stats globales
   const [
     totalProducts,
     totalOrders,
@@ -58,10 +51,12 @@ export default async function AdminDashboardPage() {
     pendingOrdersCount,
     lowStockProducts,
     recentOrders,
+    validOrders,
   ] = await Promise.all([
     prisma.product.count(),
     prisma.order.count(),
     prisma.user.count(),
+    // CA du mois en cours
     prisma.order.aggregate({
       where: {
         statut: { in: ["PAYE", "EXPEDIE", "LIVRE"] },
@@ -70,6 +65,7 @@ export default async function AdminDashboardPage() {
       _sum: { total: true },
       _count: true,
     }),
+    // CA du mois précédent
     prisma.order.aggregate({
       where: {
         statut: { in: ["PAYE", "EXPEDIE", "LIVRE"] },
@@ -87,7 +83,7 @@ export default async function AdminDashboardPage() {
     }),
     prisma.order.findMany({
       orderBy: { createdAt: "desc" },
-      take: 6,
+      take: 5,
       select: {
         id: true,
         orderNumber: true,
@@ -97,15 +93,24 @@ export default async function AdminDashboardPage() {
         createdAt: true,
       },
     }),
+    prisma.order.findMany({
+      where: {
+        statut: { in: ["PAYE", "EXPEDIE", "LIVRE"] },
+        createdAt: {
+          gte: new Date(new Date().setDate(new Date().getDate() - 7)),
+        },
+      },
+      select: { total: true, createdAt: true },
+    }),
   ]);
 
-  // 2. CA du mois en cours et du mois précédent
+  // CA du mois en cours et précédent
   const currentRevenue = currentMonthStats._sum.total || 0;
   const previousRevenue = previousMonthStats._sum.total || 0;
   const currentOrderCount = currentMonthStats._count;
   const previousOrderCount = previousMonthStats._count;
 
-  // 3. Pourcentage d'évolution
+  // Calcul du % d'évolution
   const revenueChange =
     previousRevenue > 0
       ? ((currentRevenue - previousRevenue) / previousRevenue) * 100
@@ -120,7 +125,7 @@ export default async function AdminDashboardPage() {
       ? 100
       : 0;
 
-  // 4. Historique des 6 derniers mois
+  // Historique des 6 derniers mois
   const sixMonthsAgo = new Date();
   sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
   sixMonthsAgo.setDate(1);
@@ -134,8 +139,10 @@ export default async function AdminDashboardPage() {
     select: { total: true, createdAt: true },
   });
 
-  // Initialise les 6 derniers mois à 0
-  const monthlyMap = new Map<string, { revenue: number; orders: number; label: string }>();
+  const monthlyMap = new Map<
+    string,
+    { revenue: number; orders: number; label: string }
+  >();
   for (let i = 5; i >= 0; i--) {
     const d = new Date();
     d.setMonth(d.getMonth() - i);
@@ -143,11 +150,10 @@ export default async function AdminDashboardPage() {
     monthlyMap.set(key, {
       revenue: 0,
       orders: 0,
-      label: getMonthLabel(d),
+      label: MONTH_NAMES_FR[d.getMonth()],
     });
   }
 
-  // Agrège les commandes par mois
   recentPaidOrders.forEach((o) => {
     const d = new Date(o.createdAt);
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
@@ -167,31 +173,22 @@ export default async function AdminDashboardPage() {
       orders: data.orders,
     }));
 
-  // 5. Ventes des 7 derniers jours (garde la logique existante)
-  const sevenDaysAgo = new Date();
-  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-  const validOrders7d = recentPaidOrders.filter(
-    (o) => new Date(o.createdAt) >= sevenDaysAgo
-  );
-
-  const chartDataMap = new Map<string, number>();
+  // Ventes des 7 derniers jours (graphique existant)
+  const chartDataMap = new Map();
   for (let i = 6; i >= 0; i--) {
     const d = new Date();
     d.setDate(d.getDate() - i);
     const dayStr = d.toLocaleDateString("fr-FR", { weekday: "short" });
     chartDataMap.set(dayStr, 0);
   }
-
-  validOrders7d.forEach((order) => {
-    const dayStr = new Date(order.createdAt).toLocaleDateString("fr-FR", {
+  validOrders.forEach((order) => {
+    const dayStr = order.createdAt.toLocaleDateString("fr-FR", {
       weekday: "short",
     });
     if (chartDataMap.has(dayStr)) {
-      chartDataMap.set(dayStr, chartDataMap.get(dayStr)! + order.total);
+      chartDataMap.set(dayStr, chartDataMap.get(dayStr) + order.total);
     }
   });
-
   const chartData = Array.from(chartDataMap.entries()).map(([name, total]) => ({
     name,
     total,
@@ -203,44 +200,50 @@ export default async function AdminDashboardPage() {
   });
 
   return (
-    <div className="space-y-6 md:space-y-8">
-      {/* Header */}
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="font-display text-3xl tracking-wide text-brand-black md:text-4xl">
-            Vue d'ensemble
-          </h1>
-          <p className="mt-1 flex items-center gap-2 text-sm text-brand-black/60">
-            <Calendar className="h-4 w-4" />
-            <span className="capitalize">{currentMonthLabel}</span>
-          </p>
-        </div>
+    <div className="space-y-8">
+      {/* HEADER */}
+      <div>
+        <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-brand-red">
+          [ Console de pilotage ]
+        </span>
+        <h1 className="mt-1 font-display text-3xl font-light tracking-wide text-white md:text-5xl">
+          Vue d'ensemble
+        </h1>
+        <p className="mt-2 flex items-center gap-2 font-mono text-xs text-neutral-400 max-w-xl leading-relaxed">
+          <Calendar className="h-3.5 w-3.5" />
+          <span className="capitalize">{currentMonthLabel}</span>
+        </p>
       </div>
 
-      {/* Alerte stock */}
+      {/* ALERTE STOCK */}
       {lowStockProducts.length > 0 && (
-        <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 md:p-5">
-          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+        <div className="flex items-center gap-4 rounded-[2rem] border border-amber-500/30 bg-amber-500/10 p-5 text-amber-400 backdrop-blur-2xl">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-amber-500/30 bg-amber-500/20">
+            <AlertTriangle className="h-5 w-5 text-amber-400" />
+          </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-amber-900">
-              Alerte stock faible
+            <p className="font-mono text-xs font-bold uppercase tracking-wider text-amber-400">
+              Alerte stock critique
             </p>
-            <p className="mt-1 text-xs text-amber-800/80">
-              {lowStockProducts.map((p) => `${p.name} (${p.stock})`).join(" · ")}
+            <p className="mt-1 font-mono text-xs text-amber-300/80 truncate">
+              {lowStockProducts
+                .map((p) => `${p.name} (${p.stock} restant${p.stock > 1 ? "s" : ""})`)
+                .join(" · ")}
             </p>
           </div>
           <Link
             href="/admin/produits?stock=low"
-            className="hidden shrink-0 items-center gap-1 rounded-full bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-amber-700 md:inline-flex"
+            className="hidden shrink-0 items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/20 px-4 py-2 font-mono text-xs uppercase tracking-widest text-amber-300 transition-all hover:bg-amber-500 hover:text-black md:inline-flex"
           >
-            Voir <ArrowRight className="h-3 w-3" />
+            <span>Gérer le stock</span>
+            <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
       )}
 
-      {/* Stat Cards */}
+      {/* CARTES STATISTIQUES */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCardLight
+        <StatCardDark
           label="CA ce mois"
           value={formatPrice(currentRevenue)}
           icon={TrendingUp}
@@ -253,7 +256,7 @@ export default async function AdminDashboardPage() {
               : undefined
           }
         />
-        <StatCardLight
+        <StatCardDark
           label="Commandes ce mois"
           value={currentOrderCount}
           icon={ShoppingCart}
@@ -266,27 +269,28 @@ export default async function AdminDashboardPage() {
               : undefined
           }
           badge={
-            pendingOrdersCount > 0
-              ? `${pendingOrdersCount} en attente`
-              : undefined
+            pendingOrdersCount > 0 ? `${pendingOrdersCount} en attente` : undefined
           }
         />
-        <StatCardLight label="Produits" value={totalProducts} icon={Package} />
-        <StatCardLight label="Clients" value={totalUsers} icon={Users} />
+        <StatCardDark label="Produits" value={totalProducts} icon={Package} />
+        <StatCardDark label="Clients" value={totalUsers} icon={Users} />
       </div>
 
-      {/* CA Mensuel (6 mois) */}
-      <div className="rounded-3xl border border-brand-black/5 bg-white p-6 shadow-sm">
+      {/* CHIFFRE D'AFFAIRES MENSUEL (6 MOIS) */}
+      <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-8 backdrop-blur-2xl">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h2 className="font-display text-xl tracking-wide text-brand-black">
+            <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-brand-red">
+              [ Analyse financière ]
+            </span>
+            <h2 className="mt-0.5 font-display text-2xl font-light tracking-wide text-white">
               Évolution du chiffre d'affaires
             </h2>
-            <p className="mt-1 text-xs text-brand-black/50">
+            <p className="mt-1 font-mono text-xs text-neutral-400">
               Comparatif sur les 6 derniers mois
             </p>
           </div>
-          <div className="hidden items-center gap-2 rounded-full bg-brand-red/10 px-3 py-1.5 text-[11px] font-semibold text-brand-red md:flex">
+          <div className="hidden items-center gap-2 rounded-full border border-brand-red/30 bg-brand-red/10 px-4 py-2 text-[11px] font-semibold text-brand-red md:flex">
             <TrendingUp className="h-3.5 w-3.5" />
             {formatPrice(currentRevenue)} ce mois
           </div>
@@ -294,14 +298,14 @@ export default async function AdminDashboardPage() {
 
         <MonthlyRevenueChart data={monthlyData} />
 
-        {/* Tableau récapitulatif mensuel */}
-        <div className="mt-6 overflow-hidden rounded-2xl border border-brand-black/5">
+        {/* Tableau récapitulatif */}
+        <div className="mt-6 overflow-hidden rounded-2xl border border-white/10">
           <table className="w-full">
             <thead>
-              <tr className="bg-brand-gray/40 text-[10px] font-semibold uppercase tracking-widest text-brand-black/50">
+              <tr className="border-b border-white/10 bg-white/[0.03] text-[10px] font-semibold uppercase tracking-widest text-neutral-500">
                 <th className="px-4 py-3 text-left">Mois</th>
                 <th className="px-4 py-3 text-right">Commandes</th>
-                <th className="px-4 py-3 text-right">Chiffre d'affaires</th>
+                <th className="px-4 py-3 text-right">CA</th>
                 <th className="px-4 py-3 text-right">Panier moyen</th>
               </tr>
             </thead>
@@ -312,29 +316,29 @@ export default async function AdminDashboardPage() {
                 return (
                   <tr
                     key={m.month}
-                    className={`border-t border-brand-black/5 ${
+                    className={`border-b border-white/5 last:border-0 ${
                       isCurrent ? "bg-brand-red/5" : ""
                     }`}
                   >
-                    <td className="px-4 py-3 text-sm font-medium text-brand-black">
+                    <td className="px-4 py-3 font-mono text-sm font-medium text-white">
                       {m.label}
                       {isCurrent && (
-                        <span className="ml-2 rounded-full bg-brand-red/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-brand-red">
+                        <span className="ml-2 rounded-full bg-brand-red/20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-brand-red">
                           En cours
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-right text-sm text-brand-black/70">
+                    <td className="px-4 py-3 text-right font-mono text-sm text-neutral-300">
                       {m.orders}
                     </td>
                     <td
                       className={`px-4 py-3 text-right font-display text-base ${
-                        isCurrent ? "text-brand-red" : "text-brand-black"
+                        isCurrent ? "text-brand-red" : "text-white"
                       }`}
                     >
                       {formatPrice(m.revenue)}
                     </td>
-                    <td className="px-4 py-3 text-right text-sm text-brand-black/60">
+                    <td className="px-4 py-3 text-right font-mono text-sm text-neutral-400">
                       {avgOrder > 0 ? formatPrice(avgOrder) : "—"}
                     </td>
                   </tr>
@@ -345,67 +349,70 @@ export default async function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* Ventes 7 jours + Dernières commandes */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="rounded-3xl border border-brand-black/5 bg-white p-6 shadow-sm lg:col-span-2">
+      {/* GRAPHIQUE 7J + DERNIÈRES COMMANDES */}
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-8 backdrop-blur-2xl lg:col-span-2">
           <div className="mb-6 flex items-center justify-between">
             <div>
-              <h2 className="font-display text-xl tracking-wide text-brand-black">
+              <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-brand-red">
+                [ Performance hebdomadaire ]
+              </span>
+              <h2 className="mt-0.5 font-display text-2xl font-light tracking-wide text-white">
                 Ventes des 7 derniers jours
               </h2>
-              <p className="mt-1 text-xs text-brand-black/50">
-                Activité récente
-              </p>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-red/10 text-brand-red">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-brand-red/30 bg-brand-red/10 text-brand-red shadow-[0_0_15px_rgba(239,68,68,0.2)]">
               <TrendingUp className="h-5 w-5" />
             </div>
           </div>
           <SalesChart data={chartData} />
         </div>
 
-        <div className="rounded-3xl border border-brand-black/5 bg-white p-6 shadow-sm">
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="font-display text-xl tracking-wide text-brand-black">
-              Dernières commandes
-            </h2>
-            <Link
-              href="/admin/commandes"
-              className="text-xs font-semibold text-brand-red transition hover:text-brand-black"
-            >
-              Tout voir
-            </Link>
-          </div>
-          <div className="space-y-4">
-            {recentOrders.map((o) => (
+        <div className="relative flex flex-col justify-between overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-8 backdrop-blur-2xl">
+          <div>
+            <div className="mb-6 flex items-center justify-between">
+              <div>
+                <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-brand-red">
+                  [ Flux en direct ]
+                </span>
+                <h2 className="mt-0.5 font-display text-2xl font-light tracking-wide text-white">
+                  Dernières commandes
+                </h2>
+              </div>
               <Link
-                key={o.id}
-                href={`/admin/commandes/${o.id}`}
-                className="group flex items-center justify-between gap-3 rounded-2xl border border-brand-black/5 bg-brand-gray/30 p-3 transition hover:border-brand-red/20 hover:bg-brand-red/5"
+                href="/admin/commandes"
+                className="font-mono text-xs uppercase tracking-widest text-brand-red transition-colors hover:text-white"
               >
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-brand-black group-hover:text-brand-red">
-                    {o.customerName}
-                  </p>
-                  <p className="text-[11px] text-brand-black/50">
-                    {o.orderNumber}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="font-display text-sm text-brand-black">
-                    {formatPrice(o.total)}
-                  </p>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-brand-red">
-                    {o.statut.replace("_", " ")}
-                  </p>
-                </div>
+                Tout voir
               </Link>
-            ))}
-            {recentOrders.length === 0 && (
-              <p className="text-sm text-brand-black/40">
-                Aucune commande récente.
-              </p>
-            )}
+            </div>
+
+            <div className="space-y-3">
+              {recentOrders.map((o) => (
+                <Link
+                  key={o.id}
+                  href={`/admin/commandes/${o.id}`}
+                  className="group flex items-center justify-between gap-3 rounded-2xl border border-white/5 bg-black/40 p-4 backdrop-blur-md transition-all duration-300 hover:border-brand-red/40 hover:bg-white/[0.03]"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate font-sans text-sm font-medium text-white group-hover:text-brand-red transition-colors">
+                      {o.customerName}
+                    </p>
+                    <p className="mt-0.5 font-mono text-[11px] text-neutral-400">
+                      {o.orderNumber}
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="font-display text-base font-light text-white">
+                      {formatPrice(o.total)}
+                    </p>
+                    <p className="mt-0.5 font-mono text-[9px] font-bold uppercase tracking-wider text-brand-red">
+                      {o.statut.replace("_", " ")}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -414,9 +421,9 @@ export default async function AdminDashboardPage() {
 }
 
 /* ========================================================
-   Composant local StatCardLight (mise à jour)
+   Composant StatCardDark (mise à jour)
    ======================================================== */
-function StatCardLight({
+function StatCardDark({
   label,
   value,
   icon: Icon,
@@ -425,22 +432,22 @@ function StatCardLight({
 }: {
   label: string;
   value: string | number;
-  icon: any;
+  icon: LucideIcon;
   trend?: { value: string; positive: boolean };
   badge?: string;
 }) {
   return (
-    <div className="group relative overflow-hidden rounded-3xl border border-brand-black/5 bg-white p-5 shadow-sm transition hover:border-brand-red/20 hover:shadow-md md:p-6">
+    <div className="group relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-6 backdrop-blur-2xl transition-all duration-300 hover:-translate-y-1 hover:border-brand-red/50 hover:bg-neutral-900/60 hover:shadow-[0_0_30px_rgba(239,68,68,0.15)] md:p-8">
       <div className="flex items-start justify-between">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-gray text-brand-black/60 transition group-hover:bg-brand-red group-hover:text-white">
-          <Icon className="h-5 w-5" />
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-brand-red/30 bg-brand-red/10 text-brand-red shadow-[0_0_15px_rgba(239,68,68,0.2)] backdrop-blur-md transition-all duration-300 group-hover:bg-brand-red group-hover:text-white group-hover:shadow-[0_0_25px_rgba(239,68,68,0.5)]">
+          <Icon className="h-6 w-6" />
         </div>
         {trend && (
           <span
-            className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold ${
+            className={`flex items-center gap-1 rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-wider backdrop-blur-md ${
               trend.positive
-                ? "bg-green-100 text-green-700"
-                : "bg-red-100 text-red-700"
+                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                : "border-red-500/30 bg-red-500/10 text-red-400"
             }`}
           >
             {trend.positive ? (
@@ -452,16 +459,17 @@ function StatCardLight({
           </span>
         )}
         {badge && (
-          <span className="rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-semibold text-amber-700">
+          <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 font-mono text-[10px] uppercase tracking-wider text-amber-400 backdrop-blur-md">
             {badge}
           </span>
         )}
       </div>
-      <div className="mt-5">
-        <p className="text-[11px] font-medium uppercase tracking-widest text-brand-black/50">
+
+      <div className="mt-6">
+        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-400">
           {label}
         </p>
-        <p className="mt-1 font-display text-3xl tracking-wide text-brand-black">
+        <p className="mt-1 font-display text-3xl font-light tracking-wide text-white md:text-4xl">
           {value}
         </p>
       </div>

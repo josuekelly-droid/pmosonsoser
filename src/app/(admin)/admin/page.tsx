@@ -173,7 +173,7 @@ export default async function AdminDashboardPage() {
       orders: data.orders,
     }));
 
-  // Ventes des 7 derniers jours (graphique existant)
+  // Ventes des 7 derniers jours
   const chartDataMap = new Map();
   for (let i = 6; i >= 0; i--) {
     const d = new Date();
@@ -200,7 +200,7 @@ export default async function AdminDashboardPage() {
   });
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 md:space-y-8">
       {/* HEADER */}
       <div>
         <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-brand-red">
@@ -210,14 +210,14 @@ export default async function AdminDashboardPage() {
           Vue d'ensemble
         </h1>
         <p className="mt-2 flex items-center gap-2 font-mono text-xs text-neutral-400 max-w-xl leading-relaxed">
-          <Calendar className="h-3.5 w-3.5" />
+          <Calendar className="h-3.5 w-3.5 shrink-0" />
           <span className="capitalize">{currentMonthLabel}</span>
         </p>
       </div>
 
       {/* ALERTE STOCK */}
       {lowStockProducts.length > 0 && (
-        <div className="flex items-center gap-4 rounded-[2rem] border border-amber-500/30 bg-amber-500/10 p-5 text-amber-400 backdrop-blur-2xl">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 rounded-[2rem] border border-amber-500/30 bg-amber-500/10 p-5 text-amber-400 backdrop-blur-2xl">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-amber-500/30 bg-amber-500/20">
             <AlertTriangle className="h-5 w-5 text-amber-400" />
           </div>
@@ -233,7 +233,7 @@ export default async function AdminDashboardPage() {
           </div>
           <Link
             href="/admin/produits?stock=low"
-            className="hidden shrink-0 items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/20 px-4 py-2 font-mono text-xs uppercase tracking-widest text-amber-300 transition-all hover:bg-amber-500 hover:text-black md:inline-flex"
+            className="w-full sm:w-auto inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/20 px-4 py-2 font-mono text-xs uppercase tracking-widest text-amber-300 transition-all hover:bg-amber-500 hover:text-black"
           >
             <span>Gérer le stock</span>
             <ArrowRight className="h-3.5 w-3.5" />
@@ -277,8 +277,8 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* CHIFFRE D'AFFAIRES MENSUEL (6 MOIS) */}
-      <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-8 backdrop-blur-2xl">
-        <div className="mb-6 flex items-center justify-between">
+      <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-5 sm:p-8 backdrop-blur-2xl">
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-brand-red">
               [ Analyse financière ]
@@ -290,7 +290,7 @@ export default async function AdminDashboardPage() {
               Comparatif sur les 6 derniers mois
             </p>
           </div>
-          <div className="hidden items-center gap-2 rounded-full border border-brand-red/30 bg-brand-red/10 px-4 py-2 text-[11px] font-semibold text-brand-red md:flex">
+          <div className="hidden items-center gap-2 rounded-full border border-brand-red/30 bg-brand-red/10 px-4 py-2 text-[11px] font-semibold text-brand-red md:flex shrink-0">
             <TrendingUp className="h-3.5 w-3.5" />
             {formatPrice(currentRevenue)} ce mois
           </div>
@@ -298,9 +298,9 @@ export default async function AdminDashboardPage() {
 
         <MonthlyRevenueChart data={monthlyData} />
 
-        {/* Tableau récapitulatif */}
-        <div className="mt-6 overflow-hidden rounded-2xl border border-white/10">
-          <table className="w-full">
+        {/* Tableau récapitulatif responsive avec défilement horizontal */}
+        <div className="mt-6 overflow-x-auto rounded-2xl border border-white/10">
+          <table className="w-full min-w-[600px]">
             <thead>
               <tr className="border-b border-white/10 bg-white/[0.03] text-[10px] font-semibold uppercase tracking-widest text-neutral-500">
                 <th className="px-4 py-3 text-left">Mois</th>
@@ -320,7 +320,7 @@ export default async function AdminDashboardPage() {
                       isCurrent ? "bg-brand-red/5" : ""
                     }`}
                   >
-                    <td className="px-4 py-3 font-mono text-sm font-medium text-white">
+                    <td className="px-4 py-3 font-mono text-sm font-medium text-white whitespace-nowrap">
                       {m.label}
                       {isCurrent && (
                         <span className="ml-2 rounded-full bg-brand-red/20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-brand-red">
@@ -332,13 +332,13 @@ export default async function AdminDashboardPage() {
                       {m.orders}
                     </td>
                     <td
-                      className={`px-4 py-3 text-right font-display text-base ${
+                      className={`px-4 py-3 text-right font-display text-base whitespace-nowrap ${
                         isCurrent ? "text-brand-red" : "text-white"
                       }`}
                     >
                       {formatPrice(m.revenue)}
                     </td>
-                    <td className="px-4 py-3 text-right font-mono text-sm text-neutral-400">
+                    <td className="px-4 py-3 text-right font-mono text-sm text-neutral-400 whitespace-nowrap">
                       {avgOrder > 0 ? formatPrice(avgOrder) : "—"}
                     </td>
                   </tr>
@@ -351,7 +351,7 @@ export default async function AdminDashboardPage() {
 
       {/* GRAPHIQUE 7J + DERNIÈRES COMMANDES */}
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-        <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-8 backdrop-blur-2xl lg:col-span-2">
+        <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-5 sm:p-8 backdrop-blur-2xl lg:col-span-2">
           <div className="mb-6 flex items-center justify-between">
             <div>
               <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-brand-red">
@@ -361,14 +361,14 @@ export default async function AdminDashboardPage() {
                 Ventes des 7 derniers jours
               </h2>
             </div>
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-brand-red/30 bg-brand-red/10 text-brand-red shadow-[0_0_15px_rgba(239,68,68,0.2)]">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-brand-red/30 bg-brand-red/10 text-brand-red shadow-[0_0_15px_rgba(239,68,68,0.2)]">
               <TrendingUp className="h-5 w-5" />
             </div>
           </div>
           <SalesChart data={chartData} />
         </div>
 
-        <div className="relative flex flex-col justify-between overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-8 backdrop-blur-2xl">
+        <div className="relative flex flex-col justify-between overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-5 sm:p-8 backdrop-blur-2xl">
           <div>
             <div className="mb-6 flex items-center justify-between">
               <div>
@@ -381,7 +381,7 @@ export default async function AdminDashboardPage() {
               </div>
               <Link
                 href="/admin/commandes"
-                className="font-mono text-xs uppercase tracking-widest text-brand-red transition-colors hover:text-white"
+                className="font-mono text-xs uppercase tracking-widest text-brand-red transition-colors hover:text-white shrink-0"
               >
                 Tout voir
               </Link>
@@ -394,16 +394,16 @@ export default async function AdminDashboardPage() {
                   href={`/admin/commandes/${o.id}`}
                   className="group flex items-center justify-between gap-3 rounded-2xl border border-white/5 bg-black/40 p-4 backdrop-blur-md transition-all duration-300 hover:border-brand-red/40 hover:bg-white/[0.03]"
                 >
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="truncate font-sans text-sm font-medium text-white group-hover:text-brand-red transition-colors">
                       {o.customerName}
                     </p>
-                    <p className="mt-0.5 font-mono text-[11px] text-neutral-400">
+                    <p className="mt-0.5 font-mono text-[11px] text-neutral-400 truncate">
                       {o.orderNumber}
                     </p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="font-display text-base font-light text-white">
+                    <p className="font-display text-base font-light text-white whitespace-nowrap">
                       {formatPrice(o.total)}
                     </p>
                     <p className="mt-0.5 font-mono text-[9px] font-bold uppercase tracking-wider text-brand-red">
@@ -421,7 +421,7 @@ export default async function AdminDashboardPage() {
 }
 
 /* ========================================================
-   Composant StatCardDark (mise à jour)
+   Composant StatCardDark (Responsive)
    ======================================================== */
 function StatCardDark({
   label,
@@ -438,38 +438,40 @@ function StatCardDark({
 }) {
   return (
     <div className="group relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-6 backdrop-blur-2xl transition-all duration-300 hover:-translate-y-1 hover:border-brand-red/50 hover:bg-neutral-900/60 hover:shadow-[0_0_30px_rgba(239,68,68,0.15)] md:p-8">
-      <div className="flex items-start justify-between">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-brand-red/30 bg-brand-red/10 text-brand-red shadow-[0_0_15px_rgba(239,68,68,0.2)] backdrop-blur-md transition-all duration-300 group-hover:bg-brand-red group-hover:text-white group-hover:shadow-[0_0_25px_rgba(239,68,68,0.5)]">
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-brand-red/30 bg-brand-red/10 text-brand-red shadow-[0_0_15px_rgba(239,68,68,0.2)] backdrop-blur-md transition-all duration-300 group-hover:bg-brand-red group-hover:text-white group-hover:shadow-[0_0_25px_rgba(239,68,68,0.5)]">
           <Icon className="h-6 w-6" />
         </div>
-        {trend && (
-          <span
-            className={`flex items-center gap-1 rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-wider backdrop-blur-md ${
-              trend.positive
-                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-                : "border-red-500/30 bg-red-500/10 text-red-400"
-            }`}
-          >
-            {trend.positive ? (
-              <TrendingUp className="h-3 w-3" />
-            ) : (
-              <TrendingDown className="h-3 w-3" />
-            )}
-            {trend.value}
-          </span>
-        )}
-        {badge && (
-          <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 font-mono text-[10px] uppercase tracking-wider text-amber-400 backdrop-blur-md">
-            {badge}
-          </span>
-        )}
+        <div className="flex flex-wrap items-center justify-end gap-1.5">
+          {trend && (
+            <span
+              className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider backdrop-blur-md ${
+                trend.positive
+                  ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                  : "border-red-500/30 bg-red-500/10 text-red-400"
+              }`}
+            >
+              {trend.positive ? (
+                <TrendingUp className="h-3 w-3 shrink-0" />
+              ) : (
+                <TrendingDown className="h-3 w-3 shrink-0" />
+              )}
+              <span>{trend.value}</span>
+            </span>
+          )}
+          {badge && (
+            <span className="inline-block rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-amber-400 backdrop-blur-md">
+              {badge}
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="mt-6">
-        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-400">
+        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-400 truncate">
           {label}
         </p>
-        <p className="mt-1 font-display text-3xl font-light tracking-wide text-white md:text-4xl">
+        <p className="mt-1 font-display text-2xl sm:text-3xl font-light tracking-wide text-white md:text-4xl truncate">
           {value}
         </p>
       </div>

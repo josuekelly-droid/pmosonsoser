@@ -243,7 +243,7 @@ export default async function ProduitPage({ params }: Props) {
                     product.priceB2B &&
                     product.priceB2B > 0 && (
                       <span className="mb-1 font-mono text-xs text-neutral-400">
-                        Prix pro : {formatPrice(product.priceB2B)}
+                        Prix en gros : {formatPrice(product.priceB2B)}
                       </span>
                     )
                   )}

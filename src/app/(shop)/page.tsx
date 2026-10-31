@@ -175,7 +175,7 @@ export default async function HomePage() {
             </div>
 
             <Link
-              href="/motos"
+              href="/catalogue"
               className="group relative inline-flex items-center gap-3 overflow-hidden rounded-full border border-white/20 bg-white/5 px-8 py-4 text-xs font-semibold uppercase tracking-widest text-white backdrop-blur-md transition-all duration-500 hover:border-white hover:bg-white hover:text-black"
             >
               <span>Tout le catalogue</span>

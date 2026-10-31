@@ -197,7 +197,7 @@ export function Hero() {
           >
             <span className="h-2 w-2 rounded-full bg-brand-red animate-pulse" />
             <span className="font-mono text-xs font-semibold uppercase tracking-[0.25em] text-white/80">
-              Bénin · Motos & Componentry
+              Bénin · Motos & Composantes
             </span>
           </motion.div>
 

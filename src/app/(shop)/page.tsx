@@ -167,7 +167,7 @@ export default async function HomePage() {
           <div className="flex flex-col items-start justify-between gap-8 md:flex-row md:items-end">
             <div>
               <span className="text-xs font-mono uppercase tracking-[0.3em] text-neutral-500">
-                [ Curated Selection ]
+                [ Sélection Rigoureuse ]
               </span>
               <h2 className="mt-3 font-display text-4xl font-extralight tracking-tight text-white md:text-6xl">
                 Produits <span className="underline decoration-brand-red/50 underline-offset-8">Phares</span>

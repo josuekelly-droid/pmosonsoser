@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Suspense } from "react"; // ⬅️ IMPORT AJOUTÉ
-import { Package, ArrowUpRight, Loader2 } from "lucide-react";
+import { Suspense } from "react";
+import { Package, Loader2 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/utils";
 import { constructMetadata } from "@/lib/seo";
@@ -27,42 +27,63 @@ export const CATALOG_CONFIGS: Record<string, CatalogConfig> = {
   motos: {
     slug: "motos",
     title: "Motos",
-    description: "Découvrez notre gamme complète de motos Apsonic, Honda, TVS, Haojue et Dayang. Modèles adaptés à tous les usages et tous les budgets.",
+    description:
+      "Découvrez notre gamme complète de motos Apsonic, Honda, TVS, Haojue et Dayang. Modèles adaptés à tous les usages et tous les budgets.",
     seoTitle: "Motos — Apsonic, Honda, TVS, Haojue, Dayang",
-    seoDescription: "Achetez votre moto en ligne au Bénin : Apsonic, Honda, TVS, Haojue, Dayang. Livraison rapide, garantie et SAV. Paiement Mobile Money.",
+    seoDescription:
+      "Achetez votre moto en ligne au Bénin : Apsonic, Honda, TVS, Haojue, Dayang. Livraison rapide, garantie et SAV. Paiement Mobile Money.",
     heroSubtitle: "Apsonic · Honda · TVS · Haojue · Dayang",
   },
   tricycles: {
     slug: "tricycles",
     title: "Tricycles",
-    description: "Tricycles robustes et économiques pour le transport de marchandises et de personnes. Modèles Apsonic disponibles en stock.",
+    description:
+      "Tricycles robustes et économiques pour le transport de marchandises et de personnes. Modèles Apsonic disponibles en stock.",
     seoTitle: "Tricycles — Transport & livraison",
-    seoDescription: "Tricycles Apsonic au Bénin : robustes, économiques, adaptés au transport de marchandises. Livraison rapide et garantie.",
+    seoDescription:
+      "Tricycles Apsonic au Bénin : robustes, économiques, adaptés au transport de marchandises. Livraison rapide et garantie.",
     heroSubtitle: "Modèles Apsonic disponibles",
   },
   "pieces-detachees": {
     slug: "pieces-detachees",
     title: "Pièces Détachées",
-    description: "Toutes les pièces détachées pour vos motos et tricycles. Pièces d'origine certifiées pour toutes les marques.",
+    description:
+      "Toutes les pièces détachées pour vos motos et tricycles. Pièces d'origine certifiées pour toutes les marques.",
     seoTitle: "Pièces Détachées motos & tricycles",
-    seoDescription: "Pièces détachées d'origine pour motos et tricycles au Bénin. Apsonic, Honda, TVS, Haojue. Livraison rapide, prix compétitifs.",
+    seoDescription:
+      "Pièces détachées d'origine pour motos et tricycles au Bénin. Apsonic, Honda, TVS, Haojue. Livraison rapide, prix compétitifs.",
     heroSubtitle: "Toutes marques · Pièces d'origine",
   },
   lubrifiants: {
     slug: "lubrifiants",
     title: "Lubrifiants",
-    description: "Huiles moteur, graisses et lubrifiants de marques reconnues pour entretenir et protéger votre véhicule.",
+    description:
+      "Huiles moteur, graisses et lubrifiants de marques reconnues pour entretenir et protéger votre véhicule.",
     seoTitle: "Lubrifiants — Huiles & graisses moto",
-    seoDescription: "Huiles moteur et lubrifiants moto de marques reconnues au Bénin. Livraison rapide, prix compétitifs.",
+    seoDescription:
+      "Huiles moteur et lubrifiants moto de marques reconnues au Bénin. Livraison rapide, prix compétitifs.",
     heroSubtitle: "Huiles · Graisses · Entretien",
   },
   "machines-agricoles": {
     slug: "machines-agricoles",
     title: "Machines Agricoles",
-    description: "Découvrez notre gamme de machines agricoles pour booster votre productivité : motoculteurs, pompes, tronçonneuses et plus.",
+    description:
+      "Découvrez notre gamme de machines agricoles pour booster votre productivité : motoculteurs, pompes, tronçonneuses et plus.",
     seoTitle: "Machines Agricoles — Motoculteurs, Pompes, Tronçonneuses",
-    seoDescription: "Achetez vos machines agricoles au Bénin. Motoculteurs, pompes à eau, tronçonneuses. Livraison rapide et garantie.",
+    seoDescription:
+      "Achetez vos machines agricoles au Bénin. Motoculteurs, pompes à eau, tronçonneuses. Livraison rapide et garantie.",
     heroSubtitle: "Motoculteurs · Pompes · Tronçonneuses",
+  },
+  
+  catalogue: {
+    slug: "catalogue",
+    title: "Tout le Catalogue",
+    description:
+      "Découvrez l'intégralité de notre catalogue : motos, tricycles, pièces détachées, machines agricoles et lubrifiants. Toutes marques, tous usages.",
+    seoTitle: "Catalogue complet — Motos, Tricycles, Pièces, Machines, Lubrifiants",
+    seoDescription:
+      "Parcourez tout notre catalogue de motos, tricycles, pièces détachées, machines agricoles et lubrifiants au Bénin. Livraison rapide, paiement Mobile Money.",
+    heroSubtitle: "Tous nos produits · Toutes marques",
   },
 };
 
@@ -92,7 +113,7 @@ export async function generateCatalogMetadata(
   });
 }
 
-// 🛡️ Fallback léger pour les Suspense
+
 function FilterSkeleton() {
   return (
     <div className="flex items-center justify-center rounded-2xl border border-white/10 bg-neutral-900/40 py-12">
@@ -110,16 +131,24 @@ export async function CatalogPage({
 }) {
   const isB2B = await getIsB2BValidated();
 
-  const category = await prisma.category.findUnique({
-    where: { slug: config.slug },
-  });
+  // Détection du mode "catalogue" (afficher TOUS les produits)
+  const isAllCatalog = config.slug === "catalogue";
 
-  if (!category) {
+  // En mode catalogue : on ne cherche pas de catégorie
+  const category = isAllCatalog
+    ? null
+    : await prisma.category.findUnique({ where: { slug: config.slug } });
+
+  if (!isAllCatalog && !category) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center pt-32 bg-[#0A0A0B] text-white">
+      <div className="flex min-h-[60vh] items-center justify-center bg-[#0A0A0B] pt-32 text-white">
         <div className="text-center">
-          <p className="font-mono text-xs uppercase tracking-widest text-neutral-500">404 · Erreur</p>
-          <h2 className="mt-2 font-display text-2xl font-light">Catégorie introuvable</h2>
+          <p className="font-mono text-xs uppercase tracking-widest text-neutral-500">
+            404 · Erreur
+          </p>
+          <h2 className="mt-2 font-display text-2xl font-light">
+            Catégorie introuvable
+          </h2>
         </div>
       </div>
     );
@@ -137,12 +166,20 @@ export async function CatalogPage({
   else if (sort === "nom-asc") orderBy = { name: "asc" };
   else if (sort === "nom-desc") orderBy = { name: "desc" };
 
+  // En mode catalogue : on ne filtre PAS par catégorie
   const where: any = {
-    categoryId: category.id,
+    ...(category ? { categoryId: category.id } : {}),
     ...(minPrice || maxPrice
-      ? { priceB2C: { ...(minPrice ? { gte: minPrice } : {}), ...(maxPrice ? { lte: maxPrice } : {}) } }
+      ? {
+          priceB2C: {
+            ...(minPrice ? { gte: minPrice } : {}),
+            ...(maxPrice ? { lte: maxPrice } : {}),
+          },
+        }
       : {}),
-    ...(brandSlug ? { brand: { name: { equals: brandSlug, mode: "insensitive" } } } : {}),
+    ...(brandSlug
+      ? { brand: { name: { equals: brandSlug, mode: "insensitive" } } }
+      : {}),
   };
 
   if (brandSlug) {
@@ -169,10 +206,17 @@ export async function CatalogPage({
       include: { brand: true, category: true },
     }),
     prisma.product.count({ where }),
-    prisma.brand.findMany({
-      where: { products: { some: { categoryId: category.id } } },
-      orderBy: { name: "asc" },
-    }),
+    // En mode catalogue : toutes les marques qui ont au moins 1 produit
+    // Sinon : seulement celles présentes dans la catégorie
+    isAllCatalog
+      ? prisma.brand.findMany({
+          where: { products: { some: {} } },
+          orderBy: { name: "asc" },
+        })
+      : prisma.brand.findMany({
+          where: { products: { some: { categoryId: category!.id } } },
+          orderBy: { name: "asc" },
+        }),
   ]);
 
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
@@ -191,9 +235,12 @@ export async function CatalogPage({
         brand: p.brand.name,
         offers: {
           "@type": "Offer",
-          price: (isB2B && p.priceB2B) ? p.priceB2B : p.priceB2C,
+          price: isB2B && p.priceB2B ? p.priceB2B : p.priceB2C,
           priceCurrency: "XOF",
-          availability: p.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+          availability:
+            p.stock > 0
+              ? "https://schema.org/InStock"
+              : "https://schema.org/OutOfStock",
         },
       },
     })),
@@ -201,15 +248,23 @@ export async function CatalogPage({
 
   return (
     <div className="min-h-screen bg-[#0A0A0B] text-white selection:bg-brand-red selection:text-white">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
 
       {/* HERO CATALOGUE */}
       <section className="relative isolate overflow-hidden border-b border-white/10 pt-36 pb-20 md:pt-48 md:pb-28">
         <div className="pointer-events-none absolute -top-40 right-0 h-[500px] w-[600px] rounded-full bg-brand-red/15 blur-[150px]" />
-        
+
         <div className="relative mx-auto max-w-7xl px-6 lg:px-12">
-          <nav aria-label="Fil d'Ariane" className="font-mono text-xs uppercase tracking-widest text-neutral-500">
-            <Link href="/" className="transition-colors hover:text-white">Accueil</Link>
+          <nav
+            aria-label="Fil d'Ariane"
+            className="font-mono text-xs uppercase tracking-widest text-neutral-500"
+          >
+            <Link href="/" className="transition-colors hover:text-white">
+              Accueil
+            </Link>
             <span className="mx-2.5 text-neutral-700">/</span>
             <span className="text-white">{config.title}</span>
           </nav>
@@ -223,7 +278,7 @@ export async function CatalogPage({
           </p>
 
           <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-brand-red/30 bg-brand-red/10 px-4 py-1.5 font-mono text-xs uppercase tracking-widest text-brand-red">
-            <span className="h-1.5 w-1.5 rounded-full bg-brand-red animate-pulse" />
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand-red" />
             {config.heroSubtitle}
           </div>
         </div>
@@ -233,12 +288,15 @@ export async function CatalogPage({
       <section className="relative py-16 md:py-24">
         <div className="mx-auto max-w-7xl px-6 lg:px-12">
           <div className="grid grid-cols-1 gap-8 md:grid-cols-[240px_1fr] md:gap-10 lg:grid-cols-[300px_1fr]">
-            
-            {/* 🛡️ SIDEBAR DESKTOP - Enveloppé dans Suspense */}
+            {/* SIDEBAR DESKTOP */}
             <div className="hidden md:block">
               <Suspense fallback={<FilterSkeleton />}>
                 <CatalogSidebar
-                  brands={allBrandsInCategory.map((b) => ({ id: b.id, name: b.name, slug: slugify(b.name) }))}
+                  brands={allBrandsInCategory.map((b) => ({
+                    id: b.id,
+                    name: b.name,
+                    slug: slugify(b.name),
+                  }))}
                   totalCount={totalCount}
                 />
               </Suspense>
@@ -246,10 +304,13 @@ export async function CatalogPage({
 
             {/* COLONNE PRODUITS */}
             <div className="min-w-0">
-              {/* 🛡️ TOOLBAR - Enveloppé dans Suspense */}
               <Suspense fallback={<FilterSkeleton />}>
                 <CatalogToolbar
-                  brands={allBrandsInCategory.map((b) => ({ id: b.id, name: b.name, slug: slugify(b.name) }))}
+                  brands={allBrandsInCategory.map((b) => ({
+                    id: b.id,
+                    name: b.name,
+                    slug: slugify(b.name),
+                  }))}
                   totalCount={totalCount}
                 />
               </Suspense>
@@ -260,17 +321,24 @@ export async function CatalogPage({
                     <Package className="h-8 w-8" />
                   </div>
                   <h2 className="mt-6 font-display text-2xl font-light text-white">
-                    Aucun produit <span className="italic font-serif font-normal text-neutral-400">trouvé</span>
+                    Aucun produit{" "}
+                    <span className="italic font-serif font-normal text-neutral-400">
+                      trouvé
+                    </span>
                   </h2>
                   <p className="mx-auto mt-3 max-w-sm text-sm text-neutral-400">
-                    Essayez de modifier vos critères de filtrage ou réinitialisez votre recherche.
+                    Essayez de modifier vos critères de filtrage ou réinitialisez
+                    votre recherche.
                   </p>
                 </div>
               ) : (
                 <>
                   <div className="grid grid-cols-2 gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-3 xl:grid-cols-4">
                     {products.map((p) => (
-                      <div key={p.id} className="transition-transform duration-500 hover:-translate-y-1.5">
+                      <div
+                        key={p.id}
+                        className="transition-transform duration-500 hover:-translate-y-1.5"
+                      >
                         <ProductCard
                           id={p.id}
                           name={p.name}

@@ -22,6 +22,7 @@ import { CartBadge } from "@/components/shop/cart-badge";
 
 const NAV_LINKS = [
   { href: "/", label: "Accueil" },
+  { href: "/catalogue", label: "Catalogue" },
   { href: "/motos", label: "Motos" },
   { href: "/tricycles", label: "Tricycles" },
   { href: "/pieces-detachees", label: "Pièces" },

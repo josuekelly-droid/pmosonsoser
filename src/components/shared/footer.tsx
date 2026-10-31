@@ -7,6 +7,7 @@ import { NewsletterForm } from "./newsletter-form";
 
 const LINKS = {
   boutique: [
+    { href: "/catalogue", label: "Tout le catalogue" }, 
     { href: "/motos", label: "Motos" },
     { href: "/tricycles", label: "Tricycles" },
     { href: "/pieces-detachees", label: "Pièces Détachées" },

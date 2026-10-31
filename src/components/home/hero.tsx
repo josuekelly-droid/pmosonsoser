@@ -247,7 +247,7 @@ export function Hero() {
             className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row md:justify-center lg:justify-start"
           >
             <Link
-              href="/motos"
+              href="/catalogue"
               className="group relative inline-flex h-14 w-full items-center justify-between gap-8 overflow-hidden rounded-full bg-brand-red pl-8 pr-3 font-mono text-xs font-bold uppercase tracking-widest text-white shadow-2xl shadow-brand-red/30 transition-all duration-500 hover:bg-white hover:text-black hover:shadow-brand-red/50 sm:w-auto"
             >
               <span className="relative z-10">Explorer le catalogue</span>

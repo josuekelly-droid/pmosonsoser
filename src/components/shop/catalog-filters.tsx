@@ -16,7 +16,7 @@ const SORT_OPTIONS = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* Hook : centralise la logique URL / filtres                         */
+/* Hook : centralise la logique URL / filtres                          */
 /* ------------------------------------------------------------------ */
 function useFilters() {
   const router = useRouter();
@@ -68,16 +68,19 @@ function useFilters() {
 }
 
 /* ------------------------------------------------------------------ */
-/* Contenu des filtres (partagé sidebar + drawer mobile)              */
+/* Contenu des filtres (partagé sidebar + drawer mobile)               */
 /* ------------------------------------------------------------------ */
 function FilterContent({
   brands,
   filters,
+  onApplyCallback,
 }: {
   brands: Brand[];
   filters: ReturnType<typeof useFilters>;
+  onApplyCallback?: () => void;
 }) {
-  const { currentBrand, currentMin, currentMax, apply, reset, hasFilters } = filters;
+  const { currentBrand, currentMin, currentMax, apply, reset, hasFilters } =
+    filters;
   const [minPrice, setMinPrice] = useState(currentMin);
   const [maxPrice, setMaxPrice] = useState(currentMax);
 
@@ -85,6 +88,19 @@ function FilterContent({
     setMinPrice(currentMin);
     setMaxPrice(currentMax);
   }, [currentMin, currentMax]);
+
+  // 🎯 Helper : applique + ferme le drawer si callback fourni
+  const applyAndClose = (updates: Record<string, string | null>) => {
+    apply(updates);
+    onApplyCallback?.();
+  };
+
+  const resetAndClose = () => {
+    reset();
+    setMinPrice("");
+    setMaxPrice("");
+    onApplyCallback?.();
+  };
 
   return (
     <div className="space-y-8 text-white">
@@ -97,7 +113,7 @@ function FilterContent({
           <li>
             <button
               type="button"
-              onClick={() => apply({ marque: null })}
+              onClick={() => applyAndClose({ marque: null })}
               className={cn(
                 "group flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left font-sans text-sm transition-all duration-300",
                 !currentBrand
@@ -115,7 +131,7 @@ function FilterContent({
               <li key={b.id}>
                 <button
                   type="button"
-                  onClick={() => apply({ marque: b.slug })}
+                  onClick={() => applyAndClose({ marque: b.slug })}
                   className={cn(
                     "group flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left font-sans text-sm transition-all duration-300",
                     isActive
@@ -158,7 +174,9 @@ function FilterContent({
         </div>
         <button
           type="button"
-          onClick={() => apply({ min: minPrice || null, max: maxPrice || null })}
+          onClick={() =>
+            applyAndClose({ min: minPrice || null, max: maxPrice || null })
+          }
           className="mt-4 w-full rounded-full border border-white/15 bg-white/5 py-3 font-mono text-xs font-bold uppercase tracking-widest text-white backdrop-blur-md transition-all duration-300 hover:border-brand-red hover:bg-brand-red"
         >
           Appliquer le prix
@@ -169,7 +187,7 @@ function FilterContent({
       {hasFilters && (
         <button
           type="button"
-          onClick={reset}
+          onClick={resetAndClose}
           className="flex w-full items-center justify-center gap-2 rounded-full border border-red-500/20 bg-red-500/10 py-3 font-mono text-xs font-semibold uppercase tracking-widest text-red-400 transition-all duration-300 hover:bg-red-500/20"
         >
           <X className="h-4 w-4" />
@@ -195,9 +213,7 @@ export function CatalogSidebar({
   return (
     <aside className="sticky top-28 rounded-[2.5rem] border border-white/10 bg-neutral-900/40 p-8 backdrop-blur-xl">
       <div className="mb-6 flex items-center justify-between border-b border-white/10 pb-5">
-        <h2 className="font-display text-xl font-light text-white">
-          Filtres
-        </h2>
+        <h2 className="font-display text-xl font-light text-white">Filtres</h2>
         <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 font-mono text-xs text-neutral-400">
           {totalCount} {totalCount > 1 ? "produits" : "produit"}
         </span>
@@ -220,6 +236,25 @@ export function CatalogToolbar({
   const filters = useFilters();
   const { currentSort, apply, hasFilters } = filters;
   const [open, setOpen] = useState(false);
+
+  // 🎯 Ferme le drawer au changement d'URL (sécurité)
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname, searchParams]);
+
+  // 🎯 Verrouille le scroll du body quand le drawer est ouvert
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
 
   return (
     <>
@@ -246,7 +281,11 @@ export function CatalogToolbar({
             className="appearance-none rounded-full border border-white/15 bg-neutral-900/60 px-5 py-3 pr-10 font-mono text-xs uppercase tracking-widest text-white backdrop-blur-xl outline-none"
           >
             {SORT_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value} className="bg-neutral-950 text-white">
+              <option
+                key={o.value}
+                value={o.value}
+                className="bg-neutral-950 text-white"
+              >
                 {o.label}
               </option>
             ))}
@@ -258,7 +297,8 @@ export function CatalogToolbar({
       {/* ---- BARRE DESKTOP (md+) ---- */}
       <div className="mb-8 hidden items-center justify-between md:flex">
         <p className="font-mono text-xs uppercase tracking-widest text-neutral-400">
-          <span className="font-bold text-white">{totalCount}</span> produit{totalCount > 1 ? "s" : ""} référencé{totalCount > 1 ? "s" : ""}
+          <span className="font-bold text-white">{totalCount}</span> produit
+          {totalCount > 1 ? "s" : ""} référencé{totalCount > 1 ? "s" : ""}
         </p>
 
         <div className="relative">
@@ -268,7 +308,11 @@ export function CatalogToolbar({
             className="appearance-none rounded-full border border-white/15 bg-neutral-900/40 px-6 py-3.5 pr-12 font-mono text-xs uppercase tracking-widest text-white backdrop-blur-xl outline-none transition-all duration-300 hover:border-white/30 focus:border-brand-red"
           >
             {SORT_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value} className="bg-neutral-950 text-white">
+              <option
+                key={o.value}
+                value={o.value}
+                className="bg-neutral-950 text-white"
+              >
                 Trier : {o.label}
               </option>
             ))}
@@ -280,13 +324,16 @@ export function CatalogToolbar({
       {/* ---- DRAWER MOBILE (< md) ---- */}
       {open && (
         <div
-          className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md md:hidden"
+          className="fixed inset-0 z-[100] flex items-end justify-center bg-black/70 backdrop-blur-md md:hidden"
           onClick={() => setOpen(false)}
         >
           <div
-            className="absolute bottom-0 left-0 right-0 max-h-[85vh] overflow-y-auto rounded-t-[2.5rem] border-t border-white/15 bg-neutral-950 p-8 shadow-2xl"
+            className="relative max-h-[85vh] w-full overflow-y-auto rounded-t-[2.5rem] border-t border-white/15 bg-neutral-950 p-8 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Handle visuel premium */}
+            <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-white/20" />
+
             <div className="mb-6 flex items-center justify-between border-b border-white/15 pb-4">
               <h2 className="font-display text-2xl font-light text-white">
                 Filtres & Tri
@@ -300,7 +347,12 @@ export function CatalogToolbar({
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <FilterContent brands={brands} filters={filters} />
+
+            <FilterContent
+              brands={brands}
+              filters={filters}
+              onApplyCallback={() => setOpen(false)}
+            />
           </div>
         </div>
       )}

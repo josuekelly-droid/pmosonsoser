@@ -83,7 +83,7 @@ export const CATALOG_CONFIGS: Record<string, CatalogConfig> = {
     seoTitle: "Catalogue complet — Motos, Tricycles, Pièces, Machines, Lubrifiants",
     seoDescription:
       "Parcourez tout notre catalogue de motos, tricycles, pièces détachées, machines agricoles et lubrifiants au Bénin. Livraison rapide, paiement Mobile Money.",
-    heroSubtitle: "Tous nos produits · Toutes marques",
+    heroSubtitle: "Nos produits · Toutes marques",
   },
 };
 

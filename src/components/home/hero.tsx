@@ -235,7 +235,7 @@ export function Hero() {
             custom={4}
             className="mx-auto mt-7 max-w-xl font-sans text-base leading-relaxed text-neutral-400 md:text-lg lg:mx-0"
           >
-            L'excellence motocycle au Bénin. Sélection exclusive de motos, tricycles d'ingénierie, pièces d'origine certifiées et lubrifiants haute performance.
+            L'excellence motocycle au Bénin. Sélection exclusive de motos, tricycles d'ingénierie, pièces d'origine certifiées, machines agricoles et lubrifiants haute performance.
           </motion.p>
 
           {/* Boutons CTA - PARFAITEMENT CENTRÉS SUR TABLETTE & MOBILE */}

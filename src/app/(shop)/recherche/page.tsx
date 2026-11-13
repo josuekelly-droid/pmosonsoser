@@ -70,6 +70,7 @@ export default async function RecherchePage({
                 <ProductCard
                   key={p.id}
                   id={p.id}
+                  slug={p.slug}
                   name={p.name}
                   priceB2C={p.priceB2C}
                   priceB2B={p.priceB2B}

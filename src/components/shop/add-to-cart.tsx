@@ -19,13 +19,14 @@ import { cn } from "@/lib/utils";
 type Props = {
   product: {
     id: string;
+    slug: string; 
     name: string;
     priceB2C: number;
     images: string[];
     stock: number;
   };
   selectedColor?: { id: string; name: string; hex: string } | null;
-  requiresColor?: boolean; // true si le produit a des couleurs
+  requiresColor?: boolean;
 };
 
 export function AddToCart({ product, selectedColor, requiresColor }: Props) {
@@ -43,17 +44,16 @@ export function AddToCart({ product, selectedColor, requiresColor }: Props) {
 
   function handleAdd() {
     if (outOfStock) return;
-    // ⬇️ Blocage si une couleur est requise et non sélectionnée
     if (requiresColor && !selectedColor) return;
 
     add(
       {
-        productId: product.id, // ⬅️ productId (le store génère la cartKey)
+        productId: product.id,
+        slug: product.slug,
         name: product.name,
         price: product.priceB2C,
         image: product.images?.[0],
         stock: product.stock,
-        // 🎨 Couleur ajoutée
         colorId: selectedColor?.id,
         colorName: selectedColor?.name,
         colorHex: selectedColor?.hex,
@@ -89,12 +89,13 @@ export function AddToCart({ product, selectedColor, requiresColor }: Props) {
             <h4 className="font-mono text-xs font-semibold uppercase tracking-widest text-red-400">
               Rupture de Stock
             </h4>
-            <p className="mt-1 text-xs text-neutral-400 leading-relaxed">
-              Ce produit est temporairement indisponible. Contactez notre équipe pour être informé dès le réapprovisionnement.
+            <p className="mt-1 text-xs leading-relaxed text-neutral-400">
+              Ce produit est temporairement indisponible. Contactez notre équipe
+              pour être informé dès le réapprovisionnement.
             </p>
           </div>
         </div>
-        
+
         <button
           onClick={handleShare}
           type="button"
@@ -111,7 +112,7 @@ export function AddToCart({ product, selectedColor, requiresColor }: Props) {
 
   return (
     <div className="space-y-5">
-      {/* ACTIONS SECONDAIRES (FAVORIS + PARTAGE) */}
+      {/* ACTIONS SECONDAIRES */}
       <div className="flex items-center gap-3">
         <button
           type="button"
@@ -142,15 +143,17 @@ export function AddToCart({ product, selectedColor, requiresColor }: Props) {
         </button>
       </div>
 
-      {/* AVERTISSEMENT COULEUR MANQUANTE */}
+      {/* AVERTISSEMENT COULEUR */}
       {missingColor && (
         <div className="flex items-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 font-mono text-xs text-amber-400">
           <Palette className="h-4 w-4 shrink-0" />
-          <span>Veuillez sélectionner une couleur avant d'ajouter au panier.</span>
+          <span>
+            Veuillez sélectionner une couleur avant d'ajouter au panier.
+          </span>
         </div>
       )}
 
-      {/* SÉLECTEUR DE QUANTITÉ HUD */}
+      {/* SÉLECTEUR DE QUANTITÉ */}
       <div className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-neutral-900/60 p-2.5 backdrop-blur-xl">
         <span className="pl-3 font-mono text-xs uppercase tracking-widest text-neutral-400">
           Quantité
@@ -165,7 +168,7 @@ export function AddToCart({ product, selectedColor, requiresColor }: Props) {
           >
             <Minus className="h-3.5 w-3.5" />
           </button>
-          
+
           <span className="w-10 text-center font-mono text-sm font-bold text-white">
             {qty}
           </span>
@@ -182,7 +185,7 @@ export function AddToCart({ product, selectedColor, requiresColor }: Props) {
         </div>
       </div>
 
-      {/* BOUTON PRINCIPAL D'AJOUT AU PANIER */}
+      {/* BOUTON PRINCIPAL */}
       <button
         type="button"
         onClick={handleAdd}

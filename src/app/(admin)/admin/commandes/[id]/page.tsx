@@ -151,7 +151,7 @@ export default async function AdminCommandeDetailPage({
                   </div>
                   <div className="min-w-0 flex-1">
                     <Link
-                      href={`/produits/${item.productId}`}
+                      href={`/produits/${item.product.slug}`}
                       target="_blank"
                       className="line-clamp-1 font-sans text-sm font-medium text-white transition-colors hover:text-brand-red"
                     >
@@ -161,7 +161,7 @@ export default async function AdminCommandeDetailPage({
                       {item.product.brand.name} · Quantité : {item.quantity}
                     </p>
 
-                    {/* 🎨 COULEUR SÉLECTIONNÉE */}
+                    {/*  COULEUR SÉLECTIONNÉE */}
                     {item.colorName && (
                       <div className="mt-2 inline-flex items-center gap-2 rounded-lg border border-white/10 bg-black/40 px-2.5 py-1">
                         <span
@@ -228,7 +228,9 @@ export default async function AdminCommandeDetailPage({
               <div className="space-y-4 font-mono text-xs">
                 <p className="flex items-center gap-3 text-white">
                   <UserIcon className="h-4 w-4 shrink-0 text-brand-red" />
-                  <span className="font-sans font-medium text-sm">{order.customerName}</span>
+                  <span className="font-sans font-medium text-sm">
+                    {order.customerName}
+                  </span>
                 </p>
                 <p className="flex items-center gap-3 text-neutral-300">
                   <Mail className="h-4 w-4 shrink-0 text-brand-red" />
@@ -253,7 +255,9 @@ export default async function AdminCommandeDetailPage({
               <div className="space-y-4 font-mono text-xs">
                 <p className="flex items-start gap-3 text-neutral-300">
                   <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-brand-red" />
-                  <span className="leading-relaxed">{order.adresseLivraison}</span>
+                  <span className="leading-relaxed">
+                    {order.adresseLivraison}
+                  </span>
                 </p>
                 {order.deliveryLat != null && order.deliveryLng != null && (
                   <a
@@ -276,14 +280,15 @@ export default async function AdminCommandeDetailPage({
           </section>
 
           {/* Panneau de Validation Paiement (WU / Virement) */}
-          {order.statut === "EN_ATTENTE" && order.methodePaiement !== "FEDAPAY" && (
-            <OrderPaymentPanel
-              orderId={order.id}
-              methodePaiement={order.methodePaiement}
-              currentCodeMTCN={order.codeMTCN}
-              currentPreuve={order.preuvePaiement}
-            />
-          )}
+          {order.statut === "EN_ATTENTE" &&
+            order.methodePaiement !== "FEDAPAY" && (
+              <OrderPaymentPanel
+                orderId={order.id}
+                methodePaiement={order.methodePaiement}
+                currentCodeMTCN={order.codeMTCN}
+                currentPreuve={order.preuvePaiement}
+              />
+            )}
         </div>
 
         {/* Colonne Latérale */}

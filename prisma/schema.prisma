@@ -103,6 +103,7 @@ model Color {
 
 model Product {
   id          String   @id @default(cuid())
+  slug        String   @unique
   name        String
   description String?
   priceB2C    Float
@@ -118,6 +119,8 @@ model Product {
   category   Category    @relation(fields: [categoryId], references: [id])
   brand      Brand       @relation(fields: [brandId], references: [id])
   orderItems OrderItem[]
+
+  @@index([slug])   // ⬅️ NOUVEAU : index pour les recherches par slug
 }
 
 model Order {
@@ -225,11 +228,11 @@ model Settings {
 
 model Notification {
   id        String   @id @default(cuid())
-  userId    String?  // null = Notification Admin, non-null = Notification Client
+  userId    String?
   title     String
   message   String
-  type      String   // "ORDER_NEW", "ORDER_STATUS", "B2B_REQUEST", "ACCOUNT_APPROVED"
-  link      String?  // ex: "/admin/commandes/xxx"
+  type      String
+  link      String?
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
 

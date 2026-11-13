@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import {
   ChevronRight,
   Truck,
@@ -23,14 +23,35 @@ import { ProductPurchaseBlock } from "@/components/shop/product-purchase-block";
 
 export const revalidate = 60;
 
-type Props = { params: Promise<{ id: string }> };
+type Props = { params: Promise<{ slug: string }> };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { id } = await params;
-  const product = await prisma.product.findUnique({
-    where: { id },
-    include: { brand: true, category: true },
+/* ============================================================
+   🔍 Résolution du produit par slug OU id (backward compat)
+   ============================================================ */
+async function resolveProduct(slugOrId: string) {
+  // 1. Essayer par slug (nouveau format)
+  const bySlug = await prisma.product.findUnique({
+    where: { slug: slugOrId },
+    include: { brand: true, category: true, colors: true },
   });
+
+  if (bySlug) return { product: bySlug, viaId: false };
+
+  // 2. Fallback par id (ancien format) — puis redirection
+  const byId = await prisma.product.findUnique({
+    where: { id: slugOrId },
+    include: { brand: true, category: true, colors: true },
+  });
+
+  return { product: byId, viaId: !!byId };
+}
+
+/* ============================================================
+   🏷️ Metadata SEO
+   ============================================================ */
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const { product } = await resolveProduct(slug);
 
   if (!product) {
     return constructMetadata({
@@ -39,9 +60,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     });
   }
 
-  // 🎯 SEO enrichi avec keywords spécifiques au produit
   return constructMetadata({
-    pathname: `/produits/${product.id}`,
+    pathname: `/produits/${product.slug}`,
     title: `${product.name} — ${product.brand.name}`,
     description: product.description
       ? product.description.slice(0, 155)
@@ -67,21 +87,30 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 const AVANTAGES = [
   { icon: Truck, title: "Livraison rapide", desc: "Partout au Bénin en 48h" },
-  { icon: ShieldCheck, title: "Garantie constructeur", desc: "Pièces d'origine certifiées" },
+  {
+    icon: ShieldCheck,
+    title: "Garantie constructeur",
+    desc: "Pièces d'origine certifiées",
+  },
   { icon: RefreshCw, title: "Retour 7 jours", desc: "Satisfait ou remboursé" },
   { icon: Headphones, title: "SAV dédié", desc: "Support client 6j/7" },
 ];
 
+/* ============================================================
+   📄 Page
+   ============================================================ */
 export default async function ProduitPage({ params }: Props) {
-  const { id } = await params;
-  const isB2B = await getIsB2BValidated();
-
-  const product = await prisma.product.findUnique({
-    where: { id },
-    include: { brand: true, category: true, colors: true },
-  });
+  const { slug } = await params;
+  const { product, viaId } = await resolveProduct(slug);
 
   if (!product) notFound();
+
+  // 🔄 Si on est arrivé via l'ancien ID → redirection 301 vers le slug
+  if (viaId && product.slug) {
+    redirect(`/produits/${product.slug}`);
+  }
+
+  const isB2B = await getIsB2BValidated();
 
   const related = await prisma.product.findMany({
     where: { categoryId: product.categoryId, id: { not: product.id } },
@@ -95,6 +124,9 @@ export default async function ProduitPage({ params }: Props) {
   const displayPrice = hasB2BPrice ? product.priceB2B! : product.priceB2C;
   const savings = hasB2BPrice ? product.priceB2C - product.priceB2B! : 0;
 
+  /* ============================================================
+     📊 JSON-LD Product
+     ============================================================ */
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -112,7 +144,7 @@ export default async function ProduitPage({ params }: Props) {
       : [`${siteConfig.url}/logo/pm-osons-oser-1.jpg`],
     offers: {
       "@type": "Offer",
-      url: `${siteConfig.url}/produits/${product.id}`,
+      url: `${siteConfig.url}/produits/${product.slug}`,
       priceCurrency: "XOF",
       price: displayPrice,
       availability:
@@ -124,11 +156,19 @@ export default async function ProduitPage({ params }: Props) {
     },
   };
 
+  /* ============================================================
+     📊 JSON-LD Breadcrumb
+     ============================================================ */
   const breadcrumbLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Accueil", item: siteConfig.url },
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Accueil",
+        item: siteConfig.url,
+      },
       {
         "@type": "ListItem",
         position: 2,
@@ -139,7 +179,7 @@ export default async function ProduitPage({ params }: Props) {
         "@type": "ListItem",
         position: 3,
         name: product.name,
-        item: `${siteConfig.url}/produits/${product.id}`,
+        item: `${siteConfig.url}/produits/${product.slug}`,
       },
     ],
   };
@@ -271,6 +311,7 @@ export default async function ProduitPage({ params }: Props) {
                   <ProductPurchaseBlock
                     product={{
                       id: product.id,
+                      slug: product.slug,
                       name: product.name,
                       priceB2C: displayPrice,
                       images: product.images,
@@ -398,6 +439,7 @@ export default async function ProduitPage({ params }: Props) {
                 <ProductCard
                   key={p.id}
                   id={p.id}
+                  slug={p.slug}
                   name={p.name}
                   priceB2C={p.priceB2C}
                   priceB2B={p.priceB2B}

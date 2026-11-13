@@ -2,8 +2,9 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export type CartItem = {
-  id: string;        // cartKey = `${productId}-${colorId || "default"}`
+  id: string;        // cartKey = `${productId}::${colorId || "default"}`
   productId: string; // pour l'API
+  slug: string;      // slug pour les liens URL
   name: string;
   price: number;
   image?: string;
@@ -74,6 +75,6 @@ export const useCart = create<CartState>()(
 
       clear: () => set({ items: [] }),
     }),
-    { name: "pm-osons-cart-v2" } // invalider l'ancien cache
+    { name: "pm-osons-cart-v3" } // v3 : invalide les anciens paniers (v2) sans slug
   )
 );

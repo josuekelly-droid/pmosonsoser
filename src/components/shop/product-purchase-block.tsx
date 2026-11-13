@@ -12,6 +12,7 @@ export function ProductPurchaseBlock({
 }: {
   product: {
     id: string;
+    slug: string; 
     name: string;
     priceB2C: number;
     images: string[];

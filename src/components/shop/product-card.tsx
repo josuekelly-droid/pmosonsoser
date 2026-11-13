@@ -5,6 +5,7 @@ import { formatPrice } from "@/lib/utils";
 
 type ProductCardProps = {
   id: string;
+  slug: string; // 🆕 Slug pour l'URL
   name: string;
   priceB2C: number;
   priceB2B?: number | null;
@@ -17,6 +18,7 @@ type ProductCardProps = {
 
 export function ProductCard({
   id,
+  slug,
   name,
   priceB2C,
   priceB2B,
@@ -34,7 +36,7 @@ export function ProductCard({
 
   return (
     <Link
-      href={`/produits/${id}`}
+      href={`/produits/${slug}`} // 🆕 Utilise le slug
       className="group relative flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-neutral-900/40 p-3.5 backdrop-blur-xl transition-all duration-500 hover:-translate-y-1.5 hover:border-brand-red/40 hover:bg-neutral-900/80 hover:shadow-[0_20px_40px_rgba(239,68,68,0.12)]"
     >
       {/* CADRE VISUEL PRODUIT */}
@@ -61,13 +63,13 @@ export function ProductCard({
         {/* CONTENEUR SUPÉRIEUR FLUIDE (MARQUE + PRIX PRO SANS COLLISION) */}
         <div className="absolute inset-x-3 top-3 z-10 flex items-start justify-between gap-2">
           {/* BADGE MARQUE (GAUCHE) */}
-          <span className="max-w-[55%] truncate rounded-full border border-white/10 bg-neutral-950/80 px-2.5 py-1 font-mono text-[9px] sm:text-[10px] font-semibold uppercase tracking-widest text-neutral-300 backdrop-blur-md">
+          <span className="max-w-[55%] truncate rounded-full border border-white/10 bg-neutral-950/80 px-2.5 py-1 font-mono text-[9px] font-semibold uppercase tracking-widest text-neutral-300 backdrop-blur-md sm:text-[10px]">
             {brandName}
           </span>
 
           {/* BADGE PRIX PRO B2B (DROITE) */}
           {hasB2BPrice && (
-            <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 font-mono text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-amber-400 backdrop-blur-md shadow-[0_0_12px_rgba(245,158,11,0.2)]">
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 font-mono text-[9px] font-bold uppercase tracking-widest text-amber-400 backdrop-blur-md shadow-[0_0_12px_rgba(245,158,11,0.2)] sm:text-[10px]">
               <Sparkles className="h-3 w-3 shrink-0" />
               <span>Pro</span>
             </span>

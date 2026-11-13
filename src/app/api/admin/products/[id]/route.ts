@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { productSchema } from "@/lib/validations/product";
+import { slugify } from "@/lib/utils";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -18,7 +19,7 @@ export async function GET(_: Request, { params }: Params) {
   const { id } = await params;
   const product = await prisma.product.findUnique({
     where: { id },
-    include: { brand: true, category: true },
+    include: { brand: true, category: true, colors: true },
   });
 
   if (!product) {
@@ -53,7 +54,7 @@ export async function PATCH(req: Request, { params }: Params) {
 
     const data = parsed.data;
 
-    // Vérifier qu'il existe + récupérer le slug de la catégorie pour revalidate
+    // 1. Vérifier qu'il existe + récupérer l'ancienne catégorie et l'ancien slug
     const existing = await prisma.product.findUnique({
       where: { id },
       include: { category: true },
@@ -65,9 +66,65 @@ export async function PATCH(req: Request, { params }: Params) {
       );
     }
 
+    /* ============================================
+       🆕 REGÉNÉRATION DU SLUG
+       ============================================ */
+
+    // Récupérer la marque pour générer le slug
+    const brand = await prisma.brand.findUnique({
+      where: { id: data.brandId },
+    });
+
+    if (!brand) {
+      return NextResponse.json(
+        { error: "Marque introuvable" },
+        { status: 400 }
+      );
+    }
+
+    // Déterminer la base du slug
+    let baseSlug: string;
+
+    if (data.slug && data.slug.trim()) {
+      // Slug fourni manuellement
+      baseSlug = data.slug.trim();
+    } else {
+      // Génération automatique intelligente
+      const brandInName = data.name
+        .toLowerCase()
+        .includes(brand.name.toLowerCase());
+
+      const textToSlugify = brandInName
+        ? data.name.trim()
+        : `${brand.name} ${data.name.trim()}`;
+
+      baseSlug = slugify(textToSlugify);
+    }
+
+    // Vérifier l'unicité en EXCLUANT le produit actuel
+    let finalSlug = baseSlug;
+    let counter = 1;
+
+    while (
+      await prisma.product.findFirst({
+        where: {
+          slug: finalSlug,
+          id: { not: id }, // ⬅️ Exclure le produit en cours de modification
+        },
+      })
+    ) {
+      finalSlug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+
+    /* ============================================
+       MISE À JOUR DU PRODUIT
+       ============================================ */
+
     const product = await prisma.product.update({
       where: { id },
       data: {
+        slug: finalSlug, // 🆕 Slug unique
         name: data.name.trim(),
         description: data.description?.trim() || null,
         priceB2C: data.priceB2C,
@@ -77,17 +134,32 @@ export async function PATCH(req: Request, { params }: Params) {
         categoryId: data.categoryId,
         brandId: data.brandId,
         colors: {
-      set: data.colorIds.map((id) => ({ id })), 
-    },
+          set: data.colorIds.map((id) => ({ id })),
+        },
       },
       include: { brand: true, category: true, colors: true },
     });
 
-    /* ---- Revalidation ---- */
+    /* ============================================
+       REVALIDATION DES CHEMINS
+       ============================================ */
+
     revalidatePath("/");
-    revalidatePath(`/${existing.category.slug}`);
-    revalidatePath(`/${product.category.slug}`);
-    revalidatePath(`/produits/${id}`);
+    revalidatePath(`/${existing.category.slug}`); // Ancienne catégorie
+
+    // Si la catégorie a changé, revalider aussi la nouvelle
+    if (existing.category.slug !== product.category.slug) {
+      revalidatePath(`/${product.category.slug}`);
+    }
+
+    // Ancien slug (si changé, l'ancienne page doit être invalidée)
+    if (existing.slug && existing.slug !== product.slug) {
+      revalidatePath(`/produits/${existing.slug}`);
+    }
+
+    // Nouveau slug (URL canonique actuelle)
+    revalidatePath(`/produits/${product.slug}`);
+
     revalidatePath("/admin/produits");
 
     return NextResponse.json({ ok: true, product });

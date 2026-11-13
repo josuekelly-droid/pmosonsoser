@@ -11,7 +11,6 @@ import {
   ArrowLeft,
   ShieldCheck,
   Truck,
-  Palette,
 } from "lucide-react";
 import { useCart } from "@/store/cart";
 import { formatPrice } from "@/lib/utils";
@@ -37,11 +36,15 @@ export function CartView() {
         </div>
 
         <h2 className="mt-6 font-display text-3xl font-light text-white md:text-5xl">
-          Votre panier est <span className="italic font-serif font-normal text-neutral-400">vide</span>
+          Votre panier est{" "}
+          <span className="italic font-serif font-normal text-neutral-400">
+            vide
+          </span>
         </h2>
 
-        <p className="mx-auto mt-4 max-w-md text-sm text-neutral-400 leading-relaxed">
-          Explorez notre univers de motos, tricycles, pièces détachées et lubrifiants certifiés.
+        <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-neutral-400">
+          Explorez notre univers de motos, tricycles, pièces détachées et
+          lubrifiants certifiés.
         </p>
 
         <Link
@@ -64,7 +67,8 @@ export function CartView() {
         <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-neutral-900/40 px-6 py-4 backdrop-blur-xl">
           <p className="font-mono text-xs uppercase tracking-widest text-neutral-400">
             <span className="font-bold text-white">{totalItems}</span>{" "}
-            article{totalItems > 1 ? "s" : ""} sélectionné{totalItems > 1 ? "s" : ""}
+            article{totalItems > 1 ? "s" : ""} sélectionné
+            {totalItems > 1 ? "s" : ""}
           </p>
           <button
             onClick={clear}
@@ -83,7 +87,7 @@ export function CartView() {
           >
             {/* Image */}
             <Link
-              href={`/produits/${item.productId}`} // ⬅️ CORRIGÉ : productId au lieu de id
+              href={`/produits/${item.slug}`} // 🆕 slug au lieu de productId
               className="relative aspect-square w-full shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-black/40 sm:h-28 sm:w-28"
             >
               {item.image ? (
@@ -107,7 +111,7 @@ export function CartView() {
             <div className="flex min-w-0 flex-1 flex-col justify-between">
               <div>
                 <Link
-                  href={`/produits/${item.productId}`} // ⬅️ CORRIGÉ
+                  href={`/produits/${item.slug}`} // 🆕 slug au lieu de productId
                   className="line-clamp-2 font-display text-lg font-light text-white transition-colors duration-300 hover:text-brand-red"
                 >
                   {item.name}
@@ -131,7 +135,7 @@ export function CartView() {
                 </p>
               </div>
 
-              {/* Actions mobiles : quantité + suppression */}
+              {/* Actions mobiles */}
               <div className="mt-4 flex items-center justify-between gap-3 sm:hidden">
                 <QtySelector
                   qty={item.quantity}
@@ -169,7 +173,7 @@ export function CartView() {
               </button>
             </div>
 
-            {/* Prix mobile (bas) */}
+            {/* Prix mobile */}
             <p className="text-right font-display text-xl font-light text-white sm:hidden">
               {formatPrice(item.price * item.quantity)}
             </p>
@@ -230,7 +234,6 @@ export function CartView() {
             <ArrowUpRight className="h-4 w-4 transition-transform duration-500 group-hover:rotate-45" />
           </Link>
 
-          {/* Garanties */}
           <ul className="mt-8 space-y-3 border-t border-white/10 pt-6 font-mono text-xs text-neutral-400">
             <li className="flex items-center gap-3">
               <ShieldCheck className="h-4 w-4 shrink-0 text-brand-red" />

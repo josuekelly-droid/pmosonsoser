@@ -2,6 +2,19 @@ import { z } from "zod";
 
 export const productSchema = z.object({
   name: z.string().min(2, "Nom requis").max(200),
+
+  // 🆕 Slug optionnel : si absent, il sera généré automatiquement côté API
+  slug: z
+    .string()
+    .min(2, "Slug trop court")
+    .max(200, "Slug trop long")
+    .regex(
+      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+      "Slug invalide (lettres minuscules, chiffres et tirets uniquement)"
+    )
+    .optional()
+    .or(z.literal("")),
+
   description: z.string().max(2000).optional().or(z.literal("")),
   priceB2C: z.coerce.number().min(0, "Prix invalide"),
   priceB2B: z.coerce.number().min(0).optional().nullable(),

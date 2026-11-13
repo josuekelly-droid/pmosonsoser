@@ -196,6 +196,7 @@ export default async function HomePage() {
                   <ProductCard
                     id={p.id}
                     name={p.name}
+                    slug={p.slug}
                     priceB2C={p.priceB2C}
                     priceB2B={p.priceB2B}
                     isB2B={isB2B}
